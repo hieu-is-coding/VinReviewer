@@ -1,0 +1,102 @@
+{
+  "taaco_adjacent_overlap": {
+    "mean": 0.45,
+    "std": 0.08
+  },
+  "taaco_paragraph_overlap": {
+    "mean": 0.35,
+    "std": 0.08
+  },
+  "lsa_coherence": {
+    "mean": 0.55,
+    "std": 0.10
+  },
+  "seclos_local": {
+    "mean": 0.50,
+    "std": 0.10
+  },
+  "crfno_referential": {
+    "mean": 0.40,
+    "std": 0.08
+  },
+  "mdd_mean": {
+    "mean": 2.80,
+    "std": 0.40
+  },
+  "mdd_variance": {
+    "mean": 0.30,
+    "std": 0.10
+  },
+  "mean_sentence_length": {
+    "mean": 22.0,
+    "std": 4.0
+  },
+  "subordination_ratio": {
+    "mean": 1.00,
+    "std": 0.30
+  },
+  "taales_academic_word": {
+    "mean": 0.04,
+    "std": 0.015
+  },
+  "psy_abstractness": {
+    "mean": 0.15,
+    "std": 0.05
+  },
+  "mtld": {
+    "mean": 100.0,
+    "std": 25.0
+  },
+  "hdd": {
+    "mean": 0.70,
+    "std": 0.06
+  },
+  "maas": {
+    "mean": 0.02,
+    "std": 0.005
+  },
+  "yulek": {
+    "mean": 120.0,
+    "std": 30.0
+  },
+  "errors_per_100w": {
+    "mean": 1.50,
+    "std": 0.80
+  },
+  "grammar_errors": {
+    "mean": 4.0,
+    "std": 2.0
+  },
+  "spelling_errors": {
+    "mean": 2.0,
+    "std": 1.5
+  },
+  "punctuation_errors": {
+    "mean": 1.5,
+    "std": 1.0
+  },
+  "style_suggestions": {
+    "mean": 0.5,
+    "std": 0.5
+  },
+  "citation_count": {
+    "mean": 10.0,
+    "std": 4.0
+  },
+  "citation_density": {
+    "mean": 8.0,
+    "std": 3.0
+  },
+  "unique_sources": {
+    "mean": 8.0,
+    "std": 3.0
+  },
+  "self_citation_ratio": {
+    "mean": 0.05,
+    "std": 0.03
+  },
+  "citation_recency_median": {
+    "mean": 6.0,
+    "std": 3.0
+  }
+}

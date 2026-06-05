@@ -1,0 +1,96 @@
+# Rubric Dimensions — BFS tree (depth ≤ 3)
+# Weights at each level must sum to 1.0 among siblings.
+# Adapted from AutoSOTA hierarchical rubric approach.
+
+dimensions:
+  - id: thesis_scope
+    label: "Thesis & Scope"
+    weight: 0.20
+    children:
+      - id: thesis_clarity
+        label: "Thesis clarity & specificity"
+        weight: 0.50
+      - id: scope_appropriateness
+        label: "Scope appropriateness"
+        weight: 0.30
+      - id: research_question
+        label: "Research question alignment"
+        weight: 0.20
+
+  - id: evidence_use
+    label: "Evidence Use"
+    weight: 0.20
+    children:
+      - id: source_quality
+        label: "Source quality & relevance"
+        weight: 0.35
+      - id: evidence_integration
+        label: "Evidence integration"
+        weight: 0.35
+      - id: citation_accuracy
+        label: "Citation accuracy & completeness"
+        weight: 0.30
+
+  - id: structure_cohesion
+    label: "Structure & Cohesion"
+    weight: 0.15
+    children:
+      - id: organization
+        label: "Macro-organization (sections, flow)"
+        weight: 0.40
+      - id: paragraph_cohesion
+        label: "Paragraph-level cohesion"
+        weight: 0.35
+      - id: transitions
+        label: "Transition quality"
+        weight: 0.25
+
+  - id: style_mechanics
+    label: "Style & Mechanics"
+    weight: 0.15
+    children:
+      - id: grammar_spelling
+        label: "Grammar & spelling"
+        weight: 0.35
+      - id: sentence_variety
+        label: "Sentence variety & readability"
+        weight: 0.30
+      - id: academic_register
+        label: "Academic register & tone"
+        weight: 0.35
+
+  - id: critical_analysis
+    label: "Critical Analysis"
+    weight: 0.20
+    children:
+      - id: argument_depth
+        label: "Argument depth & originality"
+        weight: 0.40
+      - id: counterargument
+        label: "Counter-argument engagement"
+        weight: 0.30
+      - id: synthesis
+        label: "Cross-source synthesis"
+        weight: 0.30
+
+  - id: conventions
+    label: "Conventions"
+    weight: 0.10
+    children:
+      - id: formatting
+        label: "Formatting compliance"
+        weight: 0.40
+      - id: citation_style
+        label: "Citation style consistency"
+        weight: 0.35
+      - id: word_count
+        label: "Length / word-count compliance"
+        weight: 0.25
+
+# Context injection depths (AutoSOTA-style)
+context_depths:
+  shallow: "dimension label + weight only"
+  intermediate: "label + weight + per-child descriptors"
+  deep: "full child descriptors + exemplar excerpts + scoring anchors"
+
+default_depth: intermediate

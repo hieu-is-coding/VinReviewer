@@ -1,0 +1,73 @@
+# Red-Line Rules — enforced by AgentSupervisor (Phase 4.2)
+# One regen attempt on violation; persistent failure → human flag.
+
+rules:
+  R1:
+    id: no_hallucinated_citations
+    label: "No hallucinated citations"
+    description: >
+      Every cited reference in the generated review must exist in
+      lit_pool.json or the manuscript's extracted bibliography.
+    severity: hard
+    action_on_violation: regen
+
+  R2:
+    id: full_rubric_coverage
+    label: "Full rubric coverage"
+    description: >
+      Every leaf node in rubric_tree.json must have an explicit
+      verdict and justification in the review output.
+    severity: hard
+    action_on_violation: regen
+
+  R3:
+    id: formatting_consistency
+    label: "No contradictory formatting advice"
+    description: >
+      Suggested revisions must not contradict formatting requirements
+      stated in the assignment prompt (margins, font, page count, etc.).
+    severity: hard
+    action_on_violation: regen
+
+  R4:
+    id: calibrated_score_bound
+    label: "Score within calibrated bound"
+    description: >
+      The overall score must fall within the calibrated monotone-affine
+      confidence interval derived from calibration.json. Prevents
+      systematic positive bias.
+    severity: soft
+    action_on_violation: flag
+
+  R5:
+    id: citation_style_consistency
+    label: "Citation-style consistency"
+    description: >
+      Stylistic suggestions about citation formatting must be
+      consistent with the detected or specified citation style
+      (APA, MLA, Chicago, etc.).
+    severity: soft
+    action_on_violation: regen
+
+  R6:
+    id: no_fabricated_references
+    label: "No fabricated references in manuscript"
+    description: >
+      If reference validation detects fabricated references in the
+      manuscript (references that cannot be verified against Crossref
+      or OpenAlex), flag for human review.
+    severity: hard
+    action_on_violation: flag
+
+  R7:
+    id: deliberation_disagreement_resolved
+    label: "Deliberation disagreement resolved"
+    description: >
+      If multi-persona deliberation shows high disagreement (score
+      variance > 0.15) on critical rubric leaves, flag for human review
+      as the automated assessment may be unreliable.
+    severity: soft
+    action_on_violation: flag
+
+max_regen_attempts: 1
+human_flag_on_persistent_failure: true

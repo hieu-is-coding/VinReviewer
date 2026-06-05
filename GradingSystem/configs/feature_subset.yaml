@@ -1,0 +1,91 @@
+# Feature Subset — curated ~25-30 z-scored features
+# These are injected into the LLM synthesis prompt (Phase 4).
+# Each entry: extractor module → metric name → human label.
+
+features:
+  # Cohesion (Phase 2.1)
+  cohesion:
+    - id: taaco_adjacent_overlap
+      label: "Adjacent sentence overlap"
+      lang: [en]
+    - id: taaco_paragraph_overlap
+      label: "Paragraph-level overlap"
+      lang: [en]
+    - id: lsa_coherence
+      label: "LSA coherence (sentence-transformer)"
+      lang: [en]
+
+  # Syntactic / Style (Phase 2.2)
+  style:
+    - id: mdd_mean
+      label: "Mean dependency distance"
+      lang: [en]
+    - id: mdd_variance
+      label: "Dependency distance variance"
+      lang: [en]
+    - id: mean_sentence_length
+      label: "Mean sentence length (tokens)"
+      lang: [en]
+    - id: subordination_ratio
+      label: "Subordination ratio"
+      lang: [en]
+    - id: taales_academic_word
+      label: "Academic word frequency"
+      lang: [en]
+
+  # Lexical diversity (Phase 2.3)
+  diversity:
+    - id: mtld
+      label: "MTLD"
+      lang: [en]
+    - id: hdd
+      label: "HD-D"
+      lang: [en]
+    - id: maas
+      label: "Maas index"
+      lang: [en]
+    - id: yulek
+      label: "Yule's K"
+      lang: [en]
+
+  # Mechanics (Phase 2.4)
+  mechanics:
+    - id: errors_per_100w
+      label: "Errors per 100 words"
+      lang: [en]
+    - id: grammar_errors
+      label: "Grammar error count"
+      lang: [en]
+    - id: spelling_errors
+      label: "Spelling error count"
+      lang: [en]
+    - id: punctuation_errors
+      label: "Punctuation error count"
+      lang: [en]
+    - id: style_suggestions
+      label: "Style suggestion count"
+      lang: [en]
+
+  # Citation / structure (Phase 2.5)
+  citations:
+    - id: citation_count
+      label: "Total citations"
+      lang: [en]
+    - id: citation_density
+      label: "Citations per 1000 words"
+      lang: [en]
+    - id: unique_sources
+      label: "Unique sources cited"
+      lang: [en]
+    - id: self_citation_ratio
+      label: "Self-citation ratio"
+      lang: [en]
+    - id: citation_recency_median
+      label: "Median citation recency (years)"
+      lang: [en]
+
+# Z-score normalization reference
+normalization:
+  method: z_score
+  reference_corpus: "data/reference_corpus/baselines.json"
+  clip_range: [-3.0, 3.0]

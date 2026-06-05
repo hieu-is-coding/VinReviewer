@@ -1,0 +1,41 @@
+services:
+
+  # -------------------------------------------------------------------------
+  # GROBID — PDF structure extraction
+  # -------------------------------------------------------------------------
+  grobid:
+    image: lfoppiano/grobid:0.8.1
+    ports:
+      - "8070:8070"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8070/api/isalive"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # -------------------------------------------------------------------------
+  # BackEnd — FastAPI orchestration service
+  # -------------------------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: BackEnd/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GROBID_URL=http://grobid:8070
+      - SEMANTIC_SCHOLAR_API_KEY=${SEMANTIC_SCHOLAR_API_KEY:-}
+      - API_KEY=${BACKEND_API_KEY}
+      - MAX_CONCURRENT_JOBS=${MAX_CONCURRENT_JOBS:-5}
+      - JOB_TIMEOUT_SECONDS=${JOB_TIMEOUT_SECONDS:-600}
+    depends_on:
+      grobid:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+    restart: unless-stopped

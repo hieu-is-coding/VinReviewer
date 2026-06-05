@@ -1,0 +1,10 @@
+project_id = "vahshwccsjxarjkzcuzq"
+
+[functions.evaluate]
+verify_jwt = false
+
+[functions.parse-pdf]
+verify_jwt = false
+
+[functions.analyze-insights]
+verify_jwt = false
