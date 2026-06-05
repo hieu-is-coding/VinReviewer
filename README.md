@@ -240,7 +240,7 @@ The Edge Function auto-proxies to BackEnd when `BACKEND_URL` and `BACKEND_API_KE
 - Conda or Miniconda
 
 **Option B — Manual**
-- Node.js 18+ / Bun 1.x
+- Node.js  20.19+ or 22.12+ / Bun 1.x
 - Python 3.11+
 
 ### 1. Clone and configure
@@ -277,7 +277,6 @@ npx supabase db push
 # Create environment with Python and Node.js
 conda create -n vinreviewer python=3.11 nodejs=18 -y
 conda activate vinreviewer
-pip install uv
 
 # GradingSystem
 cd GradingSystem
@@ -326,8 +325,6 @@ Create `FrontEnd/.env`:
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
 ```
-
-Remember to link to your supabase project
 
 ### 6. Run locally
 
