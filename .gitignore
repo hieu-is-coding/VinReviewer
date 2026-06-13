@@ -65,3 +65,8 @@ Thumbs.db
 
 # Local dev
 /sandbox/
+
+# Eval and Output
+GradingSystem/eval/
+/GradingSystem/input/
+/GradingSystem/Output/

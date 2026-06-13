@@ -310,6 +310,18 @@ Raw features are Z-score normalized against reference baselines and clipped to [
 
 $$Z = \text{clip}\left(\frac{\text{raw} - \mu}{\sigma},\ -3.0,\ 3.0\right)$$
 
+**Phase 2 — Reference Validation:**
+
+The reference validation phase verifies all extracted bibliographic references against external authority databases (Crossref and OpenAlex) to detect hallucinated or fabricated citations.
+- **Parallel Verification**: Verification tasks are executed concurrently using a `ThreadPoolExecutor` with a pool size of 5 workers (`max_workers = 5`).
+- **Rate Limiting**: To prevent rate-limit blocks from external APIs, cross-thread rate limiting enforces a configurable delay (default: 0.5 seconds) between API requests using a thread lock.
+- **Verification Strategy**:
+  1. *Direct DOI Verification*: If a reference contains a DOI, it is queried directly via Crossref. The fetched title is compared with the reference title using a normalized similarity metric (Gestalt pattern matching). A similarity $\geq 0.70$ marks the reference as `verified`; otherwise, it is flagged as `suspicious`.
+  2. *Crossref Title Search*: If no DOI is present, a title-based search is executed on Crossref. A similarity $\geq 0.85$ marks it as `verified`, while a similarity in $[0.65, 0.85)$ marks it as `likely_valid`.
+  3. *OpenAlex Fallback*: If Crossref search returns no matching records, the system queries the OpenAlex API using the same similarity thresholds.
+  4. *Fabrication/Suspicion Classification*: References failing all search strategies are classified as `suspicious` (unverifiable text) or `fabricated` (completely empty title and DOI fields).
+- **Output**: A `ReferenceValidation` model containing individual check status, matched DOIs, confidence scores, and the overall verified ratio.
+
 **Phase 3 — Evidence Audit** (`AgentCritic`):
 
 The critic agent audits the validity of inline assertions:

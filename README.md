@@ -6,6 +6,11 @@ An AI-powered academic submission review platform. Instructors upload student pa
 
 ## Architecture
 
+![VinReviewer Platform Architecture](imgs/vinreviewer_architecture.png)
+
+<details>
+<summary>Show text-based architecture diagram</summary>
+
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                        VinReviewer Platform                       │
@@ -37,6 +42,8 @@ An AI-powered academic submission review platform. Instructors upload student pa
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
+
+</details>
 
 ### Folder layout
 
