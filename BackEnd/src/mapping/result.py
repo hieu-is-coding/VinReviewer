@@ -26,7 +26,10 @@ def map_pipeline_to_evaluation(
         Dict suitable for supabase .insert() on the evaluations table.
     """
     total_max = sum(float(c.get("max_score", 5)) for c in criteria)
-    calibrated = state.calibrated_score or (state.review.overall_score if state.review else 0.0)
+    calibrated = state.calibrated_score
+    if calibrated is None:
+        raw_score = state.review.overall_score if state.review else 0.0
+        calibrated = max(0.40, min(0.96, raw_score + 0.20))
     total_score = round(calibrated * total_max, 2)
 
     # Confidence from perturbation result or supervisor violations

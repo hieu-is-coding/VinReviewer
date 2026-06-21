@@ -2,8 +2,8 @@
 
 import json
 from pathlib import Path
-from src.orchestration.graph import _save_phase_output
-from src.models import Manuscript, Language
+from grading_system_src.orchestration.graph import _save_phase_output
+from grading_system_src.models import Manuscript, Language
 
 
 def test_save_phase_output_pydantic(tmp_path: Path) -> None:

@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAssignment, useAssignmentSubmissions, useCreateAssignmentSubmission, useUpdateAssignment } from "@/hooks/useAssignments";
 import { useClassStudents, useEvaluateSubmission, useUpdateSubmissionStatus, useCreateRubric, useCreateCriterion, useDeleteCriterion, useDeleteRubric } from "@/hooks/useData";
 import { useAIInsights } from "@/hooks/useAnalytics";
+import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, Play, Loader2, Eye, CheckCircle, Upload, FileText, Trash2, Star, BarChart3, Puzzle, Users, Brain, AlertTriangle, Target, Shield, Activity, Sparkles, TrendingUp, Award, Lightbulb, Settings } from "lucide-react";
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import { SubmissionDetail } from "@/components/SubmissionDetail";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
@@ -38,6 +39,44 @@ const AssignmentDetailPage = () => {
 
   const { data: assignment, isLoading: assignmentLoading } = useAssignment(assignmentId);
   const { data: submissions, isLoading: subsLoading } = useAssignmentSubmissions(assignmentId);
+
+  useEffect(() => {
+    if (!assignmentId) return;
+
+    const channel = supabase
+      .channel("assignment-detail-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "submissions",
+          filter: `assignment_id=eq.${assignmentId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["assignment_submissions", assignmentId] });
+          queryClient.invalidateQueries({ queryKey: ["submissions"] });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "evaluations",
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["assignment_submissions", assignmentId] });
+          queryClient.invalidateQueries({ queryKey: ["submissions"] });
+          queryClient.invalidateQueries({ queryKey: ["evaluations"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [assignmentId, queryClient]);
   const { data: classStudents } = useClassStudents(classId);
   const createSubmission = useCreateAssignmentSubmission();
   const evaluateSubmission = useEvaluateSubmission();
@@ -50,11 +89,13 @@ const AssignmentDetailPage = () => {
 
   const [open, setOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<string | null>(null);
+  const [newSubmission, setNewSubmission] = useState<any | null>(null);
   const [studentId, setStudentId] = useState("");
   const [content, setContent] = useState("");
   const [evaluatingIds, setEvaluatingIds] = useState<Set<string>>(new Set());
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [pdfFileName, setPdfFileName] = useState<string | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [bulkOpen, setBulkOpen] = useState(false);
 
@@ -120,6 +161,7 @@ const AssignmentDetailPage = () => {
 
     setUploadingPdf(true);
     setPdfFileName(file.name);
+    setPdfFile(file);
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -138,6 +180,7 @@ const AssignmentDetailPage = () => {
     } catch (e: any) {
       toast.error(e.message);
       setPdfFileName(null);
+      setPdfFile(null);
     } finally {
       setUploadingPdf(false);
     }
@@ -160,37 +203,133 @@ const AssignmentDetailPage = () => {
     if (!classId || !assignmentId) return;
     const studentName = classStudents?.find((cs: any) => cs.student_id === studentId)?.students?.name || "Submission";
     try {
-      await createSubmission.mutateAsync({
+      let pdfPath: string | null = null;
+      if (pdfFile) {
+        toast("Uploading PDF to storage...");
+        const filePath = `${studentId}/${Date.now()}-${pdfFile.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("pdfs")
+          .upload(filePath, pdfFile);
+        if (uploadError) throw uploadError;
+        pdfPath = uploadData.path;
+      }
+
+      const submission = await createSubmission.mutateAsync({
         student_id: studentId,
         class_id: classId,
         assignment_id: assignmentId,
         rubric_id: assignment?.rubric_id || undefined,
         title: studentName,
         content: content.trim(),
+        pdf_path: pdfPath,
       });
-      toast.success("Submission added");
+
+      if (pdfFile) {
+        toast("Starting AI evaluation...");
+        const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || 
+          (import.meta.env.DEV 
+            ? "http://localhost:8000/evaluate-sync" 
+            : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evaluate`);
+
+        fetch(evaluateUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ submission_id: submission.id }),
+        }).then(async (response) => {
+          if (!response.ok) {
+            const err = await response.json();
+            toast.error(err.error || "Failed to complete AI evaluation in background");
+          } else {
+            toast.success("AI evaluation complete!");
+            queryClient.invalidateQueries({ queryKey: ["assignment_submissions", assignmentId] });
+            queryClient.invalidateQueries({ queryKey: ["submissions"] });
+            queryClient.invalidateQueries({ queryKey: ["evaluations"] });
+          }
+        }).catch((err) => {
+          console.error("Evaluation error:", err);
+          toast.error("Failed to run AI evaluation");
+        });
+      } else {
+        toast.success("Submission added");
+      }
+
+      setNewSubmission(submission);
+      setSelectedSubmission(submission.id);
       setOpen(false);
       setContent("");
       setStudentId("");
       setPdfFileName(null);
+      setPdfFile(null);
     } catch (e: any) {
       toast.error(e.message);
     }
   };
 
-  const handleBulkSubmitAll = async (items: { studentId: string; studentName: string; content: string }[]) => {
+  const handleBulkSubmitAll = async (items: { studentId: string; studentName: string; content: string; file?: File }[]) => {
     if (!classId || !assignmentId) return;
+    let pdfCount = 0;
+    let textCount = 0;
+
     for (const item of items) {
-      await createSubmission.mutateAsync({
-        student_id: item.studentId,
-        class_id: classId,
-        assignment_id: assignmentId,
-        rubric_id: assignment?.rubric_id || undefined,
-        title: item.studentName,
-        content: item.content,
-      });
+      try {
+        let pdfPath: string | null = null;
+        if (item.file) {
+          const filePath = `${item.studentId}/${Date.now()}-${item.file.name}`;
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from("pdfs")
+            .upload(filePath, item.file);
+          if (uploadError) throw uploadError;
+          pdfPath = uploadData.path;
+        }
+
+        const submission = await createSubmission.mutateAsync({
+          student_id: item.studentId,
+          class_id: classId,
+          assignment_id: assignmentId,
+          rubric_id: assignment?.rubric_id || undefined,
+          title: item.studentName,
+          content: item.content,
+          pdf_path: pdfPath,
+        });
+
+        if (item.file) {
+          const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || 
+            (import.meta.env.DEV 
+              ? "http://localhost:8000/evaluate-sync" 
+              : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evaluate`);
+
+          fetch(evaluateUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ submission_id: submission.id }),
+          }).then((res) => {
+            if (res.ok) {
+              pdfCount++;
+            }
+          }).catch((err) => console.error("Failed to start bulk PDF evaluation:", err));
+
+          pdfCount++; // Optimistically count as started
+        } else {
+          textCount++;
+        }
+      } catch (e: any) {
+        toast.error(`Failed to create submission for ${item.studentName}: ${e.message}`);
+      }
     }
-    toast.success(`${items.length} submission(s) added!`);
+
+    if (pdfCount > 0 && textCount > 0) {
+      toast.success(`Added ${textCount} text submission(s) and initiated evaluation for ${pdfCount} PDF submission(s)!`);
+    } else if (pdfCount > 0) {
+      toast.success(`Initiated evaluation for ${pdfCount} PDF submission(s)!`);
+    } else if (textCount > 0) {
+      toast.success(`Added ${textCount} submission(s)!`);
+    }
   };
 
 
@@ -240,12 +379,32 @@ const AssignmentDetailPage = () => {
     else distribution[4].count++;
   });
 
-  const selectedSub = submissions?.find((s: any) => s.id === selectedSubmission);
+  const selectedSub = useMemo(() => {
+    if (!selectedSubmission) return null;
+    const fromList = submissions?.find((s: any) => s.id === selectedSubmission);
+    if (fromList) return fromList;
+    if (newSubmission && newSubmission.id === selectedSubmission) {
+      const student = classStudents?.find((cs: any) => cs.student_id === newSubmission.student_id)?.students;
+      return {
+        ...newSubmission,
+        students: student ? { name: student.name, email: student.email } : { name: newSubmission.title || "Student" },
+        classes: { name: assignment?.classes?.name },
+        evaluations: []
+      };
+    }
+    return null;
+  }, [submissions, selectedSubmission, newSubmission, classStudents, assignment]);
 
   if (selectedSub) {
     return (
       <DashboardLayout>
-        <SubmissionDetail submission={selectedSub} onBack={() => setSelectedSubmission(null)} />
+        <SubmissionDetail 
+          submission={selectedSub} 
+          onBack={() => {
+            setSelectedSubmission(null);
+            setNewSubmission(null);
+          }} 
+        />
       </DashboardLayout>
     );
   }
@@ -323,7 +482,11 @@ const AssignmentDetailPage = () => {
                     let successCount = 0;
                     for (const s of pending) {
                       try {
-                        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evaluate`, {
+                        const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || 
+                          (import.meta.env.DEV 
+                            ? "http://localhost:8000/evaluate-sync" 
+                            : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evaluate`);
+                        const response = await fetch(evaluateUrl, {
                           method: "POST",
                           headers: {
                             "Content-Type": "application/json",
@@ -400,7 +563,7 @@ const AssignmentDetailPage = () => {
                             ) : pdfFileName ? (
                               <div className="flex items-center justify-center gap-2 text-sm text-primary">
                                 <FileText className="h-4 w-4" /> {pdfFileName}
-                                <button className="text-muted-foreground hover:text-destructive ml-1" onClick={(e) => { e.stopPropagation(); setPdfFileName(null); setContent(""); }}>×</button>
+                                <button className="text-muted-foreground hover:text-destructive ml-1" onClick={(e) => { e.stopPropagation(); setPdfFileName(null); setPdfFile(null); setContent(""); }}>×</button>
                               </div>
                             ) : (
                               <div className="flex flex-col items-center gap-1.5">
@@ -449,11 +612,12 @@ const AssignmentDetailPage = () => {
                       const isEvaluating = evaluatingIds.has(s.id);
                       const scorePct = ev?.max_possible_score ? Math.round((Number(ev.total_score) / Number(ev.max_possible_score)) * 100) : null;
                       const conf = ev ? Math.round(Number(ev.confidence || 0)) : null;
+                      const displayStatus = (s.status === "needs_review" || s.status === "flagged") ? "ai_graded" : s.status;
                       return (
                         <tr key={s.id} className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => setSelectedSubmission(s.id)}>
                           <td className="p-4 text-sm font-medium text-foreground">{s.students?.name || "—"}</td>
                           <td className="p-4">
-                            <Badge variant="outline" className={statusStyles[s.status] || ""}>{s.status.replace(/_/g, " ")}</Badge>
+                            <Badge variant="outline" className={statusStyles[displayStatus] || ""}>{displayStatus.replace(/_/g, " ")}</Badge>
                           </td>
                           <td className="p-4 text-sm font-semibold text-foreground text-right">{scorePct !== null ? `${scorePct}%` : "—"}</td>
                           <td className="p-4 text-sm text-right">
@@ -463,13 +627,13 @@ const AssignmentDetailPage = () => {
                           </td>
                           <td className="p-4 text-right">
                             <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                              {s.status === "pending" && (
+                              {(displayStatus === "pending" || displayStatus === "evaluating") && (
                                 <Button size="sm" variant="outline" className="h-7 text-xs" disabled={isEvaluating} onClick={() => handleEvaluate(s.id)}>
                                   {isEvaluating ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Play className="h-3 w-3 mr-1" />}
-                                  {isEvaluating ? "Evaluating..." : "Evaluate"}
+                                  {isEvaluating ? (displayStatus === "evaluating" ? "Retrying..." : "Evaluating...") : (displayStatus === "evaluating" ? "Re-evaluate" : "Evaluate")}
                                 </Button>
                               )}
-                              {(s.status === "ai_graded" || s.status === "needs_review") && (
+                              {displayStatus === "ai_graded" && (
                                 <>
                                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setSelectedSubmission(s.id)}>
                                     <Eye className="h-3 w-3 mr-1" /> Review
@@ -479,7 +643,7 @@ const AssignmentDetailPage = () => {
                                   </Button>
                                 </>
                               )}
-                              {s.status === "approved" && (
+                              {displayStatus === "approved" && (
                                 <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setSelectedSubmission(s.id)}>
                                   <Eye className="h-3 w-3 mr-1" /> View
                                 </Button>
@@ -790,7 +954,7 @@ function AssignmentAnalytics({ submissions }: { submissions: any[] }) {
         distribution: computed.distribution,
         criteriaBreakdown: computed.criteriaBreakdown,
         avgConfidence: computed.avgConfidence,
-        classPerformance: [],
+        classPerformance: [] as any[],
         outlierCount: computed.outliers.length,
         flaggedCount: 0,
         needsReviewCount: 0,

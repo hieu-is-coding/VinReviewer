@@ -2,8 +2,8 @@
 
 import pytest
 
-from src.ingest.language import detect_language
-from src.models import Language
+from grading_system_src.ingest.language import detect_language
+from grading_system_src.models import Language
 
 
 def test_detect_english() -> None:

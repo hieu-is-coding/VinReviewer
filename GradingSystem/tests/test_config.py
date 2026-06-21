@@ -1,6 +1,6 @@
 """Tests for config loading."""
 
-from src.config import load_feature_config, load_red_lines_config, load_rubric_config
+from grading_system_src.config import load_feature_config, load_red_lines_config, load_rubric_config
 
 
 def test_load_rubric_config() -> None:

@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from src.models import (
+from grading_system_src.models import (
     EvidenceAudit,
     Language,
     Manuscript,
@@ -13,7 +13,7 @@ from src.models import (
     RubricTree,
     Section,
 )
-from src.calibration.perturbation import (
+from grading_system_src.calibration.perturbation import (
     _remove_random_section,
     _shuffle_sections,
     run_perturbation_test,
@@ -76,8 +76,8 @@ class TestRemoveRandomSection:
 
 
 class TestRunPerturbationTest:
-    @patch("src.calibration.perturbation._lightweight_score")
-    @patch("src.calibration.perturbation._paraphrase_abstract")
+    @patch("grading_system_src.calibration.perturbation._lightweight_score")
+    @patch("grading_system_src.calibration.perturbation._paraphrase_abstract")
     def test_stable_scores(self, mock_paraphrase, mock_score):
         mock_paraphrase.return_value = "Paraphrased abstract."
         mock_score.return_value = 0.75  # All perturbations return same score
@@ -90,8 +90,8 @@ class TestRunPerturbationTest:
         assert result.confidence_label == "HIGH"
         assert result.score_std < 0.01
 
-    @patch("src.calibration.perturbation._lightweight_score")
-    @patch("src.calibration.perturbation._paraphrase_abstract")
+    @patch("grading_system_src.calibration.perturbation._lightweight_score")
+    @patch("grading_system_src.calibration.perturbation._paraphrase_abstract")
     def test_unstable_scores(self, mock_paraphrase, mock_score):
         mock_paraphrase.return_value = "Paraphrased."
         # Return very different scores

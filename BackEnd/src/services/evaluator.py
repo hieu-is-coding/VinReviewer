@@ -16,11 +16,15 @@ logger = logging.getLogger(__name__)
 
 
 async def evaluate_submission(submission_id: str, job_id: str) -> str:
-    """Run the full agentic pipeline for a text-based submission."""
+    """Run the full agentic pipeline for a submission (detects PDF/text)."""
     from src.services.supabase_client import fetch_submission
 
     submission = await fetch_submission(submission_id)
     content: str = submission.get("content") or ""
+    pdf_path: str | None = submission.get("pdf_path")
+
+    if pdf_path:
+        return await evaluate_pdf_storage_submission(submission_id, job_id, pdf_path)
 
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".txt", delete=False, encoding="utf-8"
@@ -31,9 +35,30 @@ async def evaluate_submission(submission_id: str, job_id: str) -> str:
     return await _evaluate_core(submission_id, job_id, tmp_path, cleanup_path=True)
 
 
+async def evaluate_pdf_storage_submission(submission_id: str, job_id: str, pdf_path: str) -> str:
+    """Download PDF from Supabase Storage and evaluate it."""
+    import httpx
+    from src.config import settings
+    import os
+
+    public_url = f"{settings.supabase_url.rstrip('/')}/storage/v1/object/public/pdfs/{pdf_path}"
+    
+    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static", "pdfs")
+    os.makedirs(static_dir, exist_ok=True)
+    local_path = os.path.join(static_dir, f"{submission_id}.pdf")
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(public_url)
+        resp.raise_for_status()
+        with open(local_path, "wb") as f:
+            f.write(resp.content)
+
+    return await _evaluate_core(submission_id, job_id, local_path, cleanup_path=False)
+
+
 async def evaluate_pdf_submission(submission_id: str, job_id: str, pdf_path: str) -> str:
     """Run the full pipeline from a PDF file path (already saved to disk)."""
-    return await _evaluate_core(submission_id, job_id, pdf_path, cleanup_path=True)
+    return await _evaluate_core(submission_id, job_id, pdf_path, cleanup_path=False)
 
 
 async def _evaluate_core(
@@ -103,9 +128,17 @@ async def _evaluate_core(
                 context={"submission_id": submission_id, "errors": state.errors},
             )
 
+        if state.manuscript and state.manuscript.full_text:
+            from src.services.supabase_client import update_submission_content
+            try:
+                await update_submission_content(submission_id, state.manuscript.full_text)
+            except Exception as e:
+                logger.warning("Failed to update submission content: %s", e)
+
         eval_id = await insert_evaluation(
             {"submission_id": submission_id, "status": "in_progress", "evaluation_type": "agentic"}
         )
+
 
         try:
             eval_payload = map_pipeline_to_evaluation(state, criteria, submission_id)
@@ -162,7 +195,7 @@ def _run_pipeline_sync(
     rubric_tree,
 ):
     """Call GradingSystem run_pipeline() synchronously (runs in thread pool)."""
-    from src.orchestration.graph import run_pipeline  # type: ignore[import]
+    from grading_system_src.orchestration.graph import run_pipeline  # type: ignore[import]
 
     return run_pipeline(
         manuscript_path=manuscript_path,

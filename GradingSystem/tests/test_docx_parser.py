@@ -1,7 +1,7 @@
 """Tests for the DOCX parser."""
 
-from src.ingest.docx_parser import _detect_inline_citations, _extract_references
-from src.models import Section
+from grading_system_src.ingest.docx_parser import _detect_inline_citations, _extract_references
+from grading_system_src.models import Section
 
 
 def test_detect_inline_citations() -> None:

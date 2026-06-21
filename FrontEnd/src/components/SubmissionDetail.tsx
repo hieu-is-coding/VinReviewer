@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
-import { ArrowLeft, Brain, BookOpen, Lightbulb, CheckCircle, AlertTriangle, Edit3, Save, X, Star, Shield, Quote, ArrowUp, ScanSearch } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { ArrowLeft, Brain, BookOpen, Lightbulb, CheckCircle, AlertTriangle, Edit3, Save, X, Star, Shield, Quote, ArrowUp, ScanSearch, Clock, Loader2, Play } from "lucide-react";
 import { escapeHtml } from "@/lib/sanitize";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useUpdateEvaluation, useUpdateSubmissionStatus, useUpdateCriteriaScore } from "@/hooks/useData";
+import { useUpdateEvaluation, useUpdateSubmissionStatus, useUpdateCriteriaScore, useEvaluateSubmission } from "@/hooks/useData";
 import { toast } from "sonner";
 
 
@@ -15,13 +15,27 @@ interface SubmissionDetailProps {
 }
 
 const statusFlow = [
-  { key: "pending", label: "Pending", color: "bg-muted text-muted-foreground" },
-  { key: "evaluating", label: "Evaluating", color: "bg-primary/10 text-primary" },
-  { key: "ai_graded", label: "AI Graded", color: "bg-accent text-accent-foreground" },
-  { key: "needs_review", label: "Needs Review", color: "bg-warning/10 text-warning" },
-  { key: "human_reviewed", label: "Human Reviewed", color: "bg-primary/10 text-primary" },
-  { key: "approved", label: "Approved", color: "bg-success/10 text-success" },
+  { key: "pending", label: "Pending", icon: Clock },
+  { key: "evaluating", label: "Evaluating", icon: Loader2 },
+  { key: "ai_graded", label: "AI Graded", icon: Brain },
+  { key: "human_reviewed", label: "Human Reviewed", icon: Shield },
+  { key: "approved", label: "Approved", icon: CheckCircle },
 ];
+
+const getPdfUrl = (submission: any) => {
+  if (submission?.pdf_path) {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+    const cleanUrl = supabaseUrl.replace(/\/$/, "");
+    return `${cleanUrl}/storage/v1/object/public/pdfs/${submission.pdf_path}`;
+  }
+  const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || "http://localhost:8000/evaluate-sync";
+  try {
+    const origin = new URL(evaluateUrl).origin;
+    return `${origin}/static/pdfs/${submission.id}.pdf`;
+  } catch (e) {
+    return `http://localhost:8000/static/pdfs/${submission.id}.pdf`;
+  }
+};
 
 // Parse the structured explanation our edge function writes:
 //   [Level: Proficient (4/5) · Confidence 82%]
@@ -66,9 +80,50 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
   const [editScoreValue, setEditScoreValue] = useState<number>(0);
   const [editScoreExplanation, setEditScoreExplanation] = useState("");
 
+  const [hasPdf, setHasPdf] = useState(false);
+  const [viewMode, setViewMode] = useState<"text" | "pdf">("text");
+  const pdfUrl = getPdfUrl(submission);
+
+  useEffect(() => {
+    if (submission?.pdf_path) {
+      setHasPdf(true);
+      setViewMode("pdf");
+      return;
+    }
+
+    fetch(pdfUrl, { method: "HEAD" })
+      .then((res) => {
+        if (res.ok) {
+          setHasPdf(true);
+          setViewMode("pdf");
+        } else {
+          setHasPdf(false);
+          setViewMode("text");
+        }
+      })
+      .catch(() => {
+        setHasPdf(false);
+        setViewMode("text");
+      });
+  }, [pdfUrl, submission?.pdf_path]);
+
   const updateEvaluation = useUpdateEvaluation();
   const updateStatus = useUpdateSubmissionStatus();
   const updateCriteriaScore = useUpdateCriteriaScore();
+  const evaluateSubmission = useEvaluateSubmission();
+  const [evaluating, setEvaluating] = useState(false);
+
+  const handleEvaluate = async () => {
+    setEvaluating(true);
+    try {
+      await evaluateSubmission.mutateAsync(submission.id);
+      toast.success("AI evaluation complete!");
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setEvaluating(false);
+    }
+  };
 
 
   const handleSaveFeedback = async () => {
@@ -95,8 +150,9 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
     } catch (e: any) { toast.error(e.message); }
   };
 
-  const currentStatusIndex = statusFlow.findIndex(s => s.key === submission.status);
-  const currentStatus = statusFlow.find(s => s.key === submission.status);
+  const displayStatus = (submission.status === "needs_review" || submission.status === "flagged") ? "ai_graded" : submission.status;
+  const currentStatusIndex = statusFlow.findIndex(s => s.key === displayStatus);
+  const currentStatus = statusFlow.find(s => s.key === displayStatus);
 
   const criteriaScores = evaluation?.criteria_scores || [];
 
@@ -116,42 +172,77 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className={currentStatus?.color || ""}>
-            {currentStatus?.label || submission.status}
+          <Badge variant="outline" className={
+            displayStatus === "pending" ? "bg-muted text-muted-foreground border-border" :
+              displayStatus === "evaluating" ? "bg-primary/10 text-primary border-primary/20" :
+                displayStatus === "ai_graded" ? "bg-accent text-accent-foreground border-accent" :
+                  displayStatus === "human_reviewed" ? "bg-primary/10 text-primary border-primary/20" :
+                    displayStatus === "approved" ? "bg-success/10 text-success border-success/20" :
+                      ""
+          }>
+            {currentStatus?.label || displayStatus}
           </Badge>
         </div>
       </div>
 
       {/* Status Pipeline */}
-      {evaluation && (
-        <div className="bg-card rounded-lg shadow-card border border-border p-4">
-          <p className="text-xs font-medium text-muted-foreground mb-3">Review Pipeline</p>
-          <div className="flex items-center gap-1">
-            {statusFlow.map((step, i) => {
-              const isActive = step.key === submission.status;
-              const isPast = i < currentStatusIndex;
-              return (
-                <div key={step.key} className="flex items-center gap-1 flex-1">
-                  <div className={`flex-1 h-2 rounded-full transition-all ${isPast ? "bg-primary" : isActive ? "bg-primary/60" : "bg-border"}`} />
-                  {i < statusFlow.length - 1 && <div className="w-1" />}
+      <div className="bg-card rounded-xl border border-border pt-6 px-6 pb-10 shadow-sm overflow-hidden relative mb-4">
+        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-primary to-accent" />
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-6">
+          Review Pipeline
+        </p>
+        <div className="relative flex items-center justify-between w-full px-6">
+          {/* Connecting background line */}
+          <div className="absolute left-12 right-12 top-[20px] h-0.5 bg-muted rounded-full z-0" />
+
+          {/* Connecting active line */}
+          <div
+            className="absolute left-12 top-[20px] h-0.5 bg-primary rounded-full transition-all duration-500 z-0"
+            style={{ width: `calc(${(currentStatusIndex / (statusFlow.length - 1)) * 100}% - ${currentStatusIndex === 0 ? 0 : 32}px)` }}
+          />
+
+          {statusFlow.map((step, i) => {
+            const isActive = step.key === displayStatus;
+            const isPast = i < currentStatusIndex;
+            const StepIcon = step.icon;
+
+            return (
+              <div key={step.key} className="flex flex-col items-center relative z-10 flex-1">
+                <div
+                  className={`h-10 w-10 rounded-full flex items-center justify-center border transition-all duration-300 ${isActive
+                    ? "bg-background border-primary text-primary shadow-[0_0_12px_rgba(59,130,246,0.3)] scale-110"
+                    : isPast
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : "bg-background border-muted text-muted-foreground"
+                    }`}
+                >
+                  {StepIcon && <StepIcon className={`h-5 w-5 ${isActive && step.key === "evaluating" ? "animate-spin" : ""}`} />}
                 </div>
-              );
-            })}
-          </div>
-          <div className="flex justify-between mt-2">
-            {statusFlow.map((step) => (
-              <span key={step.key} className={`text-[10px] ${step.key === submission.status ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                {step.label}
-              </span>
-            ))}
-          </div>
+                <span
+                  className={`text-xs mt-3 font-medium transition-colors ${isActive
+                    ? "text-primary font-semibold"
+                    : isPast
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                    }`}
+                >
+                  {step.label}
+                </span>
+                {isActive && (
+                  <span className="absolute -bottom-6 text-[9px] font-semibold text-primary animate-pulse bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 whitespace-nowrap">
+                    Active
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
       {/* Action Buttons */}
       {evaluation && (
         <div className="flex items-center gap-2 flex-wrap">
-          {(submission.status === "ai_graded" || submission.status === "needs_review") && (
+          {(displayStatus === "ai_graded") && (
             <>
               <Button size="sm" variant="outline" onClick={() => setIsEditing(!isEditing)} aria-label={isEditing ? "Cancel editing evaluation" : "Edit evaluation"}>
                 <Edit3 className="h-3.5 w-3.5 mr-1" /> {isEditing ? "Cancel Edit" : "Edit Evaluation"}
@@ -165,9 +256,14 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
             </>
           )}
           {submission.status === "human_reviewed" && (
-            <Button size="sm" onClick={() => handleStatusChange("approved")} className="bg-success hover:bg-success/90 text-success-foreground">
-              <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve Final Grade
-            </Button>
+            <>
+              <Button size="sm" onClick={() => handleStatusChange("approved")} className="bg-success hover:bg-success/90 text-success-foreground" aria-label="Approve final grade">
+                <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve Final Grade
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleStatusChange("ai_graded")} aria-label="Cancel human review">
+                <X className="h-3.5 w-3.5 mr-1" /> Cancel
+              </Button>
+            </>
           )}
           {submission.status === "approved" && (
             <Badge className="bg-success/10 text-success border-success/20 px-3 py-1">
@@ -179,14 +275,43 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Document */}
-        <div className="bg-card rounded-lg shadow-card border border-border p-6">
-          <h3 className="text-sm font-medium text-foreground mb-4 flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-primary" /> Submission
-          </h3>
-          <div
-            className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap text-sm leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: escapeHtml(submission.content || "") }}
-          />
+        <div className="bg-card rounded-lg shadow-card border border-border p-6 flex flex-col h-[750px]">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-primary" /> Submission
+            </h3>
+            {hasPdf && (
+              <div className="flex bg-muted rounded-lg p-0.5 text-xs">
+                <button
+                  onClick={() => setViewMode("pdf")}
+                  className={`px-3 py-1 rounded-md transition-all ${viewMode === "pdf" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  PDF View
+                </button>
+                <button
+                  onClick={() => setViewMode("text")}
+                  className={`px-3 py-1 rounded-md transition-all ${viewMode === "text" ? "bg-background text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  Text View
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {viewMode === "pdf" ? (
+              <iframe
+                src={pdfUrl}
+                className="w-full h-full border-0 rounded-md bg-muted"
+                title="PDF Submission Viewer"
+              />
+            ) : (
+              <div
+                className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap text-sm leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: escapeHtml(submission.content || "") }}
+              />
+            )}
+          </div>
         </div>
 
         {/* Right: Evaluation */}
@@ -315,7 +440,7 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
                                   <Badge variant="outline" className={pct >= 70 ? "border-success/30 text-success" : pct >= 40 ? "border-warning/30 text-warning" : "border-destructive/30 text-destructive"}>
                                     {cs.score} / {maxScore}
                                   </Badge>
-                                  {(submission.status === "ai_graded" || submission.status === "needs_review") && (
+                                  {(displayStatus === "ai_graded") && (
                                     <Button
                                       size="sm"
                                       variant="ghost"
@@ -438,9 +563,13 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
               )}
             </>
           ) : (
-            <div className="bg-card rounded-lg shadow-card border border-border p-12 text-center">
-              <Brain className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">No evaluation yet. Run AI evaluation from the submissions table.</p>
+            <div className="bg-card rounded-lg shadow-card border border-border p-12 text-center flex flex-col items-center justify-center gap-3">
+              <Brain className="h-10 w-10 text-muted-foreground mx-auto mb-1" />
+              <p className="text-sm text-muted-foreground">No evaluation yet.</p>
+              <Button onClick={handleEvaluate} disabled={evaluating}>
+                {evaluating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
+                {evaluating ? "Evaluating..." : "Run AI Evaluation"}
+              </Button>
             </div>
           )}
         </div>

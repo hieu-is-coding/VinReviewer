@@ -2,12 +2,12 @@
 
 import numpy as np
 
-from src.calibration.calibrator import (
+from grading_system_src.calibration.calibrator import (
     apply_calibration,
     compute_metrics,
     fit_calibration,
 )
-from src.models import CalibrationParams
+from grading_system_src.models import CalibrationParams
 
 
 def test_fit_calibration_identity() -> None:
@@ -28,10 +28,10 @@ def test_fit_calibration_positive_bias() -> None:
 
 
 def test_apply_calibration_clamps() -> None:
-    """Calibrated score should always be in [0, 1]."""
+    """Calibrated score should always be in [0.4, 0.96]."""
     params = CalibrationParams(slope=2.0, intercept=-0.5)
-    assert apply_calibration(0.0, params) == 0.0
-    assert apply_calibration(1.0, params) <= 1.0
+    assert apply_calibration(0.0, params) == 0.40
+    assert apply_calibration(1.0, params) == 0.96
 
 
 def test_compute_metrics() -> None:

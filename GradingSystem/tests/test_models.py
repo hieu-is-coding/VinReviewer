@@ -1,6 +1,6 @@
 """Tests for Pydantic models."""
 
-from src.models import (
+from grading_system_src.models import (
     CalibrationParams,
     ClaimType,
     EvidenceAudit,

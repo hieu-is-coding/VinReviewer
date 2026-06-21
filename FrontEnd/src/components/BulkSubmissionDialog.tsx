@@ -11,13 +11,14 @@ interface QueuedSubmission {
   studentName: string;
   fileName: string;
   content: string;
+  file?: File;
 }
 
 interface BulkSubmissionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   classStudents: any[];
-  onSubmitAll: (items: { studentId: string; studentName: string; content: string }[]) => Promise<void>;
+  onSubmitAll: (items: { studentId: string; studentName: string; content: string; file?: File }[]) => Promise<void>;
   parsePdfUrl: string;
   anonKey: string;
 }
@@ -60,6 +61,7 @@ export function BulkSubmissionDialog({ open, onOpenChange, classStudents, onSubm
         studentName: currentStudent?.students?.name || "Unknown",
         fileName: file.name,
         content: text,
+        file,
       }]);
       setCurrentStudentId("");
       setPasteContent("");
@@ -120,6 +122,7 @@ export function BulkSubmissionDialog({ open, onOpenChange, classStudents, onSubm
         studentId: q.studentId,
         studentName: q.studentName,
         content: q.content,
+        file: q.file,
       })));
       setQueue([]);
       setCurrentStudentId("");

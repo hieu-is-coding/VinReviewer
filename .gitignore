@@ -68,5 +68,9 @@ Thumbs.db
 
 # Eval and Output
 GradingSystem/eval/
-/GradingSystem/input/
-/GradingSystem/Output/
+GradingSystem/eval_output/
+GradingSystem/input/
+GradingSystem/output/
+
+# Supabase Local Dev
+supabase/

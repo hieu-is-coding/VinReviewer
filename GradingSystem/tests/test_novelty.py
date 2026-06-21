@@ -5,12 +5,12 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from src.agents.novelty import (
+from grading_system_src.agents.novelty import (
     NoveltyAssessment,
     _compute_novelty_scores,
     assess_novelty,
 )
-from src.models import Language, LitPool, LitPoolEntry, Manuscript
+from grading_system_src.models import Language, LitPool, LitPoolEntry, Manuscript
 
 
 def _make_manuscript() -> Manuscript:
@@ -57,7 +57,7 @@ class TestComputeNoveltyScores:
         assert len(results) == 1
         assert results[0].classification == "NOVEL"
 
-    @patch("src.agents.novelty._get_encoder")
+    @patch("grading_system_src.agents.novelty.get_encoder")
     def test_classification_logic(self, mock_encoder):
         # Mock encoder to return controlled embeddings
         encoder = MagicMock()
@@ -85,10 +85,10 @@ class TestComputeNoveltyScores:
 
 
 class TestAssessNovelty:
-    @patch("src.agents.novelty._extract_contribution_claims")
-    @patch("src.agents.novelty._compute_novelty_scores")
+    @patch("grading_system_src.agents.novelty._extract_contribution_claims")
+    @patch("grading_system_src.agents.novelty._compute_novelty_scores")
     def test_full_pipeline(self, mock_scores, mock_claims):
-        from src.models import NoveltyClaimResult
+        from grading_system_src.models import NoveltyClaimResult
 
         mock_claims.return_value = ["Claim 1", "Claim 2"]
         mock_scores.return_value = [
@@ -112,7 +112,7 @@ class TestAssessNovelty:
         assert len(result.claims) == 2
         assert 0.0 < result.overall_novelty_score < 1.0
 
-    @patch("src.agents.novelty._extract_contribution_claims")
+    @patch("grading_system_src.agents.novelty._extract_contribution_claims")
     def test_no_claims(self, mock_claims):
         mock_claims.return_value = []
         result = assess_novelty(_make_manuscript(), _make_lit_pool())

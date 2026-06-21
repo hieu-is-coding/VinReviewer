@@ -1,7 +1,7 @@
 """Tests for style feature extractor."""
 
-from src.features.style import extract_style_features
-from src.models import Language, Manuscript
+from grading_system_src.features.style import extract_style_features
+from grading_system_src.models import Language, Manuscript
 
 
 def test_en_style_features(en_manuscript: Manuscript) -> None:

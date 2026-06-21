@@ -43,13 +43,14 @@ async def evaluate_pdf(
     if file.content_type not in ("application/pdf", "application/octet-stream"):
         raise HTTPException(status_code=400, detail="Only PDF files are accepted")
 
-    # Stream to a named temp file — worker will delete it after pipeline
+    # Save directly to static/pdfs so it can be served to the FrontEnd
+    import os
     try:
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix=".pdf", dir=tempfile.gettempdir()
-        ) as tmp:
-            tmp_path = tmp.name
+        static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "static", "pdfs")
+        os.makedirs(static_dir, exist_ok=True)
+        tmp_path = os.path.join(static_dir, f"{submission_id}.pdf")
 
+        oversized = False
         async with aiofiles.open(tmp_path, "wb") as out:
             total = 0
             chunk_size = 65_536
@@ -59,13 +60,18 @@ async def evaluate_pdf(
                     break
                 total += len(chunk)
                 if total > _MAX_PDF_BYTES:
-                    Path(tmp_path).unlink(missing_ok=True)
-                    raise HTTPException(status_code=413, detail="PDF exceeds 50 MB limit")
+                    oversized = True
+                    break
                 await out.write(chunk)
+
+        if oversized:
+            Path(tmp_path).unlink(missing_ok=True)
+            raise HTTPException(status_code=413, detail="PDF exceeds 50 MB limit")
     except HTTPException:
         raise
     except Exception as exc:
-        Path(tmp_path).unlink(missing_ok=True)
+        if 'tmp_path' in locals():
+            Path(tmp_path).unlink(missing_ok=True)
         logger.exception("Failed to save uploaded PDF: %s", exc)
         raise HTTPException(status_code=500, detail="Failed to save uploaded file")
 

@@ -88,13 +88,20 @@ export function useAssignmentSubmissions(assignmentId?: string) {
       if (error) throw error;
       return data;
     },
+    refetchInterval: (query) => {
+      const data = query.state.data as any[];
+      const hasPendingOrEvaluating = data?.some(
+        (s) => s.status === "pending" || s.status === "evaluating"
+      );
+      return hasPendingOrEvaluating ? 2000 : false;
+    },
   });
 }
 
 export function useCreateAssignmentSubmission() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (values: { student_id: string; class_id: string; assignment_id: string; rubric_id?: string | null; title?: string; content: string }) => {
+    mutationFn: async (values: { student_id: string; class_id: string; assignment_id: string; rubric_id?: string | null; title?: string; content: string; pdf_path?: string | null }) => {
       const { data, error } = await supabase.from("submissions").insert(values).select().single();
       if (error) throw error;
       return data;

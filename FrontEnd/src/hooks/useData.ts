@@ -191,6 +191,13 @@ export function useSubmissions() {
       if (error) throw error;
       return data;
     },
+    refetchInterval: (query) => {
+      const data = query.state.data as any[];
+      const hasPendingOrEvaluating = data?.some(
+        (s) => s.status === "pending" || s.status === "evaluating"
+      );
+      return hasPendingOrEvaluating ? 2000 : false;
+    },
   });
 }
 
@@ -225,7 +232,11 @@ export function useEvaluateSubmission() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (submission_id: string) => {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evaluate`, {
+      const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || 
+        (import.meta.env.DEV 
+          ? "http://localhost:8000/evaluate-sync" 
+          : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evaluate`);
+      const response = await fetch(evaluateUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -239,7 +250,7 @@ export function useEvaluateSubmission() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["submissions"] });
       qc.invalidateQueries({ queryKey: ["evaluations"] });
       qc.invalidateQueries({ queryKey: ["assignment_submissions"] });

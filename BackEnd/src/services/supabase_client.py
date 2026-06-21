@@ -45,10 +45,17 @@ async def update_submission_status(submission_id: str, status: str) -> None:
     await sb.from_("submissions").update({"status": status}).eq("id", submission_id).execute()
 
 
+async def update_submission_content(submission_id: str, content: str) -> None:
+    sb = await get_client()
+    await sb.from_("submissions").update({"content": content}).eq("id", submission_id).execute()
+
+
+
 async def insert_evaluation(payload: dict) -> str:
     sb = await get_client()
-    resp = await sb.from_("evaluations").insert(payload).select("id").single().execute()
-    return resp.data["id"]
+    resp = await sb.from_("evaluations").insert(payload).select("id").execute()
+    return resp.data[0]["id"]
+
 
 
 async def update_evaluation(evaluation_id: str, payload: dict) -> None:

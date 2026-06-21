@@ -1,6 +1,6 @@
 """Tests for diagnostic output rendering."""
 
-from src.models import (
+from grading_system_src.models import (
     CalibrationParams,
     EvidenceAudit,
     Features,
@@ -15,7 +15,7 @@ from src.models import (
     Section,
     SupervisorResult,
 )
-from src.synthesis.output import render_json_output, render_markdown_report
+from grading_system_src.synthesis.output import render_json_output, render_markdown_report
 
 
 def _make_state() -> PipelineState:

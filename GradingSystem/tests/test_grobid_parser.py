@@ -1,7 +1,7 @@
 """Tests for the GROBID TEI/XML parser."""
 
-from src.ingest.grobid_client import _parse_tei
-from src.models import Language
+from grading_system_src.ingest.grobid_client import _parse_tei
+from grading_system_src.models import Language
 
 
 SAMPLE_TEI = """\

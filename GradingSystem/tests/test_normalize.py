@@ -1,8 +1,8 @@
 """Tests for the feature normalization module."""
 
 from unittest.mock import patch
-from src.features.normalize import normalize_features
-from src.models import Features, FeatureValue
+from grading_system_src.features.normalize import normalize_features
+from grading_system_src.models import Features, FeatureValue
 
 
 def test_normalize_with_no_baselines() -> None:
@@ -11,7 +11,7 @@ def test_normalize_with_no_baselines() -> None:
         "mtld": FeatureValue(id="mtld", raw_value=80.0, label="MTLD"),
     })
     
-    with patch("src.features.normalize._load_baselines", return_value={}):
+    with patch("grading_system_src.features.normalize._load_baselines", return_value={}):
         result = normalize_features(features)
         assert result.values["mtld"].z_score is None
 
@@ -26,6 +26,6 @@ def test_normalize_clips() -> None:
         "mtld": {"mean": 100.0, "std": 10.0}  # z = (200 - 100)/10 = 10, clipped to 3
     }
     
-    with patch("src.features.normalize._load_baselines", return_value=mock_baselines):
+    with patch("grading_system_src.features.normalize._load_baselines", return_value=mock_baselines):
         result = normalize_features(features)
         assert result.values["mtld"].z_score == 3.0

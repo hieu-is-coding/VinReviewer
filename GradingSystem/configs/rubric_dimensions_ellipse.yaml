@@ -1,0 +1,84 @@
+# Rubric Dimensions — ELLIPSE (English Language Learners) evaluation
+# Maps 1:1 to the six ELLIPSE scoring dimensions.
+# Weights are equal (1/6) matching the MCRMSE metric which weights all dimensions equally.
+# Leaf IDs use {dimension}_{aspect} convention for aggregation in score_mapping.py.
+
+dimensions:
+  - id: cohesion
+    label: "Cohesion"
+    weight: 0.1667
+    children:
+      - id: cohesion_flow
+        label: "Logical flow between ideas and sentences"
+        weight: 0.40
+      - id: cohesion_organization
+        label: "Overall essay organization and paragraph structure"
+        weight: 0.35
+      - id: cohesion_transitions
+        label: "Use of transition words and connective phrases"
+        weight: 0.25
+
+  - id: syntax
+    label: "Syntax"
+    weight: 0.1667
+    children:
+      - id: syntax_variety
+        label: "Variety of sentence structures (simple, compound, complex)"
+        weight: 0.50
+      - id: syntax_control
+        label: "Control and correctness of sentence construction"
+        weight: 0.50
+
+  - id: vocabulary
+    label: "Vocabulary"
+    weight: 0.1667
+    children:
+      - id: vocabulary_range
+        label: "Range and diversity of word choice"
+        weight: 0.50
+      - id: vocabulary_precision
+        label: "Precision and appropriateness of word selection"
+        weight: 0.50
+
+  - id: phraseology
+    label: "Phraseology"
+    weight: 0.1667
+    children:
+      - id: phraseology_idiomaticity
+        label: "Use of idiomatic expressions and natural phrasing"
+        weight: 0.50
+      - id: phraseology_collocations
+        label: "Appropriate use of collocations and multi-word expressions"
+        weight: 0.50
+
+  - id: grammar
+    label: "Grammar"
+    weight: 0.1667
+    children:
+      - id: grammar_accuracy
+        label: "Grammatical accuracy (subject-verb agreement, tense, articles)"
+        weight: 0.60
+      - id: grammar_complexity
+        label: "Grammatical complexity and range of structures used"
+        weight: 0.40
+
+  - id: conventions
+    label: "Conventions"
+    weight: 0.1667
+    children:
+      - id: conventions_spelling
+        label: "Spelling accuracy"
+        weight: 0.35
+      - id: conventions_punctuation
+        label: "Punctuation correctness"
+        weight: 0.35
+      - id: conventions_formatting
+        label: "Capitalization and general formatting"
+        weight: 0.30
+
+context_depths:
+  shallow: "dimension label + weight only"
+  intermediate: "label + weight + per-child descriptors"
+  deep: "full child descriptors + exemplar excerpts + scoring anchors"
+
+default_depth: intermediate

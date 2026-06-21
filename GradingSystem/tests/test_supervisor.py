@@ -1,7 +1,7 @@
 """Tests for the AgentSupervisor red-line checks."""
 
-from src.agents.supervisor import check_red_lines
-from src.models import (
+from grading_system_src.agents.supervisor import check_red_lines
+from grading_system_src.models import (
     CalibrationParams,
     EvidenceAudit,
     LeafVerdict,

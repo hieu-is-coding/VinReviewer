@@ -1,7 +1,7 @@
 """Tests for mechanics feature extractor."""
 
-from src.features.mechanics import extract_mechanics_features
-from src.models import Language, Manuscript
+from grading_system_src.features.mechanics import extract_mechanics_features
+from grading_system_src.models import Language, Manuscript
 
 
 def test_mechanics_features(en_manuscript: Manuscript) -> None:

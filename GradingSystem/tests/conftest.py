@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.models import (
+from grading_system_src.models import (
     CalibrationParams,
     ClaimSpan,
     ClaimType,

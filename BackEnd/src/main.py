@@ -21,15 +21,27 @@ class CorrelationFilter(logging.Filter):
         return True
 
 
-logging.basicConfig(
-    format="%(asctime)s [%(correlation_id)s] %(levelname)s %(name)s: %(message)s",
-    level=logging.INFO,
+log_handler = logging.StreamHandler()
+log_handler.setFormatter(
+    logging.Formatter("%(asctime)s [%(correlation_id)s] %(levelname)s %(name)s: %(message)s")
 )
-logging.getLogger().addFilter(CorrelationFilter())
+log_handler.addFilter(CorrelationFilter())
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[log_handler],
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Try to start GROBID container if not already running
+    try:
+        from src.services.grobid_launcher import ensure_grobid_running
+        await ensure_grobid_running()
+    except Exception as e:
+        logging.getLogger(__name__).warning("Failed to automatically start GROBID container: %s", e)
+
     try:
         from sentence_transformers import SentenceTransformer
 
@@ -74,6 +86,21 @@ async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
         },
     )
 
+
+from fastapi.staticfiles import StaticFiles
+import os
+
+class CORSStaticFiles(StaticFiles):
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
+
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static")
+os.makedirs(os.path.join(static_dir, "pdfs"), exist_ok=True)
+app.mount("/static", CORSStaticFiles(directory=static_dir), name="static")
 
 app.include_router(health.router, tags=["health"])
 app.include_router(evaluate.router, tags=["evaluate"])

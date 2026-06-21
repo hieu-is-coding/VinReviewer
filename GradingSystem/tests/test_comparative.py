@@ -2,12 +2,12 @@
 
 import pytest
 
-from src.calibration.comparative import (
+from grading_system_src.calibration.comparative import (
     ComparativePosition,
     _generate_statements,
     compute_comparative_position,
 )
-from src.models import LeafVerdict
+from grading_system_src.models import LeafVerdict
 
 
 class TestComputeComparativePosition:

@@ -4,13 +4,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.features.references import (
+from grading_system_src.features.references import (
     ReferenceValidation,
     _title_similarity,
     _validate_single_reference,
     validate_references,
 )
-from src.models import Language, Manuscript, Reference
+from grading_system_src.models import Language, Manuscript, Reference
 
 
 def _make_manuscript(refs: list[Reference]) -> Manuscript:
@@ -41,7 +41,7 @@ class TestTitleSimilarity:
 
 
 class TestValidateSingleReference:
-    @patch("src.features.references._check_crossref_doi")
+    @patch("grading_system_src.features.references._check_crossref_doi")
     def test_verified_by_doi(self, mock_crossref):
         mock_crossref.return_value = {"title": ["Attention Is All You Need"]}
         ref = Reference(
@@ -53,8 +53,8 @@ class TestValidateSingleReference:
         assert result.status == "verified"
         assert result.source == "crossref"
 
-    @patch("src.features.references._check_crossref_doi")
-    @patch("src.features.references._search_crossref_title")
+    @patch("grading_system_src.features.references._check_crossref_doi")
+    @patch("grading_system_src.features.references._search_crossref_title")
     def test_verified_by_title_search(self, mock_search, mock_doi):
         mock_doi.return_value = None
         mock_search.return_value = {
@@ -78,9 +78,9 @@ class TestValidateReferences:
         result = validate_references(ms, rate_limit_delay=0)
         assert result.verified_ratio == 1.0
 
-    @patch("src.features.references._validate_single_reference")
+    @patch("grading_system_src.features.references._validate_single_reference")
     def test_aggregation(self, mock_validate):
-        from src.models import RefCheckResult
+        from grading_system_src.models import RefCheckResult
 
         mock_validate.side_effect = [
             RefCheckResult(ref_id="r1", status="verified", source="crossref", confidence=0.95),

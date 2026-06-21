@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.models import (
+from grading_system_src.models import (
     DeliberationResult,
     EvidenceAudit,
     Features,
@@ -16,7 +16,7 @@ from src.models import (
     RubricNode,
     RubricTree,
 )
-from src.synthesis.deliberation import (
+from grading_system_src.synthesis.deliberation import (
     _aggregate_verdicts,
     _collect_leaf_ids,
     run_deliberation,

@@ -1,0 +1,41 @@
+# Ignore git and local IDE configs
+.git
+.gitignore
+.dockerignore
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Ignore local virtual environments and node modules
+**/node_modules
+**/.venv
+**/venv
+**/env
+**/ENV
+**/dist
+**/build
+**/.pytest_cache
+**/.coverage
+**/htmlcov
+**/.mypy_cache
+**/.ipynb_checkpoints
+
+# Ignore python compiled files
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Ignore local data and evaluation artifacts
+**/data
+**/output
+**/eval_output
+**/input
+**/tests
+
+# Ignore documentation images
+imgs/

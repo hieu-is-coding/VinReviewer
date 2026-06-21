@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.models import (
+from grading_system_src.models import (
     Language,
     LeafVerdict,
     Manuscript,
@@ -12,11 +12,11 @@ from src.models import (
     RebuttalOutcome,
     ReviewOutput,
 )
-from src.rebuttal.handler import _find_relevant_section, process_rebuttals
+from grading_system_src.rebuttal.handler import _find_relevant_section, process_rebuttals
 
 
 def _make_manuscript() -> Manuscript:
-    from src.models import Section
+    from grading_system_src.models import Section
 
     return Manuscript(
         source_path="test.pdf",
@@ -53,7 +53,7 @@ def _make_review() -> ReviewOutput:
                 suggested_revision="Minor fixes needed.",
             ),
         ],
-        overall_score=0.63,
+        overall_score=0.6333,
     )
 
 
@@ -70,7 +70,7 @@ class TestFindRelevantSection:
 
 
 class TestProcessRebuttals:
-    @patch("src.rebuttal.handler._evaluate_single_rebuttal")
+    @patch("grading_system_src.rebuttal.handler._evaluate_single_rebuttal")
     def test_successful_rebuttal(self, mock_eval):
         mock_eval.return_value = RebuttalOutcome(
             leaf_id="thesis_clarity",
@@ -93,7 +93,7 @@ class TestProcessRebuttals:
         assert result.outcomes[0].revised_score > result.outcomes[0].original_score
         assert result.score_delta > 0
 
-    @patch("src.rebuttal.handler._evaluate_single_rebuttal")
+    @patch("grading_system_src.rebuttal.handler._evaluate_single_rebuttal")
     def test_rejected_rebuttal(self, mock_eval):
         mock_eval.return_value = RebuttalOutcome(
             leaf_id="source_quality",

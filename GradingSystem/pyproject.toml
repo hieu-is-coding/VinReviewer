@@ -56,12 +56,12 @@ dev = [
 ]
 
 [project.scripts]
-agentic-reviewer = "src.cli:main"
-agentic-reviewer-rebut = "src.cli:rebut"
+agentic-reviewer = "grading_system_src.cli:main"
+agentic-reviewer-rebut = "grading_system_src.cli:rebut"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
+include = ["grading_system_src*"]
 
 [tool.ruff]
 line-length = 99

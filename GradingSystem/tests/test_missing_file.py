@@ -1,8 +1,8 @@
 """Tests for missing file handling (early termination)."""
 
 import pytest
-from src.orchestration.graph import run_pipeline, build_graph
-from src.synthesis.output import render_markdown_report, render_json_output
+from grading_system_src.orchestration.graph import run_pipeline, build_graph
+from grading_system_src.synthesis.output import render_markdown_report, render_json_output
 
 
 def test_run_pipeline_missing_file() -> None:

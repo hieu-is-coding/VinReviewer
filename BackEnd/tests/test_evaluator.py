@@ -13,13 +13,13 @@ ensure_grading_system()
 @pytest.fixture
 def mock_supabase():
     """Patch all supabase_client functions used by the evaluator."""
-    with patch("src.services.evaluator.fetch_submission", new_callable=AsyncMock) as fetch_sub, \
-         patch("src.services.evaluator.fetch_criteria", new_callable=AsyncMock) as fetch_crit, \
-         patch("src.services.evaluator.update_submission_status", new_callable=AsyncMock) as update_status, \
-         patch("src.services.evaluator.insert_evaluation", new_callable=AsyncMock) as insert_eval, \
-         patch("src.services.evaluator.update_evaluation", new_callable=AsyncMock) as update_eval, \
-         patch("src.services.evaluator.insert_criteria_scores", new_callable=AsyncMock) as insert_scores, \
-         patch("src.services.evaluator.insert_evaluation_details", new_callable=AsyncMock) as insert_details:
+    with patch("src.services.supabase_client.fetch_submission", new_callable=AsyncMock) as fetch_sub, \
+         patch("src.services.supabase_client.fetch_criteria", new_callable=AsyncMock) as fetch_crit, \
+         patch("src.services.supabase_client.update_submission_status", new_callable=AsyncMock) as update_status, \
+         patch("src.services.supabase_client.insert_evaluation", new_callable=AsyncMock) as insert_eval, \
+         patch("src.services.supabase_client.update_evaluation", new_callable=AsyncMock) as update_eval, \
+         patch("src.services.supabase_client.insert_criteria_scores", new_callable=AsyncMock) as insert_scores, \
+         patch("src.services.supabase_client.insert_evaluation_details", new_callable=AsyncMock) as insert_details:
         yield {
             "fetch_submission": fetch_sub,
             "fetch_criteria": fetch_crit,
@@ -33,7 +33,7 @@ def mock_supabase():
 
 @pytest.fixture
 def mock_job_manager():
-    with patch("src.services.evaluator.job_manager") as jm:
+    with patch("src.services.job_manager") as jm:
         yield jm
 
 

@@ -1,7 +1,7 @@
 """Tests for lexical diversity feature extractor."""
 
-from src.features.diversity import extract_diversity_features
-from src.models import Language, Manuscript
+from grading_system_src.features.diversity import extract_diversity_features
+from grading_system_src.models import Language, Manuscript
 
 
 def test_diversity_features(en_manuscript: Manuscript) -> None:

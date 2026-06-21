@@ -1,6 +1,6 @@
 """Pydantic models for API requests."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class EvaluateRequest(BaseModel):
@@ -18,8 +18,11 @@ class EvaluatePdfRequest(BaseModel):
 class WebhookPayload(BaseModel):
     """Supabase database webhook payload schema."""
 
+    model_config = ConfigDict(populate_by_name=True)
+
     type: str  # INSERT | UPDATE | DELETE
     table: str
     record: dict
     old_record: dict | None = None
-    schema: str = "public"
+    schema_: str = Field(default="public", alias="schema")
+

@@ -21,11 +21,12 @@ class AppError(Exception):
         self.context = context or {}
 
 
-class ValidationError(AppError):
+class ValidationError(ValueError, AppError):
     """Raised when input data fails validation (missing rubric, empty criteria, etc.)."""
 
     def __init__(self, detail: str, **ctx: Any):
-        super().__init__(detail, status_code=422, context=ctx)
+        ValueError.__init__(self, detail)
+        AppError.__init__(self, detail, status_code=422, context=ctx)
 
 
 class PipelineError(AppError):

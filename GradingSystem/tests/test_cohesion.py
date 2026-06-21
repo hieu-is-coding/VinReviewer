@@ -1,7 +1,7 @@
 """Tests for cohesion feature extractor."""
 
-from src.features.cohesion import extract_cohesion_features
-from src.models import Language, Manuscript
+from grading_system_src.features.cohesion import extract_cohesion_features
+from grading_system_src.models import Language, Manuscript
 
 
 def test_en_cohesion_features(en_manuscript: Manuscript) -> None:

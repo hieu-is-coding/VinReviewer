@@ -91,3 +91,78 @@ def test_webhook_ignores_non_pending(client, auth_headers, monkeypatch):
     )
     assert resp.status_code == 202
     assert resp.json()["accepted"] is False
+
+
+def test_evaluate_returns_existing_job(client, auth_headers):
+    # Setup an existing active job
+    from src.services import job_manager
+    job_manager._jobs.clear()
+    existing_job = job_manager.create_job("sub-uuid-existing")
+    job_manager.update_job(existing_job.job_id, status="running")
+
+    resp = client.post(
+        "/evaluate",
+        json={"submission_id": "sub-uuid-existing"},
+        headers=auth_headers,
+    )
+    assert resp.status_code == 202
+    data = resp.json()
+    assert data["job_id"] == existing_job.job_id
+    assert data["status"] == "running"
+    assert data["submission_id"] == "sub-uuid-existing"
+
+
+def test_webhook_processes_pending(client, auth_headers, monkeypatch):
+    from src.workers import pipeline_worker
+    from src.services import job_manager
+    job_manager._jobs.clear()
+
+    async def _noop(*args, **kwargs):
+        pass
+
+    monkeypatch.setattr(pipeline_worker, "run_text_pipeline", _noop)
+
+    resp = client.post(
+        "/webhook/submission-created",
+        json={
+            "type": "INSERT",
+            "table": "submissions",
+            "record": {"id": "sub-004", "status": "pending"},
+            "schema": "public",
+        },
+        headers=auth_headers,
+    )
+    assert resp.status_code == 202
+    data = resp.json()
+    assert data["accepted"] is True
+    assert "job_id" in data
+
+
+def test_webhook_ignores_active_job(client, auth_headers, monkeypatch):
+    from src.workers import pipeline_worker
+    from src.services import job_manager
+    job_manager._jobs.clear()
+    existing = job_manager.create_job("sub-005")
+    job_manager.update_job(existing.job_id, status="queued")
+
+    async def _noop(*args, **kwargs):
+        pass
+
+    monkeypatch.setattr(pipeline_worker, "run_text_pipeline", _noop)
+
+    resp = client.post(
+        "/webhook/submission-created",
+        json={
+            "type": "INSERT",
+            "table": "submissions",
+            "record": {"id": "sub-005", "status": "pending"},
+            "schema": "public",
+        },
+        headers=auth_headers,
+    )
+    assert resp.status_code == 202
+    data = resp.json()
+    assert data["accepted"] is False
+    assert data["reason"] == "job already active"
+    assert data["job_id"] == existing.job_id
+

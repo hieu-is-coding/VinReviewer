@@ -1,7 +1,7 @@
 """Tests for citation feature extractor."""
 
-from src.features.citations import extract_citation_features
-from src.models import Language, Manuscript
+from grading_system_src.features.citations import extract_citation_features
+from grading_system_src.models import Language, Manuscript
 
 
 def test_citation_features(en_manuscript: Manuscript) -> None:

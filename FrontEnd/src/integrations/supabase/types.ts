@@ -22,8 +22,11 @@ export type Database = {
           id: string
           rubric_id: string | null
           status: string
+          submission_type: string | null
+          target_venue: string | null
           title: string
           updated_at: string
+          use_agentic_evaluation: boolean
         }
         Insert: {
           class_id: string
@@ -32,8 +35,11 @@ export type Database = {
           id?: string
           rubric_id?: string | null
           status?: string
+          submission_type?: string | null
+          target_venue?: string | null
           title: string
           updated_at?: string
+          use_agentic_evaluation?: boolean
         }
         Update: {
           class_id?: string
@@ -42,8 +48,11 @@ export type Database = {
           id?: string
           rubric_id?: string | null
           status?: string
+          submission_type?: string | null
+          target_venue?: string | null
           title?: string
           updated_at?: string
+          use_agentic_evaluation?: boolean
         }
         Relationships: [
           {
@@ -378,6 +387,71 @@ export type Database = {
           },
         ]
       }
+      evaluation_details: {
+        Row: {
+          dimension_percentiles: Json | null
+          disagreement_flags: string[] | null
+          evaluation_id: string
+          fabricated_refs: string[] | null
+          human_flag: boolean
+          id: string
+          low_similarity_citations: Json | null
+          novelty_claims: Json | null
+          novelty_score: number | null
+          overall_percentile: number | null
+          persona_reviews: Json | null
+          pipeline_run_id: string | null
+          red_line_violations: Json | null
+          uncited_claims: Json | null
+          venue_tier: string | null
+          verified_ratio: number | null
+        }
+        Insert: {
+          dimension_percentiles?: Json | null
+          disagreement_flags?: string[] | null
+          evaluation_id: string
+          fabricated_refs?: string[] | null
+          human_flag?: boolean
+          id?: string
+          low_similarity_citations?: Json | null
+          novelty_claims?: Json | null
+          novelty_score?: number | null
+          overall_percentile?: number | null
+          persona_reviews?: Json | null
+          pipeline_run_id?: string | null
+          red_line_violations?: Json | null
+          uncited_claims?: Json | null
+          venue_tier?: string | null
+          verified_ratio?: number | null
+        }
+        Update: {
+          dimension_percentiles?: Json | null
+          disagreement_flags?: string[] | null
+          evaluation_id?: string
+          fabricated_refs?: string[] | null
+          human_flag?: boolean
+          id?: string
+          low_similarity_citations?: Json | null
+          novelty_claims?: Json | null
+          novelty_score?: number | null
+          overall_percentile?: number | null
+          persona_reviews?: Json | null
+          pipeline_run_id?: string | null
+          red_line_violations?: Json | null
+          uncited_claims?: Json | null
+          venue_tier?: string | null
+          verified_ratio?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_details_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: true
+            referencedRelation: "evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evidence_spans: {
         Row: {
           created_at: string
@@ -651,6 +725,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          pdf_path: string | null
           rubric_id: string | null
           source: string
           status: string
@@ -664,6 +739,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          pdf_path?: string | null
           rubric_id?: string | null
           source?: string
           status?: string
@@ -677,6 +753,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          pdf_path?: string | null
           rubric_id?: string | null
           source?: string
           status?: string

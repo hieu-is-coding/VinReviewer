@@ -1,20 +1,57 @@
 import { useMemo } from "react";
 import { useEvaluations, useClasses, useSubmissions } from "./useData";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import type { Evaluation, Submission } from "@/types/database";
 
 // ---- Computed Analytics ----
-export function useAnalyticsData() {
+export function useAnalyticsData(classId?: string, assignmentId?: string) {
   const { data: evaluations, isLoading: loadingEvals } = useEvaluations();
   const { data: classes, isLoading: loadingClasses } = useClasses();
   const { data: submissions, isLoading: loadingSubmissions } = useSubmissions();
 
+  const { data: assignments, isLoading: loadingAssignments } = useQuery({
+    queryKey: ["assignments", "all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("assignments")
+        .select("*, rubrics(name, id), classes(name)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const filteredEvals = useMemo(() => {
+    if (!evaluations) return [];
+    let res = evaluations;
+    if (classId && classId !== "all") {
+      res = res.filter((e: any) => e.submissions?.class_id === classId);
+    }
+    if (assignmentId && assignmentId !== "all") {
+      res = res.filter((e: any) => e.submissions?.assignment_id === assignmentId);
+    }
+    return res;
+  }, [evaluations, classId, assignmentId]);
+
+  const filteredSubs = useMemo(() => {
+    if (!submissions) return [];
+    let res = submissions;
+    if (classId && classId !== "all") {
+      res = res.filter((s: any) => s.class_id === classId);
+    }
+    if (assignmentId && assignmentId !== "all") {
+      res = res.filter((s: any) => s.assignment_id === assignmentId);
+    }
+    return res;
+  }, [submissions, classId, assignmentId]);
+
   const computed = useMemo(() => {
-    if (!evaluations || !classes || !submissions) return null;
+    if (!evaluations || !classes || !submissions || !assignments) return null;
 
     // Score percentages
     const scores: { pct: number; studentName: string; className: string; confidence: number; evalId: string; submissionId: string }[] = [];
-    evaluations.forEach((e: Evaluation & { submissions?: Submission }) => {
+    filteredEvals.forEach((e: Evaluation & { submissions?: Submission }) => {
       if (e.total_score != null && e.max_possible_score) {
         scores.push({
           pct: Math.round((Number(e.total_score) / Number(e.max_possible_score)) * 100),
@@ -57,7 +94,7 @@ export function useAnalyticsData() {
 
     // Criteria breakdown
     const criteriaMap: Record<string, { scores: number[]; maxScores: number[]; name: string }> = {};
-    evaluations.forEach((e: Evaluation & { submissions?: Submission }) => {
+    filteredEvals.forEach((e: Evaluation & { submissions?: Submission }) => {
       e.criteria_scores?.forEach((cs: { score: number; criteria: { name: string; max_score: number; weight: number } | null }) => {
         const name = cs.criteria?.name || "Unknown";
         if (!criteriaMap[name]) criteriaMap[name] = { scores: [], maxScores: [], name };
@@ -78,7 +115,7 @@ export function useAnalyticsData() {
     });
 
     // Confidence analysis
-    const confidences = evaluations.map((e: Evaluation & { submissions?: Submission }) => Number(e.confidence || 0)).filter((c: number) => c > 0);
+    const confidences = filteredEvals.map((e: Evaluation & { submissions?: Submission }) => Number(e.confidence || 0)).filter((c: number) => c > 0);
     const avgConfidence = confidences.length ? Math.round(confidences.reduce((a: number, b: number) => a + b, 0) / confidences.length) : 0;
     const CONFIDENCE_THRESHOLD = 70;
     const lowConfidence = confidences.filter((c: number) => c < CONFIDENCE_THRESHOLD);
@@ -98,17 +135,17 @@ export function useAnalyticsData() {
     }));
 
     // AI vs Human gap (evaluations that have been updated/reviewed)
-    const reviewedEvals = evaluations.filter((e: Evaluation & { submissions?: Submission }) => e.status === "reviewed" || e.status === "approved");
+    const reviewedEvals = filteredEvals.filter((e: Evaluation & { submissions?: Submission }) => e.status === "reviewed" || e.status === "approved");
 
     // Submission status breakdown
     const statusCounts: Record<string, number> = {};
-    submissions.forEach((s: Submission) => {
+    filteredSubs.forEach((s: Submission) => {
       statusCounts[s.status] = (statusCounts[s.status] || 0) + 1;
     });
 
     // Integrity stats
-    const flaggedCount = submissions.filter((s: Submission) => s.status === "flagged").length;
-    const needsReviewCount = submissions.filter((s: Submission) => s.status === "needs_review").length;
+    const flaggedCount = filteredSubs.filter((s: Submission) => s.status === "flagged").length;
+    const needsReviewCount = filteredSubs.filter((s: Submission) => s.status === "needs_review").length;
 
     // Criteria with unstable scoring (high variance)
     const unstableCriteria = criteriaBreakdown.filter((c) => c.variance > 1.5).sort((a, b) => b.variance - a.variance);
@@ -123,24 +160,25 @@ export function useAnalyticsData() {
       avgConfidence,
       lowConfidencePct,
       lowConfidenceCount: lowConfidence.length,
-      totalEvaluations: evaluations.length,
+      totalEvaluations: filteredEvals.length,
       classPerformance,
       reviewedEvals,
       statusCounts,
       flaggedCount,
       needsReviewCount,
       unstableCriteria,
-      totalSubmissions: submissions.length,
+      totalSubmissions: filteredSubs.length,
       totalClasses: classes.length,
     };
-  }, [evaluations, classes, submissions]);
+  }, [filteredEvals, filteredSubs, classes, assignments]);
 
   return {
     data: computed,
-    isLoading: loadingEvals || loadingClasses || loadingSubmissions,
-    rawEvaluations: evaluations,
-    rawSubmissions: submissions,
+    isLoading: loadingEvals || loadingClasses || loadingSubmissions || loadingAssignments,
+    rawEvaluations: filteredEvals,
+    rawSubmissions: filteredSubs,
     rawClasses: classes,
+    rawAssignments: assignments,
   };
 }
 
