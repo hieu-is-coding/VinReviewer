@@ -232,10 +232,7 @@ export function useEvaluateSubmission() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (submission_id: string) => {
-      const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || 
-        (import.meta.env.DEV 
-          ? "http://localhost:8000/evaluate-sync" 
-          : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evaluate`);
+      const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || "http://localhost:8000/evaluate-sync";
       const response = await fetch(evaluateUrl, {
         method: "POST",
         headers: {

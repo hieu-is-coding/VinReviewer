@@ -183,10 +183,23 @@ export function useAnalyticsData(classId?: string, assignmentId?: string) {
 }
 
 // ---- AI Insights ----
+const getBackendUrl = () => {
+  const evalUrl = import.meta.env.VITE_EVALUATE_API_URL;
+  if (evalUrl) {
+    try {
+      const url = new URL(evalUrl);
+      return url.origin;
+    } catch (e) {
+      return evalUrl.replace(/\/evaluate-sync$/, "");
+    }
+  }
+  return "http://localhost:8000";
+};
+
 export function useAIInsights() {
   return useMutation({
     mutationFn: async (analyticsData: Record<string, unknown>) => {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-insights`, {
+      const response = await fetch(`${getBackendUrl()}/analyze-insights`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

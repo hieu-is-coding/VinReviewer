@@ -23,6 +23,20 @@ import { BulkSubmissionDialog } from "@/components/BulkSubmissionDialog";
 import { SectionHeader } from "@/components/analytics/SectionHeader";
 import { MiniStat } from "@/components/analytics/MiniStat";
 
+const getBackendUrl = () => {
+  const evalUrl = import.meta.env.VITE_EVALUATE_API_URL;
+  if (evalUrl) {
+    try {
+      const url = new URL(evalUrl);
+      return url.origin;
+    } catch (e) {
+      return evalUrl.replace(/\/evaluate-sync$/, "");
+    }
+  }
+  return "http://localhost:8000";
+};
+
+
 const statusStyles: Record<string, string> = {
   pending: "bg-muted text-muted-foreground border-border",
   evaluating: "bg-primary/10 text-primary border-primary/20",
@@ -165,7 +179,7 @@ const AssignmentDetailPage = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-pdf`, {
+      const response = await fetch(`${getBackendUrl()}/parse-pdf`, {
         method: "POST",
         headers: { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
         body: formData,
@@ -226,10 +240,7 @@ const AssignmentDetailPage = () => {
 
       if (pdfFile) {
         toast("Starting AI evaluation...");
-        const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || 
-          (import.meta.env.DEV 
-            ? "http://localhost:8000/evaluate-sync" 
-            : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evaluate`);
+        const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || "http://localhost:8000/evaluate-sync";
 
         fetch(evaluateUrl, {
           method: "POST",
@@ -296,10 +307,7 @@ const AssignmentDetailPage = () => {
         });
 
         if (item.file) {
-          const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || 
-            (import.meta.env.DEV 
-              ? "http://localhost:8000/evaluate-sync" 
-              : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evaluate`);
+          const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || "http://localhost:8000/evaluate-sync";
 
           fetch(evaluateUrl, {
             method: "POST",
@@ -482,10 +490,7 @@ const AssignmentDetailPage = () => {
                     let successCount = 0;
                     for (const s of pending) {
                       try {
-                        const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || 
-                          (import.meta.env.DEV 
-                            ? "http://localhost:8000/evaluate-sync" 
-                            : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/evaluate`);
+                        const evaluateUrl = import.meta.env.VITE_EVALUATE_API_URL || "http://localhost:8000/evaluate-sync";
                         const response = await fetch(evaluateUrl, {
                           method: "POST",
                           headers: {
@@ -778,7 +783,7 @@ const AssignmentDetailPage = () => {
           onOpenChange={setBulkOpen}
           classStudents={classStudents || []}
           onSubmitAll={handleBulkSubmitAll}
-          parsePdfUrl={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-pdf`}
+          parsePdfUrl={`${getBackendUrl()}/parse-pdf`}
           anonKey={import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}
         />
       </div>
