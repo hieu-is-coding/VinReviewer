@@ -86,6 +86,7 @@ export interface Submission {
   classes: { name: string } | null;
   rubrics: { name: string } | null;
   evaluations: Evaluation[];
+  pdf_path: string | null;
 }
 
 export interface Assignment {
@@ -111,6 +112,7 @@ export interface AssignmentSubmission {
   created_at: string;
   students: { name: string } | null;
   evaluations: Evaluation[];
+  pdf_path: string | null;
 }
 
 export interface EvaluationDetail {
