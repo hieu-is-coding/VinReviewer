@@ -43,7 +43,7 @@ async def evaluate_pdf_storage_submission(submission_id: str, job_id: str, pdf_p
 
     public_url = f"{settings.supabase_url.rstrip('/')}/storage/v1/object/public/pdfs/{pdf_path}"
     
-    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static", "pdfs")
+    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "static", "pdfs")
     os.makedirs(static_dir, exist_ok=True)
     local_path = os.path.join(static_dir, f"{submission_id}.pdf")
 
@@ -110,7 +110,7 @@ async def _evaluate_core(
 
         import os
         import shutil
-        static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static")
+        static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "static")
         output_dir = os.path.join(static_dir, "eval_output", submission_id)
         phases_dir = os.path.join(output_dir, "phases")
         if os.path.exists(phases_dir):
