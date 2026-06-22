@@ -108,6 +108,18 @@ async def _evaluate_core(
 
         await update_submission_status(submission_id, "evaluating")
 
+        import os
+        import shutil
+        static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static")
+        output_dir = os.path.join(static_dir, "eval_output", submission_id)
+        phases_dir = os.path.join(output_dir, "phases")
+        if os.path.exists(phases_dir):
+            try:
+                shutil.rmtree(phases_dir)
+            except Exception as e:
+                logger.warning("Failed to clean up old phases directory: %s", e)
+        os.makedirs(output_dir, exist_ok=True)
+
         rubric_tree = map_criteria_to_rubric(criteria)
 
         try:
@@ -117,6 +129,7 @@ async def _evaluate_core(
                 assignment_prompt=assignment_prompt,
                 target_venue=target_venue,
                 rubric_tree=rubric_tree,
+                output_dir=output_dir,
             )
         finally:
             if cleanup_path:
@@ -193,6 +206,7 @@ def _run_pipeline_sync(
     assignment_prompt: str,
     target_venue: str,
     rubric_tree,
+    output_dir: str | None = None,
 ):
     """Call GradingSystem run_pipeline() synchronously (runs in thread pool)."""
     from grading_system_src.orchestration.graph import run_pipeline  # type: ignore[import]
@@ -201,4 +215,5 @@ def _run_pipeline_sync(
         manuscript_path=manuscript_path,
         assignment_prompt=assignment_prompt,
         target_venue=target_venue,
+        output_dir=output_dir,
     )

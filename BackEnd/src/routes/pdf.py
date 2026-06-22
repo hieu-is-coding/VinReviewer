@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import secrets
 import tempfile
 from pathlib import Path
 
 import aiofiles
-from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Security, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Security, UploadFile, Header
 from fastapi.security.api_key import APIKeyHeader
 
 from src.config import settings
@@ -24,9 +25,28 @@ _api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 _MAX_PDF_BYTES = 50 * 1024 * 1024
 
 
-async def _require_api_key(key: str | None = Security(_api_key_header)) -> None:
-    if not key or not secrets.compare_digest(key, settings.api_key):
+async def _require_api_key(
+    x_api_key: str | None = Header(None, alias="X-API-Key"),
+    authorization: str | None = Header(None, alias="Authorization"),
+) -> None:
+    token = None
+    if authorization:
+        parts = authorization.split()
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            token = parts[1]
+        else:
+            token = authorization
+
+    key = x_api_key or token
+    if not key:
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+    if secrets.compare_digest(key, settings.api_key):
+        return
+    if hasattr(settings, "supabase_service_key") and secrets.compare_digest(key, settings.supabase_service_key):
+        return
+
+    raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 
 @router.post(
@@ -86,3 +106,37 @@ async def evaluate_pdf(
         "PDF queued: submission=%s job=%s path=%s", submission_id, job.job_id, tmp_path
     )
     return {"job_id": job.job_id, "status": "queued", "submission_id": submission_id}
+
+
+@router.post(
+    "/parse-pdf",
+    dependencies=[Depends(_require_api_key)],
+)
+async def parse_pdf(
+    file: UploadFile,
+) -> dict:
+    """Accept a PDF upload, run ingest on it to extract text, and return the text."""
+    if file.content_type not in ("application/pdf", "application/octet-stream"):
+        raise HTTPException(status_code=400, detail="Only PDF files are accepted")
+
+    import tempfile
+    import os
+    from grading_system_src.ingest.pipeline import ingest
+
+    # Save UploadFile to a temporary file
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        content = await file.read()
+        tmp.write(content)
+        tmp_path = tmp.name
+
+    try:
+        from src.compat import ensure_grading_system
+        ensure_grading_system()
+        ms = await asyncio.to_thread(ingest, tmp_path)
+        return {"text": ms.full_text or ""}
+    except Exception as exc:
+        logger.exception("Failed to parse PDF: %s", exc)
+        raise HTTPException(status_code=500, detail=str(exc))
+    finally:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)

@@ -81,8 +81,8 @@ def fit_calibration(
 def apply_calibration(score: float, params: CalibrationParams) -> float:
     """Apply the monotone affine calibration to a raw score with +20% adjustment and bounds [0.40, 0.96]."""
     calibrated = params.slope * score + params.intercept
-    adjusted = calibrated + 0.20
-    return float(np.clip(adjusted, 0.40, 0.96))
+    adjusted = calibrated + 0.10
+    return float(np.clip(adjusted, 0.42, 0.96))
 
 
 def compute_metrics(
