@@ -19,8 +19,7 @@ COPY GradingSystem/pyproject.toml /app/GradingSystem/
 RUN mkdir -p /app/GradingSystem/grading_system_src && \
     touch /app/GradingSystem/grading_system_src/__init__.py
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -e /app/GradingSystem
+RUN uv pip install --system -e /app/GradingSystem
 
 # ── 2. BackEnd deps ──────────────────────────────────────────────────────────
 COPY BackEnd/pyproject.toml /app/backend/
@@ -29,8 +28,7 @@ COPY BackEnd/pyproject.toml /app/backend/
 RUN mkdir -p /app/backend/src && \
     touch /app/backend/src/__init__.py
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system -e /app/backend
+RUN uv pip install --system -e /app/backend
 
 # ── 3. Copy source (invalidates cache only for final layers) ─────────────────
 COPY GradingSystem/ /app/GradingSystem/
