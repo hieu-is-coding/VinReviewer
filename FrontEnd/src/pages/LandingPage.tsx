@@ -185,7 +185,7 @@ export default function LandingPage() {
                 url: "/classes",
                 details: [
                   'Click "New Class" on the Classes page to set up your course.',
-                  "Inside the class, click "New Assignment" and fill in the title and description.",
+                  "Inside the class, click 'New Assignment' and fill in the title and description.",
                   "Define the grading rubric: add criteria, point values, and descriptions so the AI knows what to evaluate.",
                 ],
               },
@@ -220,7 +220,7 @@ export default function LandingPage() {
                 action: "Go to Dashboard →",
                 url: "/dashboard",
                 details: [
-                  "Submissions flagged for review appear in the Dashboard under "Needs Human Review".",
+                  'Submissions flagged for review appear in the Dashboard under "Needs Human Review".',
                   "Click into a submission to see the AI's proposed scores and feedback side-by-side with the original document.",
                   'Edit any scores or feedback you disagree with, then click "Approve" to finalize the grade.',
                 ],
