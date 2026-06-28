@@ -1,0 +1,37 @@
+{
+  "calibration": {
+    "slope": 0.9999999999999986,
+    "intercept": -0.1999999999999989,
+    "lower_bound": 0.4499999999999997,
+    "upper_bound": 0.45000000000000023
+  },
+  "raw_score": 0.69,
+  "calibrated_score": 0.5900000000000001,
+  "comparative": {
+    "overall_percentile": 53.3,
+    "dimension_percentiles": {
+      "thesis_clarity": 84.1,
+      "scope_appropriateness": 76.5,
+      "research_question": 89.9,
+      "source_quality": 99.2,
+      "evidence_integration": 67.2,
+      "citation_accuracy": 94.0,
+      "organization": 67.2,
+      "paragraph_cohesion": 56.6,
+      "transitions": 17.3,
+      "argument_depth": 94.0,
+      "counterargument": 56.6,
+      "synthesis": 67.2,
+      "formatting": 98.3,
+      "citation_style": 96.7,
+      "word_count": 98.3
+    },
+    "venue_tier": "general",
+    "comparative_statements": [
+      "This paper scores in the 53th percentile relative to submissions at general venues.",
+      "Strongest aspect: 'source_quality' (99th percentile).",
+      "Weakest aspect: 'transitions' (17th percentile) \u2014 below average for general submissions.",
+      "This paper is in the borderline range; revision is recommended."
+    ]
+  }
+}

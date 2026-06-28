@@ -1,0 +1,2635 @@
+{
+  "claims": [
+    {
+      "text": "1 Introduction\nThe recent advent of large language models (LLMs) has significantly impacted the computing industry.",
+      "section_id": "",
+      "start_char": 0,
+      "end_char": 115,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2465300134276638,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Almost every sector of the modern economy is exploring the adoption of LLMs, with many already actively using them for various applications.",
+      "section_id": "",
+      "start_char": 116,
+      "end_char": 256,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2719109476176113,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Most real-world applications rely on hyperscaler-provided LLM serving systems because on-premise LLM deployment requires prohibitive costs.",
+      "section_id": "",
+      "start_char": 257,
+      "end_char": 396,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16662498216231453,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As LLM inferencing is for multi-tenant environments, the serving systems batch multiple requests to parallelize the inference computation.",
+      "section_id": "",
+      "start_char": 397,
+      "end_char": 535,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3419235284672326,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While batching promises a significant throughput boost for operations where operand matrices can be shared across requests on GPUs and other AI accelerators, attention layers in transformer-based LLMs consist of un-batchable operations with request-specific, un-shareable operands, lowering hardware utilization.",
+      "section_id": "",
+      "start_char": 536,
+      "end_char": 848,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29518457950145627,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As the un-batchable operations cannot exploit on-chip data reuse, they produce enormous memory read, causing memory bandwidth to become the key system bottleneck.",
+      "section_id": "",
+      "start_char": 849,
+      "end_char": 1011,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26597429698015124,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Additionally, request batching in LLM inference has another resource implication.",
+      "section_id": "",
+      "start_char": 1012,
+      "end_char": 1093,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11600116419011387,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "LLMs generate key-value activation and cache them in memory for computation reuse, often called KV cache.",
+      "section_id": "",
+      "start_char": 1094,
+      "end_char": 1199,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24161250213808866,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As this KV cache is not shared across different user requests, the large batch size is directly translated into a large KV cache size, requiring massive memory capacity.",
+      "section_id": "",
+      "start_char": 1200,
+      "end_char": 1369,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2960712614799516,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Furthermore, as KV cache size scales linearly with the sequence length, the recent trend of supporting very long sequences (e.g., 2 million tokens) places even greater pressure on memory capacity.",
+      "section_id": "",
+      "start_char": 1370,
+      "end_char": 1566,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19899954174932483,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Consequently, LLM serving systems require both high bandwidth and high capacity to enable fast inferencing.",
+      "section_id": "",
+      "start_char": 1567,
+      "end_char": 1674,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.383482612691296,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This resource demand aligns with the immense user demand for LLM services, making it challenging for service providers to build cost-effective LLM serving systems.",
+      "section_id": "",
+      "start_char": 1675,
+      "end_char": 1838,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.261539437422297,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Existing solutions often choose to trade-off one resource for the other, as visualized in Figure 1.",
+      "section_id": "",
+      "start_char": 1839,
+      "end_char": 1938,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1481623976341532,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Below, we classify the existing solutions into the following three categories: (1) Prioritizing bandwidth over capacity: Currently, using HBM-equipped GPUs is the de-facto standard solution for LLM inference processing.",
+      "section_id": "",
+      "start_char": 1939,
+      "end_char": 2158,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18554812500347376,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While this approach achieves massive bandwidth, it often compromises capacity, forcing systems to scale out, which not only reduces core utilization but also increases the cost of building the system.",
+      "section_id": "",
+      "start_char": 2159,
+      "end_char": 2359,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20625971608947238,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "(2) Leveraging PIM and/or PNM: Even with HBMs, LLM inferencing systems still face bandwidth bottlenecks.",
+      "section_id": "",
+      "start_char": 2360,
+      "end_char": 2464,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1949869006201656,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To address this challenge, recent works have explored the near-data processing (NDP) paradigm, leveraging PIM and/or PNM.",
+      "section_id": "",
+      "start_char": 2465,
+      "end_char": 2586,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1681348296627796,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While these approaches mitigate the bandwidth bottleneck, their inherent nature requires further reductions in memory capacity, limiting their viability as a fundamental solution.",
+      "section_id": "",
+      "start_char": 2587,
+      "end_char": 2766,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20977783622583535,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "(3) Exploring LLM quantization strategies: One fundamental strategy for jointly addressing the conflicting objectives is to minimize the memory footprint required for LLM inferencing.",
+      "section_id": "",
+      "start_char": 2767,
+      "end_char": 2950,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24297572367006434,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To achieve this goal, a large body of prior work have recently developed LLM-targeted quantization techniques.",
+      "section_id": "",
+      "start_char": 2951,
+      "end_char": 3061,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24274214860227764,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While these techniques successfully achieve significant reductions in bitwidth, they often prioritize minimizing bitwidth over effectively translating these reductions into practical inferencing speedups.",
+      "section_id": "",
+      "start_char": 3062,
+      "end_char": 3266,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15759483583241804,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Alone, none of the solutions is sufficient for building fast and efficient LLM serving systems, which motivates us to develop an acceleration solution, namely Oaken.",
+      "section_id": "",
+      "start_char": 3267,
+      "end_char": 3432,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2976127500439966,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "By jointly leveraging algorithmic and hardware techniques, Oaken achieves otherwise unattainable levels of effective bandwidth and capacity, resulting in substantially higher throughput than alternatives.",
+      "section_id": "",
+      "start_char": 3433,
+      "end_char": 3637,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1618504475620676,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Oaken comprises (1) Algorithmic technique: an online-offline hybrid KV cache quantization technique, and (2) Hardware technique: the hardware incarnations of the proposed algorithms, including quantization/dequantization engines and memory management units that can be integrated with any existing LLM accelerators.",
+      "section_id": "",
+      "start_char": 3638,
+      "end_char": 3953,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.40132055684719986,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Oaken makes the following contributions: (1) Online-offline hybrid KV cache quantization: Many of the recently-proposed KV cache quantization techniques commonly use low bitwidth (e.g., INT4) for most values, while selectively using higher bitwidth (e.g., FP16) for outlier values.",
+      "section_id": "",
+      "start_char": 3954,
+      "end_char": 4235,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3595109165418966,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While this approach achieves high accuracy and low bitwidth, the prohibitively high cost of online threshold calculation or mixed-precision computation renders it nearly impractical for real-world use cases.",
+      "section_id": "",
+      "start_char": 4236,
+      "end_char": 4443,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.244310565694523,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Thus, there is a critical need for a cost-effective solution to identify thresholds that distinguish outliers from inliers, enabling the translation of KV cache quantization into tangible speedups.",
+      "section_id": "",
+      "start_char": 4444,
+      "end_char": 4641,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23157844257732402,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To achieve this goal, Oaken employs an online-offline hybrid approach, where data-agnostic outlier thresholds are determined at offline and subsequently applied to set the quantization scale at online.",
+      "section_id": "",
+      "start_char": 4642,
+      "end_char": 4843,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29396775775681155,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Furthermore, Oaken introduces a quantization loss mitigation technique that shifts values toward a smaller range, converting outliers into inliers prior to quantization.",
+      "section_id": "",
+      "start_char": 4844,
+      "end_char": 5013,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20774171505996786,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Finally, Oaken stores the quantized values by using dense tensors for inliers and fusing sparse outliers into the dense tensors.",
+      "section_id": "",
+      "start_char": 5014,
+      "end_char": 5142,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22052049733414578,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "(2) Quantization-aware hardware modules for LLM accelerators: We devise custom quantization/dequantization engines and memory management units, which are aware of the proposed quantization algorithm.",
+      "section_id": "",
+      "start_char": 5143,
+      "end_char": 5342,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.27353209810908485,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These hardware modules can be integrated with any existing LLM accelerators such as GPUs, NPUs, and LLM-customized ones.",
+      "section_id": "",
+      "start_char": 5343,
+      "end_char": 5463,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22821186242331218,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We place these modules in the DMA unit that is commonly present in modern LLM accelerators.",
+      "section_id": "",
+      "start_char": 5464,
+      "end_char": 5555,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25043123406323653,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In designing the memory management unit (MMU), the challenge is to achieve the maximal bandwidth, which is close to the physical limit, while effectively laying out the dense and sparse matrices in memory.",
+      "section_id": "",
+      "start_char": 5556,
+      "end_char": 5761,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3194620910456032,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We design the MMU with two management tables for dense and sparse data, respectively, to handle virtual-to-physical address mappings and manage the single address space at page granularity.",
+      "section_id": "",
+      "start_char": 5762,
+      "end_char": 5951,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16711801548643332,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This design maximizes memory bandwidth utilization while avoiding fragmentation and burst order issues.",
+      "section_id": "",
+      "start_char": 5952,
+      "end_char": 6055,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20326509745591353,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To evaluate the effectiveness of Oaken, we use eight different LLMs that include OPT, Llama2, Mistral, and Mixtral, with varying sizes.",
+      "section_id": "",
+      "start_char": 6056,
+      "end_char": 6191,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26258527202710763,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We use Wikitext, PIQA, Winogrande, and Hellaswag datasets, which are widely used in prior works.",
+      "section_id": "",
+      "start_char": 6192,
+      "end_char": 6288,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15278851681018954,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We synthesize the SystemVerilog RTL code of our accelerator in TSMC 28nm technology using Synopsys Design Compiler, which offers the area information of each component in the accelerator.",
+      "section_id": "",
+      "start_char": 6289,
+      "end_char": 6476,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22732071635673143,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Our experimental results report that compared to NVIDIA A100 using state-of-the-art KV cache quantization techniques, Oaken offers up to 1.58\u00d7 throughput speedup, owing to the bitwidth reduction that reaches up to 70.0%.",
+      "section_id": "",
+      "start_char": 6477,
+      "end_char": 6697,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2951133621630009,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We achieve this speedup by only introducing a modest 0.87% accuracy degradation, which demonstrates the algorithmic robustness of our KV cache quantization technique.",
+      "section_id": "",
+      "start_char": 6698,
+      "end_char": 6864,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19583978642954636,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Furthermore, Oaken modules incur only 8.21% area overhead, which is negligible given the significant performance benefits they enable.",
+      "section_id": "",
+      "start_char": 6865,
+      "end_char": 6999,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14181225493571462,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These advantages demonstrate that Oaken achieves the dual objectives of bandwidth and capacity, representing an important step toward building fast and cost-effective LLM inference serving systems.",
+      "section_id": "",
+      "start_char": 7000,
+      "end_char": 7197,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2983347668748609,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "2 Background\n2.1 A Primer on LLM Inference As illustrated in Figure 2(a), inference of large language model is mainly divided into two phases: the prefill phase and the generation phase.",
+      "section_id": "",
+      "start_char": 7198,
+      "end_char": 7384,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3109758610554574,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The prefill phase takes input tokens and passes them through decoder layers to generate a single output token.",
+      "section_id": "",
+      "start_char": 7385,
+      "end_char": 7495,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17775017133588272,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In the generation phase, the token generated in the previous iteration is used to produce the next token.",
+      "section_id": "",
+      "start_char": 7496,
+      "end_char": 7601,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21758192100972312,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This process is autoregressive, with each iteration generating one token.",
+      "section_id": "",
+      "start_char": 7602,
+      "end_char": 7675,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18741225604618683,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "LLMs typically consist of multiple decoder layers, with multi-head attention being one of the key operations.",
+      "section_id": "",
+      "start_char": 7676,
+      "end_char": 7785,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2561905504312938,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As visualized in Figure 2(b), the multi-head attention begins with generating the query, key, and value activations.",
+      "section_id": "",
+      "start_char": 7786,
+      "end_char": 7902,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1621172693230586,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The key and value are buffered in the on-chip memory for subsequent operations and are also stored as KV cache in the off-chip memory for future iterations.",
+      "section_id": "",
+      "start_char": 7903,
+      "end_char": 8059,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20924042831933937,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The query is then multiplied with the transposed key, which is directly fetched from the on-chip memory during the prefill phase, while it is loaded from the off-chip KV cache during the generation phase.",
+      "section_id": "",
+      "start_char": 8060,
+      "end_char": 8264,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2884646609005783,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Similarly, subsequent computation using the value requires access to either on-chip memory or the KV cache in the same manner as the key.",
+      "section_id": "",
+      "start_char": 8265,
+      "end_char": 8402,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20590982063885316,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "2.2 Batching for High-Throughput LLM Inference Batching is a commonly used method to enhance inference throughput in LLM serving systems.",
+      "section_id": "",
+      "start_char": 8403,
+      "end_char": 8540,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.35572732219062786,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "It entails processing multiple requests simultaneously and boosts inference throughput by converting memory-bound operations into compute-bound ones through on-chip data reuse.",
+      "section_id": "",
+      "start_char": 8541,
+      "end_char": 8717,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20103762783964144,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For instance, in the feed-forward network, weights read from memory can be reused across multiple requests, reducing memory access and increasing throughput.",
+      "section_id": "",
+      "start_char": 8718,
+      "end_char": 8875,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28229441167314717,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 2(b) depicts the two types of operations that comprises the multi-head attention layer.",
+      "section_id": "",
+      "start_char": 8876,
+      "end_char": 8970,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22843602060707022,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In activation-weight operations, including Generate QKV and Projection, the activations of the requests share the same weights.",
+      "section_id": "",
+      "start_char": 8971,
+      "end_char": 9098,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2064002803817936,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This enables on-chip data reuse, reducing memory access and execution time.",
+      "section_id": "",
+      "start_char": 9099,
+      "end_char": 9174,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15152475677231803,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, in activation-activation operations, where the query is multiplied by the transposed key or the score is multiplied by the value, each request requires distinct keys or values, making batched processing challenging.",
+      "section_id": "",
+      "start_char": 9175,
+      "end_char": 9399,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2402024883049494,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As a result, batching fails to reduce memory accesses in this case, providing no performance benefits in terms of latency.",
+      "section_id": "",
+      "start_char": 9400,
+      "end_char": 9522,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13620653362443377,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "2.3 LLM Quantization Recently, as demands for LLM inference ever-increasing memory capacity, the community has explored solutions to mitigate this demand through quantization techniques that reduce the bit precision of weights or activations.",
+      "section_id": "",
+      "start_char": 9523,
+      "end_char": 9765,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.31268506784905403,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Many of these studies focus on easing the memory pressure caused by model weights, which is particularly effective for accelerating small-batch inference.",
+      "section_id": "",
+      "start_char": 9766,
+      "end_char": 9920,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23192701032196522,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, these methods achieve limited speedup for larger batches and long sequence lengths due to the KV cache, whose size scales with the batch size and sequence length.",
+      "section_id": "",
+      "start_char": 9921,
+      "end_char": 10092,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2954018799177613,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Approaches to quantize both weights and activations also face similar limitations.",
+      "section_id": "",
+      "start_char": 10093,
+      "end_char": 10175,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17493057152333294,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To this end, researchers have recently started directing their attention to KV cache quantization.",
+      "section_id": "",
+      "start_char": 10176,
+      "end_char": 10274,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29321489898186526,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Some of these works propose quantizing the keys and values of the attention layers on a per-vector basis, while others propose quantizing the KV cache into multiple vector groups of similar magnitudes, applying channel reordering technique.",
+      "section_id": "",
+      "start_char": 10275,
+      "end_char": 10515,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22399189232899985,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "3 Motivation\nThis paper focuses on effectively utilizing batched LLM inference to enhance throughput.",
+      "section_id": "",
+      "start_char": 10516,
+      "end_char": 10617,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2973449869021043,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To accomplish this, we thoroughly analyze the characteristics of LLM inference, particularly comparing the un-batched and batched execution in this section.",
+      "section_id": "",
+      "start_char": 10618,
+      "end_char": 10774,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.252629966013993,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "3.1 Characterization of Batched LLM Inference Single-instance inferencing.",
+      "section_id": "",
+      "start_char": 10775,
+      "end_char": 10849,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20921429296174518,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We analyze the bottlenecks of batched inference by examining accelerator core utilization in both single and batched request scenarios.",
+      "section_id": "",
+      "start_char": 10850,
+      "end_char": 10985,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1848812480291967,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 3(a) shows the difference in core utilization between the prefill and generation phases when processing a single request.",
+      "section_id": "",
+      "start_char": 10986,
+      "end_char": 11114,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.112416395030941,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "During the prefill phase, multiple cores are utilized to process multiple input tokens in a parallelized manner.",
+      "section_id": "",
+      "start_char": 11115,
+      "end_char": 11227,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1968947222775666,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, the generation phase processes only one token from the previous iteration, making it highly sequential process that limits parallelization.",
+      "section_id": "",
+      "start_char": 11228,
+      "end_char": 11376,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13284490049670647,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Therefore, the accelerator can utilize only a few cores, resulting in high latency in generating all output tokens.",
+      "section_id": "",
+      "start_char": 11377,
+      "end_char": 11492,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11548725493119663,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Batched inferencing.",
+      "section_id": "",
+      "start_char": 11493,
+      "end_char": 11513,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.0,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 3(b) illustrates core utilization for batched inference.",
+      "section_id": "",
+      "start_char": 11514,
+      "end_char": 11577,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1700231537900455,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Similar to the single-request scenario, the prefill phase for batched requests is also parallelizable across multiple cores, resulting in high core utilization.",
+      "section_id": "",
+      "start_char": 11578,
+      "end_char": 11738,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2798225430528889,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, the generation phase when processing batched requests still shows underutilization, engendering even longer latency due to bandwidth contention.",
+      "section_id": "",
+      "start_char": 11739,
+      "end_char": 11892,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2158499933807517,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This is because key-value from attention layers cannot be batched and shared across requests, and the accelerator utilizes a limited number of cores per request.",
+      "section_id": "",
+      "start_char": 11893,
+      "end_char": 12054,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21225559190064722,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 3(c) shows GPU core utilization during the generation phase of Llama2-13B model on an NVIDIA A100 GPU, indicating that underutilization primarily arises from the multi-head attention operations.",
+      "section_id": "",
+      "start_char": 12055,
+      "end_char": 12256,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18661843476981324,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Batching: the double-edged solution.",
+      "section_id": "",
+      "start_char": 12257,
+      "end_char": 12293,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11737057190346344,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A straightforward solution to this issue is to increase the batch size to fully utilize all the cores, but this introduces a new challenge.",
+      "section_id": "",
+      "start_char": 12294,
+      "end_char": 12433,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26571248441617135,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The key-value size required for attention operations is proportional to the batch size.",
+      "section_id": "",
+      "start_char": 12434,
+      "end_char": 12521,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22868437518254958,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, as the batch size increases, the memory footprint due to the KV cache also grows, resulting in longer operation latency which is bounded by memory bandwidth.",
+      "section_id": "",
+      "start_char": 12522,
+      "end_char": 12688,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23583077663005916,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Recent techniques, such as grouped and multi-query attentions, reduce the memory overhead by shrinking the KV cache size but cannot fully address this issue.",
+      "section_id": "",
+      "start_char": 12689,
+      "end_char": 12846,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19705819880238348,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Our analysis suggests the two key observations: (1) While the prefill phase fully utilizes the compute resources, the generation phase often fails to do so.",
+      "section_id": "",
+      "start_char": 12847,
+      "end_char": 13003,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21684759503313908,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This imbalance offers an opportunity to enhance throughput with a larger batch size, while it also increases the demand for memory capacity due to the KV cache, driving up system construction costs.",
+      "section_id": "",
+      "start_char": 13004,
+      "end_char": 13202,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3147607684047351,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "(2) The increased KV cache size due to the aggressive batched processing also causes a high demand for memory bandwidth to efficiently compute attention operations, delaying the entire generation phase during batched inference.",
+      "section_id": "",
+      "start_char": 13203,
+      "end_char": 13430,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3219043220680097,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "3.2 Trade-off between Bandwidth and Capacity While LLM serving demands both high bandwidth and large capacity, memory technologies exhibit a trade-off between these two resources.",
+      "section_id": "",
+      "start_char": 13431,
+      "end_char": 13610,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.30381608551554135,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "High-bandwidth memory (HBM) sacrifices a substantial portion of capacity to deliver exceptional bandwidth, whereas Low-Power Double Data Rate (LPDDR) DRAM occupies the opposite end of the trade-off space.",
+      "section_id": "",
+      "start_char": 13611,
+      "end_char": 13815,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2939677577568115,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Motivated by these observations and insights, we conduct preliminary studies to better understand the performance implications of these conflicting resources on LLM inferencing throughput.",
+      "section_id": "",
+      "start_char": 13816,
+      "end_char": 14004,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21038025208520938,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 4(a) and (b) present throughput comparison results for Llama2-13B and OPT-30B models using two accelerator variants with different memory types.",
+      "section_id": "",
+      "start_char": 14005,
+      "end_char": 14156,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14832922911459767,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "We set both the input and output sequence length to 1K and use an existing LLM-customized accelerator.",
+      "section_id": "",
+      "start_char": 14157,
+      "end_char": 14259,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.175518601518996,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 4(c) lists the specifications of the two accelerators evaluated.",
+      "section_id": "",
+      "start_char": 14260,
+      "end_char": 14331,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2034515933603192,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "For the smaller LLM model, both accelerators achieve sublinearly-scaling throughput as the batch size increases, with the HBM-based accelerator achieving the highest performance due to its superior bandwidth.",
+      "section_id": "",
+      "start_char": 14332,
+      "end_char": 14540,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.333675828117482,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "However, for larger LLM models and batch sizes, scaling challenges become evident for the HBM-based accelerator.",
+      "section_id": "",
+      "start_char": 14541,
+      "end_char": 14653,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2196672282383502,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "In contrast, the LPDDR-based accelerator can accommodate larger batches, demonstrating the best performance.",
+      "section_id": "",
+      "start_char": 14654,
+      "end_char": 14762,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12349052063149292,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "To summarize, while high memory bandwidth is crucial for achieving high throughput, sufficient memory capacity is also essential to efficiently serve LLMs, particularly with larger models and batches.",
+      "section_id": "",
+      "start_char": 14763,
+      "end_char": 14963,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.45170963390877383,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Several recent studies also emphasize the importance of memory capacity in LLM inference and suggest introducing large-capacity memory into the LLM accelerators.",
+      "section_id": "",
+      "start_char": 14964,
+      "end_char": 15125,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24297572367006431,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Despite the industry\u2019s growing demand for large-scale LLM inference, current memory technologies struggle to meet both capacity and bandwidth requirements, necessitating a choice.",
+      "section_id": "",
+      "start_char": 15126,
+      "end_char": 15305,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2467757168787475,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "We explore this trade-off by evaluating our solution, equipped with either LPDDR or HBM memory, across various batched inference scenarios.",
+      "section_id": "",
+      "start_char": 15306,
+      "end_char": 15445,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12912986505579116,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "3.3 KV Cache Quantization Leveraging the memory that offers either sufficient bandwidth or capacity, combined with scaling out the system, can help address the bottlenecks in batched inference.",
+      "section_id": "",
+      "start_char": 15446,
+      "end_char": 15639,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.27700363534718825,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "However, this approach incurs substantial system-building costs and severe resource underutilization, making it neither a fundamental nor a sustainable solution.",
+      "section_id": "",
+      "start_char": 15640,
+      "end_char": 15801,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12041966594480749,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Algorithmic approach to the memory wall.",
+      "section_id": "",
+      "start_char": 15802,
+      "end_char": 15842,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19205393916889385,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To tackle the memory wall challenge, the community has explored algorithmic approaches to reduce the demands on both conflicting resources fundamentally.",
+      "section_id": "",
+      "start_char": 15843,
+      "end_char": 15996,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23541991212638957,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Quantization is one such direction, widely recognized for its ability to alleviate both capacity and bandwidth bottlenecks simultaneously.",
+      "section_id": "",
+      "start_char": 15997,
+      "end_char": 16135,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24044536242182457,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "As discussed in Section 2.3, many efforts focus on weight quantization and reducing the computation workload to accelerate LLM inference.",
+      "section_id": "",
+      "start_char": 16136,
+      "end_char": 16273,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24595490986695356,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "However, our experimental results show that weight-only quantization has a limited impact on addressing the memory wall in the batched scenarios.",
+      "section_id": "",
+      "start_char": 16274,
+      "end_char": 16419,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17384821801052747,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Limitations of weight-only quantization techniques.",
+      "section_id": "",
+      "start_char": 16420,
+      "end_char": 16471,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1981981343808097,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 5(a) illustrates the memory capacity requirements for model weights and KV cache as batch size increases.",
+      "section_id": "",
+      "start_char": 16472,
+      "end_char": 16584,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19376005183314718,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "While the memory usage for weights remains constant, the KV cache size grows, eventually dominating the entire device memory.",
+      "section_id": "",
+      "start_char": 16585,
+      "end_char": 16710,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24830871872982216,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Figure 5(b) compares the performance between 4-bit weight quantization and 4-bit KV cache quantization.",
+      "section_id": "",
+      "start_char": 16711,
+      "end_char": 16814,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2699910420495622,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The result shows a minimal performance improvement from weight quantization, showing its ineffectiveness in addressing the memory wall for batched LLM inference.",
+      "section_id": "",
+      "start_char": 16815,
+      "end_char": 16976,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25293809169866516,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "However, KV cache quantization delivers larger performance gains, demonstrating its effectiveness in relieving memory pressure.",
+      "section_id": "",
+      "start_char": 16977,
+      "end_char": 17104,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17081595381144005,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Limitations of existing KV cache quantization solutions.",
+      "section_id": "",
+      "start_char": 17105,
+      "end_char": 17161,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3026367273760212,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Recently, a large body of prior works has explored the KV cache quantization methods.",
+      "section_id": "",
+      "start_char": 17162,
+      "end_char": 17247,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22650263710871119,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "While these works have pioneered a novel research direction, they are constrained by substantial runtime overhead to enable quantization, compromises in accuracy for faster quantization, or a combination of both.",
+      "section_id": "",
+      "start_char": 17248,
+      "end_char": 17460,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26852106232044604,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "These limitations in existing solutions emphasize the need for a KV cache quantization technique that achieves low bitwidth without compromising accuracy.",
+      "section_id": "",
+      "start_char": 17461,
+      "end_char": 17615,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17904230244527095,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Furthermore, such low bitwidth must translate into tangible throughput improvements at the hardware level.",
+      "section_id": "",
+      "start_char": 17616,
+      "end_char": 17722,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21161498858807057,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To meet these demanding requirements, we propose an algorithm-hardware co-designed acceleration solution for efficient batched LLM inference, Oaken.",
+      "section_id": "",
+      "start_char": 17723,
+      "end_char": 17871,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22835262090272973,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "4 Oaken\u2019s KV Quantization Algorithm\nOur quantization algorithm is driven by three primary empirical properties we obtain from observing the value distribution of the KV cache during LLM inference.",
+      "section_id": "",
+      "start_char": 17872,
+      "end_char": 18068,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.30493645514553636,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Building upon the three observed properties, we incorporate three algorithmic techniques into Oaken\u2019s KV cache quantization.",
+      "section_id": "",
+      "start_char": 18069,
+      "end_char": 18193,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25131578239640096,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Below, we will first discuss the empirical analysis results for KV cache distribution and then describe the three techniques one by one.",
+      "section_id": "",
+      "start_char": 18194,
+      "end_char": 18330,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1668699984173696,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "4.1 Observations in KV Distribution Existing LLM quantization methods often suggest that dealing with large values has a significant impact on model accuracy.",
+      "section_id": "",
+      "start_char": 18331,
+      "end_char": 18489,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26258527202710763,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Moreover, other prior works suggest that small values near zero can vanish due to underflow during quantization, leading to larger error.",
+      "section_id": "",
+      "start_char": 18490,
+      "end_char": 18627,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15595177858735146,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "These observations underscore the importance of analyzing the distribution and characteristics of the quantization targets.",
+      "section_id": "",
+      "start_char": 18628,
+      "end_char": 18751,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25378248431665,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "We examine the value distribution of the KV cache across several LLMs and datasets and derive key insights for designing effective quantization techniques.",
+      "section_id": "",
+      "start_char": 18752,
+      "end_char": 18907,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3080471995410763,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The magnitude of keys and values varies across models and among decoder layers within each model.",
+      "section_id": "",
+      "start_char": 18923,
+      "end_char": 19020,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18035710393765242,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "These variations are distinctive properties of each model and decoder layer, driven by differences in their model weights.",
+      "section_id": "",
+      "start_char": 19021,
+      "end_char": 19143,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1128358933553938,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "From this observation, we gain the insight that the quantization factor should be determined separately for each model and its individual decoder layers.",
+      "section_id": "",
+      "start_char": 19144,
+      "end_char": 19297,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2323308402244999,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "We see that the range of KV cache values remains consistent across these datasets.",
+      "section_id": "",
+      "start_char": 19313,
+      "end_char": 19395,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15505937880794454,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "This observation implies there is no need for the quantization factor to be tailored to the input sequences but only a global quantization factor per layer.",
+      "section_id": "",
+      "start_char": 19396,
+      "end_char": 19552,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20858873165113673,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The distributions exhibit multiple vertical lines, indicating that high-magnitude values are concentrated in specific channels.",
+      "section_id": "",
+      "start_char": 19568,
+      "end_char": 19695,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21602675501414165,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "This pattern in the channel magnitudes, aligning with previous observations, suggests the need for per-vector or per-vector-group quantization.",
+      "section_id": "",
+      "start_char": 19696,
+      "end_char": 19839,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21480394735004193,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "However, this result also reveals exceptions to this pattern, appearing as discontinuous lines and dots, which cause an accuracy drop when using only a single quantization scale per vector or vector group.",
+      "section_id": "",
+      "start_char": 19840,
+      "end_char": 20045,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14307207782769632,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Based on this observation, we introduce multiple quantization groups within a channel to maintain accuracy, splitting the key-value vector into groups based on the magnitude of each element.",
+      "section_id": "",
+      "start_char": 20046,
+      "end_char": 20236,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2531606044658851,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "In summary, we derive the following three insights for designing Oaken\u2019s quantization technique: \u2022 Oaken should determine the quantization factor separately for each model and decoder layer.",
+      "section_id": "",
+      "start_char": 20237,
+      "end_char": 20427,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22617317848696497,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "\u2022 Oaken can employ a common scaling factor regardless of input prompts, showing its insensitivity to data patterns.",
+      "section_id": "",
+      "start_char": 20428,
+      "end_char": 20543,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12137107430113882,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "\u2022 Oaken should use multiple quantization groups segmented by the magnitude of the values within each vector.",
+      "section_id": "",
+      "start_char": 20544,
+      "end_char": 20652,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28870510806013133,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "4.2 Algorithm Overview We propose a quantization algorithm designed to improve performance by maximizing the compression ratio of the KV cache while minimizing quantization loss, based on the observations and insights.",
+      "section_id": "",
+      "start_char": 20653,
+      "end_char": 20871,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2924614821342023,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Oaken\u2019s quantization technique consists of three components: (1) Threshold-based online-offline hybrid quantization that separates and quantizes inlier and outlier values, (2) Group-shift quantization that quantizes values with larger magnitude, and (3) Fused dense-and-sparse encoding that minimizes capacity overhead due to sparse matrices.",
+      "section_id": "",
+      "start_char": 20872,
+      "end_char": 21214,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.313778618078155,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The following sections introduce a detailed design of each component.",
+      "section_id": "",
+      "start_char": 21215,
+      "end_char": 21284,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22491949102567474,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "4.3 Threshold-based Online-Offline Hybrid Quantization Oaken minimizes quantization loss by isolating outlier values that are either exceptionally large or exceptionally small compared to typical inlier values.",
+      "section_id": "",
+      "start_char": 21285,
+      "end_char": 21495,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2618537560486866,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "We propose a threshold-based online-offline hybrid quantization method for more fine-grained grouping.",
+      "section_id": "",
+      "start_char": 21496,
+      "end_char": 21598,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.31011875761588903,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Oaken separates the per-token KV vector into three quantization groups: outer, middle, and inner.",
+      "section_id": "",
+      "start_char": 21599,
+      "end_char": 21696,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22775460508192005,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The middle group consists of inliers where most KV values belong, while the outer and inner groups consist of outliers, with large and small magnitudes, respectively.",
+      "section_id": "",
+      "start_char": 21697,
+      "end_char": 21863,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2683392774176293,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Oaken prevents the quantization scale from being skewed due to large-magnitude outliers by isolating the outer group, and ensures the small-magnitude outliers do not vanish during quantization by isolating the inner group.",
+      "section_id": "",
+      "start_char": 21864,
+      "end_char": 22086,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23119421886767616,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Offline outlier threshold profiling.",
+      "section_id": "",
+      "start_char": 22087,
+      "end_char": 22123,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13122428866708555,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To separate outliers from inliers, the topK operation is typically used to maintain a constant ratio of outliers.",
+      "section_id": "",
+      "start_char": 22124,
+      "end_char": 22237,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20212408585863734,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "While this approach results in minimal quantization loss, the topK operation, essentially a sorting with a time complexity of O(n log n), introduces significant overhead when performed during inference, degrading end-to-end performance.",
+      "section_id": "",
+      "start_char": 22238,
+      "end_char": 22474,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.27925220514565524,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Oaken employs offline outlier threshold profiling, leveraging the consistent characteristics in the distribution of KV cache discussed to avoid expensive online operations.",
+      "section_id": "",
+      "start_char": 22475,
+      "end_char": 22647,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3365844634815972,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The criteria for splitting the KV cache into three groups are based on four thresholds determined through offline threshold profiling.",
+      "section_id": "",
+      "start_char": 22648,
+      "end_char": 22782,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2093685607932761,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Using these thresholds, the outer group, middle group, and inner group are defined as follows: Oaken performs approximately a hundred offline inferences with sample input prompts to gather distribution information from the KV cache of each decoder layer.",
+      "section_id": "",
+      "start_char": 22783,
+      "end_char": 23037,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2132089447416697,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The four group thresholds are extracted during the profiling process from the KV cache of each inference run using topK operations, and their averages are computed for each decoder layer.",
+      "section_id": "",
+      "start_char": 23038,
+      "end_char": 23225,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1987274539933499,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These statistics are then used to establish group thresholds for the KV cache.",
+      "section_id": "",
+      "start_char": 23226,
+      "end_char": 23304,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16687002811933926,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As discussed, Oaken\u2019s offline profiling should be performed separately for each model, whereas the KV cache distribution and the profiling are independent of both the profiling dataset and future inputs.",
+      "section_id": "",
+      "start_char": 23305,
+      "end_char": 23508,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2666160608789667,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "It effectively minimizes accuracy loss with only a small number of inferences, ensuring minimal and one-time overhead.",
+      "section_id": "",
+      "start_char": 23509,
+      "end_char": 23627,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1407140934009933,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Uniform quantization.",
+      "section_id": "",
+      "start_char": 23628,
+      "end_char": 23649,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18394746265594208,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Oaken adopts uniform quantization, where the scaling factor is calculated using only simple statistics to minimize hardware complexity.",
+      "section_id": "",
+      "start_char": 23650,
+      "end_char": 23785,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19083492549855202,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The overall flow of Oaken\u2019s quantization algorithm consists of three components: (1) Threshold-based online-offline hybrid quantization that separates and quantizes inlier and outlier values, (2) Group-shift quantization that quantizes values with larger magnitude, and (3) Fused dense-and-sparse encoding that minimizes capacity overhead due to sparse matrices.",
+      "section_id": "",
+      "start_char": 23786,
+      "end_char": 24148,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.31399139025404915,
+      "claim_type": "UNSUPPORTED"
+    }
+  ],
+  "uncited_claims": [
+    {
+      "text": "1 Introduction\nThe recent advent of large language models (LLMs) has significantly impacted the computing industry.",
+      "section_id": "",
+      "start_char": 0,
+      "end_char": 115,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2465300134276638,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Almost every sector of the modern economy is exploring the adoption of LLMs, with many already actively using them for various applications.",
+      "section_id": "",
+      "start_char": 116,
+      "end_char": 256,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2719109476176113,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Most real-world applications rely on hyperscaler-provided LLM serving systems because on-premise LLM deployment requires prohibitive costs.",
+      "section_id": "",
+      "start_char": 257,
+      "end_char": 396,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16662498216231453,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While batching promises a significant throughput boost for operations where operand matrices can be shared across requests on GPUs and other AI accelerators, attention layers in transformer-based LLMs consist of un-batchable operations with request-specific, un-shareable operands, lowering hardware utilization.",
+      "section_id": "",
+      "start_char": 536,
+      "end_char": 848,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29518457950145627,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As the un-batchable operations cannot exploit on-chip data reuse, they produce enormous memory read, causing memory bandwidth to become the key system bottleneck.",
+      "section_id": "",
+      "start_char": 849,
+      "end_char": 1011,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26597429698015124,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Additionally, request batching in LLM inference has another resource implication.",
+      "section_id": "",
+      "start_char": 1012,
+      "end_char": 1093,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11600116419011387,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "LLMs generate key-value activation and cache them in memory for computation reuse, often called KV cache.",
+      "section_id": "",
+      "start_char": 1094,
+      "end_char": 1199,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24161250213808866,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As this KV cache is not shared across different user requests, the large batch size is directly translated into a large KV cache size, requiring massive memory capacity.",
+      "section_id": "",
+      "start_char": 1200,
+      "end_char": 1369,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2960712614799516,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Furthermore, as KV cache size scales linearly with the sequence length, the recent trend of supporting very long sequences (e.g., 2 million tokens) places even greater pressure on memory capacity.",
+      "section_id": "",
+      "start_char": 1370,
+      "end_char": 1566,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19899954174932483,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This resource demand aligns with the immense user demand for LLM services, making it challenging for service providers to build cost-effective LLM serving systems.",
+      "section_id": "",
+      "start_char": 1675,
+      "end_char": 1838,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.261539437422297,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Existing solutions often choose to trade-off one resource for the other, as visualized in Figure 1.",
+      "section_id": "",
+      "start_char": 1839,
+      "end_char": 1938,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1481623976341532,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Below, we classify the existing solutions into the following three categories: (1) Prioritizing bandwidth over capacity: Currently, using HBM-equipped GPUs is the de-facto standard solution for LLM inference processing.",
+      "section_id": "",
+      "start_char": 1939,
+      "end_char": 2158,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18554812500347376,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While this approach achieves massive bandwidth, it often compromises capacity, forcing systems to scale out, which not only reduces core utilization but also increases the cost of building the system.",
+      "section_id": "",
+      "start_char": 2159,
+      "end_char": 2359,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20625971608947238,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "(2) Leveraging PIM and/or PNM: Even with HBMs, LLM inferencing systems still face bandwidth bottlenecks.",
+      "section_id": "",
+      "start_char": 2360,
+      "end_char": 2464,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1949869006201656,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To address this challenge, recent works have explored the near-data processing (NDP) paradigm, leveraging PIM and/or PNM.",
+      "section_id": "",
+      "start_char": 2465,
+      "end_char": 2586,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1681348296627796,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While these approaches mitigate the bandwidth bottleneck, their inherent nature requires further reductions in memory capacity, limiting their viability as a fundamental solution.",
+      "section_id": "",
+      "start_char": 2587,
+      "end_char": 2766,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20977783622583535,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "(3) Exploring LLM quantization strategies: One fundamental strategy for jointly addressing the conflicting objectives is to minimize the memory footprint required for LLM inferencing.",
+      "section_id": "",
+      "start_char": 2767,
+      "end_char": 2950,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24297572367006434,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To achieve this goal, a large body of prior work have recently developed LLM-targeted quantization techniques.",
+      "section_id": "",
+      "start_char": 2951,
+      "end_char": 3061,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24274214860227764,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While these techniques successfully achieve significant reductions in bitwidth, they often prioritize minimizing bitwidth over effectively translating these reductions into practical inferencing speedups.",
+      "section_id": "",
+      "start_char": 3062,
+      "end_char": 3266,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15759483583241804,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Alone, none of the solutions is sufficient for building fast and efficient LLM serving systems, which motivates us to develop an acceleration solution, namely Oaken.",
+      "section_id": "",
+      "start_char": 3267,
+      "end_char": 3432,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2976127500439966,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "By jointly leveraging algorithmic and hardware techniques, Oaken achieves otherwise unattainable levels of effective bandwidth and capacity, resulting in substantially higher throughput than alternatives.",
+      "section_id": "",
+      "start_char": 3433,
+      "end_char": 3637,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1618504475620676,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While this approach achieves high accuracy and low bitwidth, the prohibitively high cost of online threshold calculation or mixed-precision computation renders it nearly impractical for real-world use cases.",
+      "section_id": "",
+      "start_char": 4236,
+      "end_char": 4443,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.244310565694523,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Thus, there is a critical need for a cost-effective solution to identify thresholds that distinguish outliers from inliers, enabling the translation of KV cache quantization into tangible speedups.",
+      "section_id": "",
+      "start_char": 4444,
+      "end_char": 4641,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23157844257732402,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To achieve this goal, Oaken employs an online-offline hybrid approach, where data-agnostic outlier thresholds are determined at offline and subsequently applied to set the quantization scale at online.",
+      "section_id": "",
+      "start_char": 4642,
+      "end_char": 4843,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29396775775681155,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Furthermore, Oaken introduces a quantization loss mitigation technique that shifts values toward a smaller range, converting outliers into inliers prior to quantization.",
+      "section_id": "",
+      "start_char": 4844,
+      "end_char": 5013,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20774171505996786,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Finally, Oaken stores the quantized values by using dense tensors for inliers and fusing sparse outliers into the dense tensors.",
+      "section_id": "",
+      "start_char": 5014,
+      "end_char": 5142,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22052049733414578,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "(2) Quantization-aware hardware modules for LLM accelerators: We devise custom quantization/dequantization engines and memory management units, which are aware of the proposed quantization algorithm.",
+      "section_id": "",
+      "start_char": 5143,
+      "end_char": 5342,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.27353209810908485,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These hardware modules can be integrated with any existing LLM accelerators such as GPUs, NPUs, and LLM-customized ones.",
+      "section_id": "",
+      "start_char": 5343,
+      "end_char": 5463,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22821186242331218,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We place these modules in the DMA unit that is commonly present in modern LLM accelerators.",
+      "section_id": "",
+      "start_char": 5464,
+      "end_char": 5555,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25043123406323653,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We design the MMU with two management tables for dense and sparse data, respectively, to handle virtual-to-physical address mappings and manage the single address space at page granularity.",
+      "section_id": "",
+      "start_char": 5762,
+      "end_char": 5951,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16711801548643332,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This design maximizes memory bandwidth utilization while avoiding fragmentation and burst order issues.",
+      "section_id": "",
+      "start_char": 5952,
+      "end_char": 6055,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20326509745591353,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To evaluate the effectiveness of Oaken, we use eight different LLMs that include OPT, Llama2, Mistral, and Mixtral, with varying sizes.",
+      "section_id": "",
+      "start_char": 6056,
+      "end_char": 6191,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26258527202710763,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We use Wikitext, PIQA, Winogrande, and Hellaswag datasets, which are widely used in prior works.",
+      "section_id": "",
+      "start_char": 6192,
+      "end_char": 6288,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15278851681018954,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We synthesize the SystemVerilog RTL code of our accelerator in TSMC 28nm technology using Synopsys Design Compiler, which offers the area information of each component in the accelerator.",
+      "section_id": "",
+      "start_char": 6289,
+      "end_char": 6476,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22732071635673143,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Our experimental results report that compared to NVIDIA A100 using state-of-the-art KV cache quantization techniques, Oaken offers up to 1.58\u00d7 throughput speedup, owing to the bitwidth reduction that reaches up to 70.0%.",
+      "section_id": "",
+      "start_char": 6477,
+      "end_char": 6697,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2951133621630009,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We achieve this speedup by only introducing a modest 0.87% accuracy degradation, which demonstrates the algorithmic robustness of our KV cache quantization technique.",
+      "section_id": "",
+      "start_char": 6698,
+      "end_char": 6864,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19583978642954636,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Furthermore, Oaken modules incur only 8.21% area overhead, which is negligible given the significant performance benefits they enable.",
+      "section_id": "",
+      "start_char": 6865,
+      "end_char": 6999,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14181225493571462,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These advantages demonstrate that Oaken achieves the dual objectives of bandwidth and capacity, representing an important step toward building fast and cost-effective LLM inference serving systems.",
+      "section_id": "",
+      "start_char": 7000,
+      "end_char": 7197,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2983347668748609,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The prefill phase takes input tokens and passes them through decoder layers to generate a single output token.",
+      "section_id": "",
+      "start_char": 7385,
+      "end_char": 7495,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17775017133588272,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In the generation phase, the token generated in the previous iteration is used to produce the next token.",
+      "section_id": "",
+      "start_char": 7496,
+      "end_char": 7601,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21758192100972312,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This process is autoregressive, with each iteration generating one token.",
+      "section_id": "",
+      "start_char": 7602,
+      "end_char": 7675,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18741225604618683,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "LLMs typically consist of multiple decoder layers, with multi-head attention being one of the key operations.",
+      "section_id": "",
+      "start_char": 7676,
+      "end_char": 7785,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2561905504312938,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As visualized in Figure 2(b), the multi-head attention begins with generating the query, key, and value activations.",
+      "section_id": "",
+      "start_char": 7786,
+      "end_char": 7902,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1621172693230586,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The key and value are buffered in the on-chip memory for subsequent operations and are also stored as KV cache in the off-chip memory for future iterations.",
+      "section_id": "",
+      "start_char": 7903,
+      "end_char": 8059,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20924042831933937,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The query is then multiplied with the transposed key, which is directly fetched from the on-chip memory during the prefill phase, while it is loaded from the off-chip KV cache during the generation phase.",
+      "section_id": "",
+      "start_char": 8060,
+      "end_char": 8264,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2884646609005783,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Similarly, subsequent computation using the value requires access to either on-chip memory or the KV cache in the same manner as the key.",
+      "section_id": "",
+      "start_char": 8265,
+      "end_char": 8402,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20590982063885316,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "It entails processing multiple requests simultaneously and boosts inference throughput by converting memory-bound operations into compute-bound ones through on-chip data reuse.",
+      "section_id": "",
+      "start_char": 8541,
+      "end_char": 8717,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20103762783964144,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For instance, in the feed-forward network, weights read from memory can be reused across multiple requests, reducing memory access and increasing throughput.",
+      "section_id": "",
+      "start_char": 8718,
+      "end_char": 8875,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28229441167314717,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 2(b) depicts the two types of operations that comprises the multi-head attention layer.",
+      "section_id": "",
+      "start_char": 8876,
+      "end_char": 8970,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22843602060707022,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In activation-weight operations, including Generate QKV and Projection, the activations of the requests share the same weights.",
+      "section_id": "",
+      "start_char": 8971,
+      "end_char": 9098,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2064002803817936,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This enables on-chip data reuse, reducing memory access and execution time.",
+      "section_id": "",
+      "start_char": 9099,
+      "end_char": 9174,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15152475677231803,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, in activation-activation operations, where the query is multiplied by the transposed key or the score is multiplied by the value, each request requires distinct keys or values, making batched processing challenging.",
+      "section_id": "",
+      "start_char": 9175,
+      "end_char": 9399,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2402024883049494,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As a result, batching fails to reduce memory accesses in this case, providing no performance benefits in terms of latency.",
+      "section_id": "",
+      "start_char": 9400,
+      "end_char": 9522,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13620653362443377,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Many of these studies focus on easing the memory pressure caused by model weights, which is particularly effective for accelerating small-batch inference.",
+      "section_id": "",
+      "start_char": 9766,
+      "end_char": 9920,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23192701032196522,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, these methods achieve limited speedup for larger batches and long sequence lengths due to the KV cache, whose size scales with the batch size and sequence length.",
+      "section_id": "",
+      "start_char": 9921,
+      "end_char": 10092,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2954018799177613,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Approaches to quantize both weights and activations also face similar limitations.",
+      "section_id": "",
+      "start_char": 10093,
+      "end_char": 10175,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17493057152333294,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To this end, researchers have recently started directing their attention to KV cache quantization.",
+      "section_id": "",
+      "start_char": 10176,
+      "end_char": 10274,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29321489898186526,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Some of these works propose quantizing the keys and values of the attention layers on a per-vector basis, while others propose quantizing the KV cache into multiple vector groups of similar magnitudes, applying channel reordering technique.",
+      "section_id": "",
+      "start_char": 10275,
+      "end_char": 10515,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22399189232899985,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "3 Motivation\nThis paper focuses on effectively utilizing batched LLM inference to enhance throughput.",
+      "section_id": "",
+      "start_char": 10516,
+      "end_char": 10617,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2973449869021043,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To accomplish this, we thoroughly analyze the characteristics of LLM inference, particularly comparing the un-batched and batched execution in this section.",
+      "section_id": "",
+      "start_char": 10618,
+      "end_char": 10774,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.252629966013993,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We analyze the bottlenecks of batched inference by examining accelerator core utilization in both single and batched request scenarios.",
+      "section_id": "",
+      "start_char": 10850,
+      "end_char": 10985,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1848812480291967,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 3(a) shows the difference in core utilization between the prefill and generation phases when processing a single request.",
+      "section_id": "",
+      "start_char": 10986,
+      "end_char": 11114,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.112416395030941,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "During the prefill phase, multiple cores are utilized to process multiple input tokens in a parallelized manner.",
+      "section_id": "",
+      "start_char": 11115,
+      "end_char": 11227,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1968947222775666,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, the generation phase processes only one token from the previous iteration, making it highly sequential process that limits parallelization.",
+      "section_id": "",
+      "start_char": 11228,
+      "end_char": 11376,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13284490049670647,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Therefore, the accelerator can utilize only a few cores, resulting in high latency in generating all output tokens.",
+      "section_id": "",
+      "start_char": 11377,
+      "end_char": 11492,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11548725493119663,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Similar to the single-request scenario, the prefill phase for batched requests is also parallelizable across multiple cores, resulting in high core utilization.",
+      "section_id": "",
+      "start_char": 11578,
+      "end_char": 11738,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2798225430528889,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, the generation phase when processing batched requests still shows underutilization, engendering even longer latency due to bandwidth contention.",
+      "section_id": "",
+      "start_char": 11739,
+      "end_char": 11892,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2158499933807517,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This is because key-value from attention layers cannot be batched and shared across requests, and the accelerator utilizes a limited number of cores per request.",
+      "section_id": "",
+      "start_char": 11893,
+      "end_char": 12054,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21225559190064722,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 3(c) shows GPU core utilization during the generation phase of Llama2-13B model on an NVIDIA A100 GPU, indicating that underutilization primarily arises from the multi-head attention operations.",
+      "section_id": "",
+      "start_char": 12055,
+      "end_char": 12256,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18661843476981324,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A straightforward solution to this issue is to increase the batch size to fully utilize all the cores, but this introduces a new challenge.",
+      "section_id": "",
+      "start_char": 12294,
+      "end_char": 12433,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26571248441617135,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The key-value size required for attention operations is proportional to the batch size.",
+      "section_id": "",
+      "start_char": 12434,
+      "end_char": 12521,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22868437518254958,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, as the batch size increases, the memory footprint due to the KV cache also grows, resulting in longer operation latency which is bounded by memory bandwidth.",
+      "section_id": "",
+      "start_char": 12522,
+      "end_char": 12688,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23583077663005916,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Recent techniques, such as grouped and multi-query attentions, reduce the memory overhead by shrinking the KV cache size but cannot fully address this issue.",
+      "section_id": "",
+      "start_char": 12689,
+      "end_char": 12846,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19705819880238348,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Our analysis suggests the two key observations: (1) While the prefill phase fully utilizes the compute resources, the generation phase often fails to do so.",
+      "section_id": "",
+      "start_char": 12847,
+      "end_char": 13003,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21684759503313908,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "High-bandwidth memory (HBM) sacrifices a substantial portion of capacity to deliver exceptional bandwidth, whereas Low-Power Double Data Rate (LPDDR) DRAM occupies the opposite end of the trade-off space.",
+      "section_id": "",
+      "start_char": 13611,
+      "end_char": 13815,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2939677577568115,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Motivated by these observations and insights, we conduct preliminary studies to better understand the performance implications of these conflicting resources on LLM inferencing throughput.",
+      "section_id": "",
+      "start_char": 13816,
+      "end_char": 14004,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21038025208520938,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 4(a) and (b) present throughput comparison results for Llama2-13B and OPT-30B models using two accelerator variants with different memory types.",
+      "section_id": "",
+      "start_char": 14005,
+      "end_char": 14156,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14832922911459767,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "We set both the input and output sequence length to 1K and use an existing LLM-customized accelerator.",
+      "section_id": "",
+      "start_char": 14157,
+      "end_char": 14259,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.175518601518996,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 4(c) lists the specifications of the two accelerators evaluated.",
+      "section_id": "",
+      "start_char": 14260,
+      "end_char": 14331,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2034515933603192,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "However, for larger LLM models and batch sizes, scaling challenges become evident for the HBM-based accelerator.",
+      "section_id": "",
+      "start_char": 14541,
+      "end_char": 14653,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2196672282383502,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "In contrast, the LPDDR-based accelerator can accommodate larger batches, demonstrating the best performance.",
+      "section_id": "",
+      "start_char": 14654,
+      "end_char": 14762,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12349052063149292,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Several recent studies also emphasize the importance of memory capacity in LLM inference and suggest introducing large-capacity memory into the LLM accelerators.",
+      "section_id": "",
+      "start_char": 14964,
+      "end_char": 15125,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24297572367006431,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Despite the industry\u2019s growing demand for large-scale LLM inference, current memory technologies struggle to meet both capacity and bandwidth requirements, necessitating a choice.",
+      "section_id": "",
+      "start_char": 15126,
+      "end_char": 15305,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2467757168787475,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "We explore this trade-off by evaluating our solution, equipped with either LPDDR or HBM memory, across various batched inference scenarios.",
+      "section_id": "",
+      "start_char": 15306,
+      "end_char": 15445,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12912986505579116,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "3.3 KV Cache Quantization Leveraging the memory that offers either sufficient bandwidth or capacity, combined with scaling out the system, can help address the bottlenecks in batched inference.",
+      "section_id": "",
+      "start_char": 15446,
+      "end_char": 15639,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.27700363534718825,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "However, this approach incurs substantial system-building costs and severe resource underutilization, making it neither a fundamental nor a sustainable solution.",
+      "section_id": "",
+      "start_char": 15640,
+      "end_char": 15801,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12041966594480749,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To tackle the memory wall challenge, the community has explored algorithmic approaches to reduce the demands on both conflicting resources fundamentally.",
+      "section_id": "",
+      "start_char": 15843,
+      "end_char": 15996,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23541991212638957,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Quantization is one such direction, widely recognized for its ability to alleviate both capacity and bandwidth bottlenecks simultaneously.",
+      "section_id": "",
+      "start_char": 15997,
+      "end_char": 16135,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24044536242182457,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "As discussed in Section 2.3, many efforts focus on weight quantization and reducing the computation workload to accelerate LLM inference.",
+      "section_id": "",
+      "start_char": 16136,
+      "end_char": 16273,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24595490986695356,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "However, our experimental results show that weight-only quantization has a limited impact on addressing the memory wall in the batched scenarios.",
+      "section_id": "",
+      "start_char": 16274,
+      "end_char": 16419,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17384821801052747,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Figure 5(a) illustrates the memory capacity requirements for model weights and KV cache as batch size increases.",
+      "section_id": "",
+      "start_char": 16472,
+      "end_char": 16584,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19376005183314718,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "While the memory usage for weights remains constant, the KV cache size grows, eventually dominating the entire device memory.",
+      "section_id": "",
+      "start_char": 16585,
+      "end_char": 16710,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24830871872982216,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Figure 5(b) compares the performance between 4-bit weight quantization and 4-bit KV cache quantization.",
+      "section_id": "",
+      "start_char": 16711,
+      "end_char": 16814,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2699910420495622,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The result shows a minimal performance improvement from weight quantization, showing its ineffectiveness in addressing the memory wall for batched LLM inference.",
+      "section_id": "",
+      "start_char": 16815,
+      "end_char": 16976,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25293809169866516,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "However, KV cache quantization delivers larger performance gains, demonstrating its effectiveness in relieving memory pressure.",
+      "section_id": "",
+      "start_char": 16977,
+      "end_char": 17104,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17081595381144005,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Recently, a large body of prior works has explored the KV cache quantization methods.",
+      "section_id": "",
+      "start_char": 17162,
+      "end_char": 17247,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22650263710871119,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "While these works have pioneered a novel research direction, they are constrained by substantial runtime overhead to enable quantization, compromises in accuracy for faster quantization, or a combination of both.",
+      "section_id": "",
+      "start_char": 17248,
+      "end_char": 17460,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26852106232044604,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "These limitations in existing solutions emphasize the need for a KV cache quantization technique that achieves low bitwidth without compromising accuracy.",
+      "section_id": "",
+      "start_char": 17461,
+      "end_char": 17615,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17904230244527095,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Furthermore, such low bitwidth must translate into tangible throughput improvements at the hardware level.",
+      "section_id": "",
+      "start_char": 17616,
+      "end_char": 17722,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21161498858807057,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To meet these demanding requirements, we propose an algorithm-hardware co-designed acceleration solution for efficient batched LLM inference, Oaken.",
+      "section_id": "",
+      "start_char": 17723,
+      "end_char": 17871,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22835262090272973,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Building upon the three observed properties, we incorporate three algorithmic techniques into Oaken\u2019s KV cache quantization.",
+      "section_id": "",
+      "start_char": 18069,
+      "end_char": 18193,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25131578239640096,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Below, we will first discuss the empirical analysis results for KV cache distribution and then describe the three techniques one by one.",
+      "section_id": "",
+      "start_char": 18194,
+      "end_char": 18330,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1668699984173696,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "4.1 Observations in KV Distribution Existing LLM quantization methods often suggest that dealing with large values has a significant impact on model accuracy.",
+      "section_id": "",
+      "start_char": 18331,
+      "end_char": 18489,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26258527202710763,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Moreover, other prior works suggest that small values near zero can vanish due to underflow during quantization, leading to larger error.",
+      "section_id": "",
+      "start_char": 18490,
+      "end_char": 18627,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15595177858735146,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "These observations underscore the importance of analyzing the distribution and characteristics of the quantization targets.",
+      "section_id": "",
+      "start_char": 18628,
+      "end_char": 18751,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25378248431665,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The magnitude of keys and values varies across models and among decoder layers within each model.",
+      "section_id": "",
+      "start_char": 18923,
+      "end_char": 19020,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18035710393765242,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "These variations are distinctive properties of each model and decoder layer, driven by differences in their model weights.",
+      "section_id": "",
+      "start_char": 19021,
+      "end_char": 19143,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1128358933553938,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "From this observation, we gain the insight that the quantization factor should be determined separately for each model and its individual decoder layers.",
+      "section_id": "",
+      "start_char": 19144,
+      "end_char": 19297,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2323308402244999,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "We see that the range of KV cache values remains consistent across these datasets.",
+      "section_id": "",
+      "start_char": 19313,
+      "end_char": 19395,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15505937880794454,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "This observation implies there is no need for the quantization factor to be tailored to the input sequences but only a global quantization factor per layer.",
+      "section_id": "",
+      "start_char": 19396,
+      "end_char": 19552,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20858873165113673,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The distributions exhibit multiple vertical lines, indicating that high-magnitude values are concentrated in specific channels.",
+      "section_id": "",
+      "start_char": 19568,
+      "end_char": 19695,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21602675501414165,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "This pattern in the channel magnitudes, aligning with previous observations, suggests the need for per-vector or per-vector-group quantization.",
+      "section_id": "",
+      "start_char": 19696,
+      "end_char": 19839,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21480394735004193,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "However, this result also reveals exceptions to this pattern, appearing as discontinuous lines and dots, which cause an accuracy drop when using only a single quantization scale per vector or vector group.",
+      "section_id": "",
+      "start_char": 19840,
+      "end_char": 20045,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14307207782769632,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Based on this observation, we introduce multiple quantization groups within a channel to maintain accuracy, splitting the key-value vector into groups based on the magnitude of each element.",
+      "section_id": "",
+      "start_char": 20046,
+      "end_char": 20236,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2531606044658851,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "In summary, we derive the following three insights for designing Oaken\u2019s quantization technique: \u2022 Oaken should determine the quantization factor separately for each model and decoder layer.",
+      "section_id": "",
+      "start_char": 20237,
+      "end_char": 20427,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22617317848696497,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "\u2022 Oaken can employ a common scaling factor regardless of input prompts, showing its insensitivity to data patterns.",
+      "section_id": "",
+      "start_char": 20428,
+      "end_char": 20543,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12137107430113882,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "\u2022 Oaken should use multiple quantization groups segmented by the magnitude of the values within each vector.",
+      "section_id": "",
+      "start_char": 20544,
+      "end_char": 20652,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28870510806013133,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "4.2 Algorithm Overview We propose a quantization algorithm designed to improve performance by maximizing the compression ratio of the KV cache while minimizing quantization loss, based on the observations and insights.",
+      "section_id": "",
+      "start_char": 20653,
+      "end_char": 20871,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2924614821342023,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The following sections introduce a detailed design of each component.",
+      "section_id": "",
+      "start_char": 21215,
+      "end_char": 21284,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22491949102567474,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "4.3 Threshold-based Online-Offline Hybrid Quantization Oaken minimizes quantization loss by isolating outlier values that are either exceptionally large or exceptionally small compared to typical inlier values.",
+      "section_id": "",
+      "start_char": 21285,
+      "end_char": 21495,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2618537560486866,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Oaken separates the per-token KV vector into three quantization groups: outer, middle, and inner.",
+      "section_id": "",
+      "start_char": 21599,
+      "end_char": 21696,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22775460508192005,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The middle group consists of inliers where most KV values belong, while the outer and inner groups consist of outliers, with large and small magnitudes, respectively.",
+      "section_id": "",
+      "start_char": 21697,
+      "end_char": 21863,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2683392774176293,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Oaken prevents the quantization scale from being skewed due to large-magnitude outliers by isolating the outer group, and ensures the small-magnitude outliers do not vanish during quantization by isolating the inner group.",
+      "section_id": "",
+      "start_char": 21864,
+      "end_char": 22086,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23119421886767616,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "To separate outliers from inliers, the topK operation is typically used to maintain a constant ratio of outliers.",
+      "section_id": "",
+      "start_char": 22124,
+      "end_char": 22237,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20212408585863734,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "While this approach results in minimal quantization loss, the topK operation, essentially a sorting with a time complexity of O(n log n), introduces significant overhead when performed during inference, degrading end-to-end performance.",
+      "section_id": "",
+      "start_char": 22238,
+      "end_char": 22474,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.27925220514565524,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The criteria for splitting the KV cache into three groups are based on four thresholds determined through offline threshold profiling.",
+      "section_id": "",
+      "start_char": 22648,
+      "end_char": 22782,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2093685607932761,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Using these thresholds, the outer group, middle group, and inner group are defined as follows: Oaken performs approximately a hundred offline inferences with sample input prompts to gather distribution information from the KV cache of each decoder layer.",
+      "section_id": "",
+      "start_char": 22783,
+      "end_char": 23037,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2132089447416697,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The four group thresholds are extracted during the profiling process from the KV cache of each inference run using topK operations, and their averages are computed for each decoder layer.",
+      "section_id": "",
+      "start_char": 23038,
+      "end_char": 23225,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1987274539933499,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These statistics are then used to establish group thresholds for the KV cache.",
+      "section_id": "",
+      "start_char": 23226,
+      "end_char": 23304,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16687002811933926,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As discussed, Oaken\u2019s offline profiling should be performed separately for each model, whereas the KV cache distribution and the profiling are independent of both the profiling dataset and future inputs.",
+      "section_id": "",
+      "start_char": 23305,
+      "end_char": 23508,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2666160608789667,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "It effectively minimizes accuracy loss with only a small number of inferences, ensuring minimal and one-time overhead.",
+      "section_id": "",
+      "start_char": 23509,
+      "end_char": 23627,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1407140934009933,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Oaken adopts uniform quantization, where the scaling factor is calculated using only simple statistics to minimize hardware complexity.",
+      "section_id": "",
+      "start_char": 23650,
+      "end_char": 23785,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19083492549855202,
+      "claim_type": "UNSUPPORTED"
+    }
+  ],
+  "low_similarity_citations": []
+}

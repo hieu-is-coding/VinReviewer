@@ -1,0 +1,26 @@
+{
+  "claims": [
+    {
+      "claim_text": "Modern Large Language Model (LLM) serving system batches multiple requests to achieve high throughput, while batching attention operations is challenging, rendering memory bandwidth a critical bottleneck",
+      "max_similarity": 0.4069929347791674,
+      "closest_paper_id": "2817c9d2b0c4bd789f8ee7868167f113fed5e1d9",
+      "closest_paper_title": "Oaken: Fast and Efficient LLM Serving with Online-Offline Hybrid KV Cache Quantization",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "Today, to mitigate this issue, the community relies on high-end GPUs with multiple high-bandwidth memory (HBM) channels",
+      "max_similarity": 0.46287607429027416,
+      "closest_paper_id": "2817c9d2b0c4bd789f8ee7868167f113fed5e1d9",
+      "closest_paper_title": "Oaken: Fast and Efficient LLM Serving with Online-Offline Hybrid KV Cache Quantization",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "Unfortunately, HBM\u2019s high bandwidth often comes at the expense of limited memory capacity, necessitating systems to scale, which reduces core utilization and increases costs",
+      "max_similarity": 0.46461165731738724,
+      "closest_paper_id": "2817c9d2b0c4bd789f8ee7868167f113fed5e1d9",
+      "closest_paper_title": "Oaken: Fast and Efficient LLM Serving with Online-Offline Hybrid KV Cache Quantization",
+      "classification": "NOVEL"
+    }
+  ],
+  "overall_novelty_score": 1.0
+}
