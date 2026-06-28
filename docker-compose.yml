@@ -1,8 +1,17 @@
 services:
 
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
+  # GROBID — PDF parsing service (mirrors the separate Railway service)
+  # ---------------------------------------------------------------------------
+  grobid:
+    image: lfoppiano/grobid:0.8.1
+    ports:
+      - "8070:8070"
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
   # BackEnd — FastAPI orchestration service
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   backend:
     build:
       context: .
@@ -17,8 +26,11 @@ services:
       - API_KEY=${BACKEND_API_KEY}
       - MAX_CONCURRENT_JOBS=${MAX_CONCURRENT_JOBS:-5}
       - JOB_TIMEOUT_SECONDS=${JOB_TIMEOUT_SECONDS:-600}
+      - GROBID_URL=http://grobid:8070
+    depends_on:
+      - grobid
     deploy:
       resources:
         limits:
-          memory: 4G
+          memory: 2G
     restart: unless-stopped
