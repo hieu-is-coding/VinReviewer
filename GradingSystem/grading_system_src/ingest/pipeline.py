@@ -9,7 +9,7 @@ from pathlib import Path
 from grading_system_src.models import Language, Manuscript
 
 from .docx_parser import process_docx
-from .grobid_client import process_pdf
+from .pdf_parser import process_pdf
 from .language import detect_language
 
 logger = logging.getLogger(__name__)

@@ -10,7 +10,6 @@ class Settings(BaseSettings):
 
     # GradingSystem
     openai_api_key: str
-    grobid_url: str = "http://localhost:8070"
     semantic_scholar_api_key: str = ""
 
     # Server
@@ -28,6 +27,5 @@ settings = Settings()  # type: ignore[call-arg]
 
 # Propagate settings to OS environment variables for the GradingSystem package and LangChain
 os.environ["OPENAI_API_KEY"] = settings.openai_api_key
-os.environ["GROBID_URL"] = settings.grobid_url
 os.environ["S2_API_KEY"] = settings.semantic_scholar_api_key
 

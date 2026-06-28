@@ -1,1 +1,1 @@
-"""Ingestion: GROBID client, DOCX parser, language detector."""
+"""Ingestion: PDF parser (pypdf + LLM), DOCX parser, language detector."""
