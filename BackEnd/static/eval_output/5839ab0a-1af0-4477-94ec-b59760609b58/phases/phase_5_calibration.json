@@ -1,0 +1,39 @@
+{
+  "calibration": {
+    "slope": 0.9999999999999986,
+    "intercept": -0.1999999999999989,
+    "lower_bound": 0.4499999999999997,
+    "upper_bound": 0.45000000000000023
+  },
+  "raw_score": 0.7467,
+  "calibrated_score": 0.6466999999999999,
+  "comparative": {
+    "overall_percentile": 71.1,
+    "dimension_percentiles": {
+      "thesis_clarity": 89.9,
+      "scope_appropriateness": 94.0,
+      "research_question": 98.8,
+      "source_quality": 98.3,
+      "evidence_integration": 87.3,
+      "citation_accuracy": 99.2,
+      "organization": 94.0,
+      "paragraph_cohesion": 80.5,
+      "transitions": 62.0,
+      "grammar_spelling": 97.6,
+      "sentence_variety": 80.5,
+      "academic_register": 98.3,
+      "argument_depth": 97.6,
+      "counterargument": 56.6,
+      "synthesis": 84.1,
+      "formatting": 97.6,
+      "citation_style": 98.8,
+      "word_count": 98.3
+    },
+    "venue_tier": "general",
+    "comparative_statements": [
+      "This paper scores in the 71th percentile relative to submissions at general venues.",
+      "Strongest aspect: 'citation_accuracy' (99th percentile).",
+      "Based on historical data, this paper has a strong chance of acceptance."
+    ]
+  }
+}

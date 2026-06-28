@@ -1,0 +1,2241 @@
+{
+  "claims": [
+    {
+      "text": "Introduction\nWith the revolutionary success of Large Language Models (LLMs) across various applications, there have been many recent efforts to reduce the costs of their deployment.",
+      "section_id": "",
+      "start_char": 3,
+      "end_char": 184,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.5196448406424061,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, there has been a considerable focus on compressing LLMs using techniques like pruning (Frantar & Alistarh, 2023; Zhang et al., 2023; Santacroce et al., 2023; Ma et al., 2023) or quantization (Lin et al., 2023; Frantar et al., 2023; Kim et al., 2023b), as the parameter size is the primary obstacle for their efficient deployment.",
+      "section_id": "",
+      "start_char": 185,
+      "end_char": 528,
+      "cited_ref_ids": [
+        "(Frantar & Alistarh, 2023; Zhang et al., 2023; Santacroce et al., 2023; Ma et al., 2023)",
+        "(Lin et al., 2023; Frantar et al., 2023; Kim et al., 2023b)"
+      ],
+      "evidence_similarity": 0.5973923022945624,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Meanwhile, there has been limited discussion on mitigating the costs associated with deploying multiple LLMs of varying sizes, despite its practical significance.",
+      "section_id": "",
+      "start_char": 529,
+      "end_char": 691,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3268914670883422,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Real-world scenarios often demand the dynamic adaptation of multiple LLMs, each with distinct model quality/inference latency trade-offs.",
+      "section_id": "",
+      "start_char": 692,
+      "end_char": 829,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.239106968382085,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This approach enables the effective handling of queries with varied latency constraints, enhancing the user experience.",
+      "section_id": "",
+      "start_char": 830,
+      "end_char": 949,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3581486034386217,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Moreover, it supports a popular generation acceleration technique: speculative decoding (Leviathan et al., 2023; Chen et al., 2023; Kim et al., 2023d).",
+      "section_id": "",
+      "start_char": 950,
+      "end_char": 1101,
+      "cited_ref_ids": [
+        "(Leviathan et al., 2023; Chen et al., 2023; Kim et al., 2023d)"
+      ],
+      "evidence_similarity": 0.4750959738178099,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Despite these benefits, deploying multiple LLMs of varying sizes presents challenges.",
+      "section_id": "",
+      "start_char": 1102,
+      "end_char": 1187,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22894856937357597,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "First, it exacerbates the already high memory costs of LLM deployment, and second, it necessitates training of multiple model versions when models of desired sizes are not readily available as open-source.",
+      "section_id": "",
+      "start_char": 1188,
+      "end_char": 1393,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3413681065536831,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Any-precision LLM, an extension of the concept of any-precision DNN (Yu et al., 2021) to LLM, is a promising solution for the low-cost deployment of multiple, different-sized LLMs.",
+      "section_id": "",
+      "start_char": 1394,
+      "end_char": 1574,
+      "cited_ref_ids": [
+        "(Yu et al., 2021)"
+      ],
+      "evidence_similarity": 0.5064428112312976,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Any-precision DNN refers to an n-bit quantized model capable of generating lower bit quantized models ((n-1)-bit, (n-2)-bit, ...) simply by taking its most significant bits (MSBs).",
+      "section_id": "",
+      "start_char": 1575,
+      "end_char": 1755,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2914881308023849,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Applying this concept to LLM enables the utilization of multiple LLMs with varying sizes by storing only a single large LLM (n-bit model) in memory, while avoiding the additional overhead of training multiple LLMs.",
+      "section_id": "",
+      "start_char": 1756,
+      "end_char": 1970,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.4010847838713878,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Meanwhile, two challenges need to be resolved for effective implementation of any-precision LLM.",
+      "section_id": "",
+      "start_char": 1971,
+      "end_char": 2067,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2743434515203843,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "First, a practical method for any-precision quantization of LLM is needed.",
+      "section_id": "",
+      "start_char": 2068,
+      "end_char": 2142,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.4071378981629826,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The existing any-precision quantization method on DNN requires training the model from scratch, limiting its applicability to LLMs.",
+      "section_id": "",
+      "start_char": 2143,
+      "end_char": 2274,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3440900822003661,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Second, a new GPU kernel for quantized matrix-vector multiplication is required, which will translate the use of reduced bit-widths in any-precision LLMs into shorter inference times.",
+      "section_id": "",
+      "start_char": 2275,
+      "end_char": 2458,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3811194806605456,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Existing kernels for quantized matrix-vector multiplication are unable to load just a portion of each quantized weight value\u2019s bit-vector.",
+      "section_id": "",
+      "start_char": 2459,
+      "end_char": 2597,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.40381684457822903,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Consequently, with existing kernels, opting for a model with a lower bit-width does not reduce memory bandwidth usage.",
+      "section_id": "",
+      "start_char": 2598,
+      "end_char": 2716,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2182788515626526,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Thus, we in this paper make a strong case for any-precision LLM by addressing the two aforementioned issues.",
+      "section_id": "",
+      "start_char": 2717,
+      "end_char": 2825,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2696570726832312,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "First, we build a lightweight method for any-precision quantization of LLM.",
+      "section_id": "",
+      "start_char": 2826,
+      "end_char": 2901,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.30950115457115307,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Utilizing a post-training quantization (PTQ) framework, it first generates a low-bit model and then incrementally upscales it to higher bit-widths, conserving the any-precision property.",
+      "section_id": "",
+      "start_char": 2902,
+      "end_char": 3088,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22393598257556235,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Second, we develop a new software engine specialized for any-precision support, that effectively saves memory bandwidth for serving any-precision LLMs by changing the memory layout of weights.",
+      "section_id": "",
+      "start_char": 3089,
+      "end_char": 3281,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.35587627914511133,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Our extensive experimental studies demonstrate that our solution is a powerful approach for the deployment of multiple, different-sized LLMs, achieving the following results: \u2022 Our solution efficiently packs LLMs quantized to varying bit-widths, such as 3, 4, ...",
+      "section_id": "",
+      "start_char": 3282,
+      "end_char": 3545,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2954491662178477,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "up to n bits, into a memory footprint comparable to a single n-bit LLM.",
+      "section_id": "",
+      "start_char": 3546,
+      "end_char": 3617,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21509997872595982,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "\u2022 Our solution yields a set of quantized LLMs of varying bit-widths that, while offering any-precision support, match the quality of the state-of-the-art quantization techniques at each bit-width.",
+      "section_id": "",
+      "start_char": 3618,
+      "end_char": 3814,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29636530550906154,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "\u2022 Our solution, despite having to adopt a bit-interleaved (bitplane) memory layout for the support of any-precision, showcases high inference throughput, matching or even outperforming that of state-of-the-art quantized matrix-vector multiplication engines that do not support any-precision (Kim et al., 2023b).",
+      "section_id": "",
+      "start_char": 3815,
+      "end_char": 4126,
+      "cited_ref_ids": [
+        "(Kim et al., 2023b)"
+      ],
+      "evidence_similarity": 0.2743556470361031,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "GPU Basics GPU Architecture Fundamentals.",
+      "section_id": "",
+      "start_char": 4146,
+      "end_char": 4187,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13615304878873877,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A GPU, the de facto standard platform for executing LLMs, comprises a large number of processing elements called Streaming Multiprocessors (SMs).",
+      "section_id": "",
+      "start_char": 4188,
+      "end_char": 4333,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.33675669962041693,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "GPUs often include multi-level on-chip SRAM caches.",
+      "section_id": "",
+      "start_char": 4334,
+      "end_char": 4385,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2175765866798759,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A part of the L1 cache can be configured as shared memory, providing a memory space that can be directly controlled by programmers.",
+      "section_id": "",
+      "start_char": 4386,
+      "end_char": 4517,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28760048155076456,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "GPUs use a large number of threads to execute operations, which are known as kernels.",
+      "section_id": "",
+      "start_char": 4535,
+      "end_char": 4620,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2431732579570614,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Threads are structured into thread blocks whose execution is scheduled on SMs.",
+      "section_id": "",
+      "start_char": 4621,
+      "end_char": 4699,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14184963934012293,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "All threads within a thread block share the same shared memory space.",
+      "section_id": "",
+      "start_char": 4700,
+      "end_char": 4769,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17549876558806582,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Within each thread block, threads are further organized into a set of warps, with each warp consisting of 32 consecutive threads.",
+      "section_id": "",
+      "start_char": 4770,
+      "end_char": 4899,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1877311627273142,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "All threads within a warp execute the same instruction at the same time.",
+      "section_id": "",
+      "start_char": 4900,
+      "end_char": 4972,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13620740742911155,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "LLM Quantization This section discusses recent advancements in LLM quantization with a specific emphasis on weight-only, post-training quantization (PTQ).",
+      "section_id": "",
+      "start_char": 4978,
+      "end_char": 5132,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3771393578420655,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In LLMs, there is a pronounced shift towards quantizing only the weights, as the dominant bottleneck in inference throughput is the memory constraint imposed by the size of weight parameters, rather than computational requirements.",
+      "section_id": "",
+      "start_char": 5133,
+      "end_char": 5364,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3007572466758125,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Moreover, Post-Training Quantization (PTQ) has become a favored method for quantizing LLMs due to its practicality.",
+      "section_id": "",
+      "start_char": 5365,
+      "end_char": 5480,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3263648800198138,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Although Quantization-Aware Training (QAT) typically yields superior performance, its high training expense frequently renders it impractical (Liu et al., 2023; Dettmers et al., 2023; Kim et al., 2023a).",
+      "section_id": "",
+      "start_char": 5481,
+      "end_char": 5684,
+      "cited_ref_ids": [
+        "(Liu et al., 2023; Dettmers et al., 2023; Kim et al., 2023a)"
+      ],
+      "evidence_similarity": 0.6042717559093833,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "GPTQ (Frantar et al., 2023), a pioneering work on weight-only PTQ for LLM, formulates quantization as a layer-wise weight reconstruction problem.",
+      "section_id": "",
+      "start_char": 5685,
+      "end_char": 5830,
+      "cited_ref_ids": [
+        "(Frantar et al., 2023)"
+      ],
+      "evidence_similarity": 0.732460331854479,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "GPTQ methodically quantizes each channel in iterations, simultaneously adjusting the remaining not-yet-quantized weights to correct for quantization-induced errors.",
+      "section_id": "",
+      "start_char": 5831,
+      "end_char": 5995,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2719205296736168,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "AWQ (Lin et al., 2023) performs per-channel scaling to safeguard a small fraction of salient weights as a preprocessing step.",
+      "section_id": "",
+      "start_char": 5996,
+      "end_char": 6121,
+      "cited_ref_ids": [
+        "(Lin et al., 2023)"
+      ],
+      "evidence_similarity": 0.4323370967478989,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Similarly, QuIP (Chee et al., 2023) preprocesses weights to be more amenable to quantization, yielding impressive results even at 2-bit precision.",
+      "section_id": "",
+      "start_char": 6122,
+      "end_char": 6268,
+      "cited_ref_ids": [
+        "(Chee et al., 2023)"
+      ],
+      "evidence_similarity": 0.38167002497310254,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, its practical utility is in question as it adds a substantial runtime overhead.",
+      "section_id": "",
+      "start_char": 6269,
+      "end_char": 6357,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19409178610417055,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While the aforementioned methods employ uniform quantization, non-uniform quantization may be a more effective alternative as it better captures the weight distributions (Gholami et al., 2021).",
+      "section_id": "",
+      "start_char": 6358,
+      "end_char": 6551,
+      "cited_ref_ids": [
+        "(Gholami et al., 2021)"
+      ],
+      "evidence_similarity": 0.5432614173602155,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "SqueezeLLM (Kim et al., 2023b) proposes a clustering-based LLM quantization that considers the sensitivity of each weight.",
+      "section_id": "",
+      "start_char": 6552,
+      "end_char": 6674,
+      "cited_ref_ids": [
+        "(Kim et al., 2023b)"
+      ],
+      "evidence_similarity": 0.5672650658161913,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Somewhat orthogonal to the aforementioned studies that primarily focus on rounding schemes, there are also proposals to use mixed precision as a way of allocating more bits to sensitive weights (Kim et al., 2023b; Dettmers et al., 2024; Lee et al., 2024).",
+      "section_id": "",
+      "start_char": 6675,
+      "end_char": 6930,
+      "cited_ref_ids": [
+        "(Kim et al., 2023b; Dettmers et al., 2024; Lee et al., 2024)"
+      ],
+      "evidence_similarity": 0.2935050627065895,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Need for Deploying Multiple, Different-sized LLMs Deploying a set of different-sized LLMs provides significant practical advantages.",
+      "section_id": "",
+      "start_char": 6950,
+      "end_char": 7082,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.31097696100575956,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "It enhances user experience by effectively handling queries with varying latency requirements.",
+      "section_id": "",
+      "start_char": 7083,
+      "end_char": 7177,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12802467804704887,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Depending on the specific needs of users and applications, some queries require quick responses, while others can tolerate slower response times.",
+      "section_id": "",
+      "start_char": 7178,
+      "end_char": 7323,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.35775247699931423,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Latency requirements become even more diverse when serving multiple different tasks concurrently, a common use case of LLMs.",
+      "section_id": "",
+      "start_char": 7324,
+      "end_char": 7448,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21998740353211285,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For instance, queries for interactive tasks like chatbots are mostly latency-sensitive, while tasks like document analysis, often handled in the background, allow for more relaxed response times.",
+      "section_id": "",
+      "start_char": 7449,
+      "end_char": 7644,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23275290298078963,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In fact, the approach of adaptively selecting different DNN models with various accuracy-latency trade-offs has been widely studied as a way to effectively meet user requirements due to its practical significance (Wan et al., 2020; Zhang et al., 2020; Han et al., 2016).",
+      "section_id": "",
+      "start_char": 7645,
+      "end_char": 7915,
+      "cited_ref_ids": [
+        "(Wan et al., 2020; Zhang et al., 2020; Han et al., 2016)"
+      ],
+      "evidence_similarity": 0.4443876335186404,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Another scenario that necessitates multiple LLMs of varying sizes is speculative decoding.",
+      "section_id": "",
+      "start_char": 7916,
+      "end_char": 8006,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21309753254481748,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This popular technique boosts the throughput of a large model by additionally utilizing one or more smaller draft models (Leviathan et al., 2023; Chen et al., 2023; Kim et al., 2023d; Miao et al., 2023).",
+      "section_id": "",
+      "start_char": 8007,
+      "end_char": 8210,
+      "cited_ref_ids": [
+        "(Leviathan et al., 2023; Chen et al., 2023; Kim et al., 2023d; Miao et al., 2023)"
+      ],
+      "evidence_similarity": 0.4495181098836025,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Challenges of Deploying Multiple, Different-sized LLMs In deploying multiple LLMs, we face two practical challenges: memory overhead and training costs.",
+      "section_id": "",
+      "start_char": 8216,
+      "end_char": 8368,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3183879466877305,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Challenge 1: Memory Overhead.",
+      "section_id": "",
+      "start_char": 8369,
+      "end_char": 8398,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17579194380133345,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "First, a large memory capacity overhead is introduced.",
+      "section_id": "",
+      "start_char": 8399,
+      "end_char": 8453,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3400743900740083,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As LLMs are typically substantial in size, maintaining even a few additional smaller models incurs significant costs.",
+      "section_id": "",
+      "start_char": 8454,
+      "end_char": 8571,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23117523213128383,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, deploying three tiers of LLMs with varying sizes \u2014 a large base model, a half-sized model, and a quarter-sized model \u2014 nearly doubles on the total memory requirement.",
+      "section_id": "",
+      "start_char": 8572,
+      "end_char": 8751,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3262359027028403,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Challenge 2: Training Costs.",
+      "section_id": "",
+      "start_char": 8752,
+      "end_char": 8780,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19477412224735388,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Acquiring multiple different-sized LLMs is challenging in itself.",
+      "section_id": "",
+      "start_char": 8781,
+      "end_char": 8846,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2175765866798759,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While some open-source LLMs such as OPT (Zhang et al., 2022) offer a comprehensive range of models with varying parameter counts, this is usually not the case.",
+      "section_id": "",
+      "start_char": 8847,
+      "end_char": 9006,
+      "cited_ref_ids": [
+        "(Zhang et al., 2022)"
+      ],
+      "evidence_similarity": 0.47070403323867255,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Most open-source LLMs offer only one to three variants, limiting their versatility across different use scenarios.",
+      "section_id": "",
+      "start_char": 9007,
+      "end_char": 9121,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25339494435076154,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "If a model in the desired size is unavailable, users must create it by themselves.",
+      "section_id": "",
+      "start_char": 9122,
+      "end_char": 9204,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24631911566947484,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, training an LLM is very costly due to its high computational needs and large corpus requirement.",
+      "section_id": "",
+      "start_char": 9205,
+      "end_char": 9310,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.30499285702650974,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "One approach is to distill the available large model into smaller ones instead of training smaller models from scratch (Hinton et al., 2015; Hsieh et al., 2023; Gu et al., 2024; Zhao et al., 2022; Agarwal et al., 2024).",
+      "section_id": "",
+      "start_char": 9311,
+      "end_char": 9530,
+      "cited_ref_ids": [
+        "(Hinton et al., 2015; Hsieh et al., 2023; Gu et al., 2024; Zhao et al., 2022; Agarwal et al., 2024)"
+      ],
+      "evidence_similarity": 0.6288611646225946,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While this approach reduces computation costs, it still entails non-trivial engineering challenges, including the need to assemble a proper set of training data and finding favorable hyperparameters for training.",
+      "section_id": "",
+      "start_char": 9531,
+      "end_char": 9743,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25526908765438705,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These two challenges become particularly prominent when individuals run LLMs on personal platforms like desktops and mobile devices.",
+      "section_id": "",
+      "start_char": 9744,
+      "end_char": 9876,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25208290681781104,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In these scenarios \u2014 unlike with datacenter-scale inference \u2014 compute, memory, and even engineering resources are severely limited.",
+      "section_id": "",
+      "start_char": 9877,
+      "end_char": 10008,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1872358705411609,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Thus, this paper focuses on addressing the challenges associated with deploying multiple, different-sized LLMs for on-device inference.",
+      "section_id": "",
+      "start_char": 10009,
+      "end_char": 10144,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3751752999705647,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Our Solution: Any-Precision LLM Concept.",
+      "section_id": "",
+      "start_char": 10150,
+      "end_char": 10190,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.41906654433586965,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Any-precision quantization, initially introduced in prior work (Yu et al., 2021), is a promising solution to mitigate the costs of deploying multiple different-sized LLMs.",
+      "section_id": "",
+      "start_char": 10191,
+      "end_char": 10362,
+      "cited_ref_ids": [
+        "(Yu et al., 2021)"
+      ],
+      "evidence_similarity": 0.3689549240426533,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 1 visualizes the concept of any-precision quantization.",
+      "section_id": "",
+      "start_char": 10363,
+      "end_char": 10425,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3629222732710209,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The core is to derive smaller models (7-bit, 6-bit quantized model, ...) from a large model (8-bit quantized model), referred to as the parent model, by taking only the upper bits of its parameters.",
+      "section_id": "",
+      "start_char": 10426,
+      "end_char": 10624,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29820123180478236,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Of course, a special method tailored for any-precision quantization is required to ensure that taking just the prefixes of the parent model parameters does not result in significant quality drops.",
+      "section_id": "",
+      "start_char": 10625,
+      "end_char": 10821,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.34492774155389505,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The any-precision approach is highly memory-efficient as it allows the utilization of varying bit-width models by only storing in memory 1) the quantized weights of the parent model and 2) a set of quantization parameters (e.g.",
+      "section_id": "",
+      "start_char": 10822,
+      "end_char": 11049,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.35082121762803053,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "centroid values) associated with each supported bit-width, relatively small in size.",
+      "section_id": "",
+      "start_char": 11050,
+      "end_char": 11134,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16448859710910296,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Also, there is no need to train multiple models.",
+      "section_id": "",
+      "start_char": 11135,
+      "end_char": 11183,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2557274995172551,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Table 1 gives a quantitative analysis on the memory savings of any-precision LLM, the application of any-precision quantization to LLMs.",
+      "section_id": "",
+      "start_char": 11184,
+      "end_char": 11320,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3854959544382842,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Without any-precision quantization, adaptively using models of different bit-widths requires the deployment of separate models, each taking up its own memory space.",
+      "section_id": "",
+      "start_char": 11321,
+      "end_char": 11485,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3083684340211285,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We refer to this strategy as separate deployment.",
+      "section_id": "",
+      "start_char": 11486,
+      "end_char": 11535,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1744342155132677,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We compare the required memory space of separate deployment against any-precision LLM, for various scenarios requiring different sets of bit-widths with the Llama-2-7B model.",
+      "section_id": "",
+      "start_char": 11536,
+      "end_char": 11710,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.36661856165201095,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Any-precision LLM significantly reduces memory costs across a range of scenarios, achieving a maximum saving of 3.56\u00d7 when supporting all bit-widths from 3 to 8.",
+      "section_id": "",
+      "start_char": 11711,
+      "end_char": 11872,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.31730247440014936,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Challenges of Any-Precision LLM.",
+      "section_id": "",
+      "start_char": 11873,
+      "end_char": 11905,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.45906439885698924,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While the concept itself is appealing, there are critical issues in directly applying the method of the original work (Yu et al., 2021), which mainly targets CNN models, to LLMs.",
+      "section_id": "",
+      "start_char": 11906,
+      "end_char": 12084,
+      "cited_ref_ids": [
+        "(Yu et al., 2021)"
+      ],
+      "evidence_similarity": 0.39966445803969686,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "First, it is a quantization-aware training (QAT) scheme, requiring models to be trained from scratch.",
+      "section_id": "",
+      "start_char": 12085,
+      "end_char": 12186,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25280114902074413,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "During training, the forward pass quantizes parameters to varying bit-widths so that the resulting model is robust to any-precision quantization.",
+      "section_id": "",
+      "start_char": 12187,
+      "end_char": 12332,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2783355039813614,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, for LLMs, training is not affordable to most users.",
+      "section_id": "",
+      "start_char": 12333,
+      "end_char": 12393,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3096169107450572,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Second, this work has no regard for memory bandwidth saving.",
+      "section_id": "",
+      "start_char": 12394,
+      "end_char": 12454,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28980071190792944,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The entire n-bit parameters of the parent model are loaded into memory, only then being further quantized into lower bit-width weights by bit-shifting as needed.",
+      "section_id": "",
+      "start_char": 12455,
+      "end_char": 12616,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22806123524324137,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This strategy makes sense for CNN models, which are usually compute-bound.",
+      "section_id": "",
+      "start_char": 12617,
+      "end_char": 12691,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2398113659631165,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On the other hand, on-device LLM inference is highly memory-bound due to its low arithmetic intensity.",
+      "section_id": "",
+      "start_char": 12692,
+      "end_char": 12794,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28623790201936916,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Consequently, the memory load of weight parameters is the single primary performance bottleneck (Kim et al., 2023c).",
+      "section_id": "",
+      "start_char": 12795,
+      "end_char": 12911,
+      "cited_ref_ids": [
+        "(Kim et al., 2023c)"
+      ],
+      "evidence_similarity": 0.32433107047931237,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Hence, when the original method is applied to LLMs as-is, operating at low bit-widths may provide little inference latency improvements over that of the parent model.",
+      "section_id": "",
+      "start_char": 12912,
+      "end_char": 13078,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3052254082661663,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A new solution is required for LLMs, one that incorporates both a low-cost any-precision quantization method and a specialized software engine wherein reduced precision inference directly translates to actual speed-ups.",
+      "section_id": "",
+      "start_char": 13079,
+      "end_char": 13298,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2988092358471973,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Any-Precision Quantization for LLM\n4.1.",
+      "section_id": "",
+      "start_char": 13302,
+      "end_char": 13341,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.45906439885698924,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Incremental Upscaling We propose a novel approach to any-precision quantization of LLMs, termed incremental upscaling.",
+      "section_id": "",
+      "start_char": 13342,
+      "end_char": 13460,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2564308497663491,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 2 illustrates the two-stage flow of the any-precision quantization, utilizing incremental upscaling.",
+      "section_id": "",
+      "start_char": 13461,
+      "end_char": 13568,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2694594339654086,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Assuming a list of candidate bit-widths ({nk}Kk=1), the initial step quantizes the model to the minimum supported bit-width (n1), which we refer to as seed model.",
+      "section_id": "",
+      "start_char": 13569,
+      "end_char": 13731,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24561190195827642,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Subsequently, we incrementally upscale the seed model one bit at a time, until we obtain the final nK-bit parent model.",
+      "section_id": "",
+      "start_char": 13732,
+      "end_char": 13851,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1666801168012208,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For every incremental upscale from an ni-bit model to an ni+1-bit model, all parameters of the ni-bit model are inherited to the ni+1-bit model, and a single additional bit is appended to the end of each parameter.",
+      "section_id": "",
+      "start_char": 13852,
+      "end_char": 14066,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2992759055362223,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Non-uniform Quantization-based Incremental Upscaling For our incremental upscaling-based approach of any-precision quantization, a particular quantization method must be adopted as a backbone for both the seed model generation and the subsequent upscaling process.",
+      "section_id": "",
+      "start_char": 14072,
+      "end_char": 14336,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3428366119882703,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While any PTQ method can be employed for this purpose, we rule out the use of QAT method to ensure that our solution does not involve an expensive training process.",
+      "section_id": "",
+      "start_char": 14337,
+      "end_char": 14501,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.27179517901542977,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Among various PTQ methods, an optimal choice would be one that 1) demonstrates state-of-the-art quantization results for the generation of a quality seed model and 2) seamlessly extends to the incremental upscaling process.",
+      "section_id": "",
+      "start_char": 14502,
+      "end_char": 14725,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.31088222987772207,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To this end, we utilize the state-of-the-art clustering-based non-uniform quantization scheme, SqueezeLLM (Kim et al., 2023b), as the backbone method.",
+      "section_id": "",
+      "start_char": 14726,
+      "end_char": 14876,
+      "cited_ref_ids": [
+        "(Kim et al., 2023b)"
+      ],
+      "evidence_similarity": 0.37723493877103736,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "It delivers state-of-the-art results and is readily compatible with incremental upscaling.",
+      "section_id": "",
+      "start_char": 14877,
+      "end_char": 14967,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29880715233359845,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Incremental upscaling with the clustering-based quantization method is straightforward.",
+      "section_id": "",
+      "start_char": 14968,
+      "end_char": 15055,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.39405028405237663,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In SqueezeLLM, quantization is a process of clustering the parameters, where values within each cluster are rounded to its centroid.",
+      "section_id": "",
+      "start_char": 15056,
+      "end_char": 15188,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29444067971397647,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In this light, incremental upscaling can be achieved by further dividing each cluster into two sub-clusters.",
+      "section_id": "",
+      "start_char": 15189,
+      "end_char": 15297,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1338436317674863,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, we perform a weighted K-means clustering on the values of each cluster to generate the two sub-clusters.",
+      "section_id": "",
+      "start_char": 15298,
+      "end_char": 15416,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29555356088707785,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A sensitivity metric based on an approximated second-order derivative is used during clustering, like in the original method.",
+      "section_id": "",
+      "start_char": 15417,
+      "end_char": 15542,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23289360122471348,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 3 visualizes the upscaling process on the clustering-based non-uniform quantization method, assuming the case of producing a 3-bit model from a 2-bit model.",
+      "section_id": "",
+      "start_char": 15543,
+      "end_char": 15706,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2800696414127276,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In this instance, three weight parameters (w1, w3, w4) initially assigned to cluster01 \u2014 previously rounded to its centroidc01 \u2014 are now divided into two new sub-clusters, namely 010 and 011, each with its respective centroids c010 and c011.",
+      "section_id": "",
+      "start_char": 15707,
+      "end_char": 15948,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20283028667904918,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The same process is applied to the remaining three clusters (00, 10, 11), resulting in a final total of eight sub-clusters.",
+      "section_id": "",
+      "start_char": 15949,
+      "end_char": 16072,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.27907752469967234,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In contrast to clustering-based methods, state-of-the-art uniform quantization methods often involve complicated mechanisms such as weight reconstruction (Frantar et al., 2023) and per-channel scaling (Lin et al., 2023) that are not readily compatible with incremental upscaling.",
+      "section_id": "",
+      "start_char": 16073,
+      "end_char": 16352,
+      "cited_ref_ids": [
+        "(Frantar et al., 2023)",
+        "(Lin et al., 2023)"
+      ],
+      "evidence_similarity": 0.3619560585535202,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, Table 2 presents the results of applying incremental upscaling to two state-of-the-art uniform methods (AWQ, GPTQ), using a 3-bit model as the seed model.",
+      "section_id": "",
+      "start_char": 16353,
+      "end_char": 16520,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3328175664586597,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The upscaled models consistently underperform the independently quantized models, showing unacceptable degradation at low bit-widths such as 4.",
+      "section_id": "",
+      "start_char": 16521,
+      "end_char": 16664,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20656668698986047,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We provide an in-depth discussion on the challenges of applying incremental upscaling on existing uniform quantization methods, along with additional experimental results, in Appendix E.",
+      "section_id": "",
+      "start_char": 16665,
+      "end_char": 16851,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.32486095521518393,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specialized Software Engine\n5.1.",
+      "section_id": "",
+      "start_char": 16855,
+      "end_char": 16887,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1808266490445306,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Need for New Software Engine There are multiple GPU kernels designed for the efficient execution of weight-only-quantized LLMs (NVIDIA; Lin et al., 2023; Frantar et al., 2023; Kim et al., 2023b; turboderp; Park et al., 2024).",
+      "section_id": "",
+      "start_char": 16888,
+      "end_char": 17113,
+      "cited_ref_ids": [
+        "(NVIDIA; Lin et al., 2023; Frantar et al., 2023; Kim et al., 2023b; turboderp; Park et al., 2024)"
+      ],
+      "evidence_similarity": 0.48572112741216333,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While demonstrating promising performance, most of these existing implementations cannot support any-precision quantization because of their way of representing quantized weights.",
+      "section_id": "",
+      "start_char": 17114,
+      "end_char": 17293,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24713895265044972,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "They use a bitpacking-based representation, illustrated in Figure 4-(a).",
+      "section_id": "",
+      "start_char": 17294,
+      "end_char": 17366,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17495030178769325,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Bitpacking-based representations store quantized weights sequentially in a single 1-D array.",
+      "section_id": "",
+      "start_char": 17367,
+      "end_char": 17459,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18471208472594228,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "With this representation, the entire weight array has to be loaded even when running a model in a reduced bit-width.",
+      "section_id": "",
+      "start_char": 17460,
+      "end_char": 17576,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2645627196126412,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example in Figure 4-(a), even when executing a 2-bit or 3-bit model, the full 4-bit values have to be read from memory.",
+      "section_id": "",
+      "start_char": 17577,
+      "end_char": 17700,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3034696321213172,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This is because of the coarse-grained memory access granularity of GPUs, typically 128 bytes.",
+      "section_id": "",
+      "start_char": 17701,
+      "end_char": 17794,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2895713275367364,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This results in virtually no performance improvements.",
+      "section_id": "",
+      "start_char": 17795,
+      "end_char": 17849,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18422544423952258,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On the contrary, bitplane-based representation is a suitable choice for any-precision LLM support.",
+      "section_id": "",
+      "start_char": 17850,
+      "end_char": 17948,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3608891746512339,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Bitplane-based representation decomposes quantized weights into n bit-vectors, where n is the bit-width.",
+      "section_id": "",
+      "start_char": 17949,
+      "end_char": 18053,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16932575016260362,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Each bit-vector is formed by taking each bit position of the quantized values.",
+      "section_id": "",
+      "start_char": 18054,
+      "end_char": 18132,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20166625555845827,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Figure 4-(b) illustrates the bitplane-based representation.",
+      "section_id": "",
+      "start_char": 18133,
+      "end_char": 18192,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16957224307812852,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "In this representation, any runtime request of reduced bit-width directly translates into proportional speedup, as we can simply load the specified amount of bits.",
+      "section_id": "",
+      "start_char": 18193,
+      "end_char": 18356,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26602232036254947,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "While relatively common in CPU GEMM implementations (Cowan et al., 2020; Umuroglu & Jahre, 2017), its adoption in GPUs has not gained much attention yet.",
+      "section_id": "",
+      "start_char": 18357,
+      "end_char": 18510,
+      "cited_ref_ids": [
+        "(Cowan et al., 2020; Umuroglu & Jahre, 2017)"
+      ],
+      "evidence_similarity": 0.3641201245230209,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Concurrent to our work, LUT-GEMM proposes a quantized matrix-vector multiplication kernel adopting a kind of bitplane-based weight representation (Park et al., 2024), but it lacks support for any-precision as it necessitates the generation of distinct weight layouts to accommodate different bit-widths.",
+      "section_id": "",
+      "start_char": 18511,
+      "end_char": 18814,
+      "cited_ref_ids": [
+        "(Park et al., 2024)"
+      ],
+      "evidence_similarity": 0.4675619529490379,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "More importantly, LUT-GEMM strictly requires weights to adhere to a specific format called BCQ (binary-coding quantization) \u2014 BCQ cannot support the codebook-based non-uniform quantization method, which we identify as optimal for any-precision LLM.",
+      "section_id": "",
+      "start_char": 18815,
+      "end_char": 19063,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28322590838814143,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Hence, a novel software engine that fully supports both bitplane-based weight representation and non-uniform quantization is needed.",
+      "section_id": "",
+      "start_char": 19064,
+      "end_char": 19196,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.36165329808906127,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "System Overview Figure 5 is an overview of our engine for any-precision LLM.",
+      "section_id": "",
+      "start_char": 19202,
+      "end_char": 19278,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.36734687444401576,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This figure assumes a scenario where support for 3, 4 and 8-bit is available, and the engine is requested to run a 4-bit model.",
+      "section_id": "",
+      "start_char": 19279,
+      "end_char": 19406,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2731202442831199,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For simplicity, we show only a single linear operation.",
+      "section_id": "",
+      "start_char": 19407,
+      "end_char": 19462,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22146651102821568,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Weight matrix bitplanes of bit 0 to bit 7, along with tables containing centroid values for the supported bit-widths (3, 4, 8-bit), are stored in memory.",
+      "section_id": "",
+      "start_char": 19463,
+      "end_char": 19616,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29137655788891836,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Assuming channel-wise quantization, the centroid tables have rows equal to the number of output channels (n), with each row containing 2k values, where k refers to the bit-width.",
+      "section_id": "",
+      "start_char": 19617,
+      "end_char": 19795,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3623019019988528,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For each operation, only necessary data is loaded from memory, which in this case includes the centroid table for 4-bit and the bitplanes for bit 4, 5, 6, and 7 in this example.",
+      "section_id": "",
+      "start_char": 19796,
+      "end_char": 19973,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24143315690145226,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The rows of the centroid table are scattered across the shared memory of different thread blocks since they are frequently accessed by all the threads in the block.",
+      "section_id": "",
+      "start_char": 19974,
+      "end_char": 20138,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28312825519162105,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Meanwhile, the threads load non-overlapping regions of the weight bitplanes.",
+      "section_id": "",
+      "start_char": 20139,
+      "end_char": 20215,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25677025310976814,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Thread-Level Operations.",
+      "section_id": "",
+      "start_char": 20216,
+      "end_char": 20240,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.080806854381741,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Figure 6 depicts the five step thread-level operation, assuming a bit-width of 4.",
+      "section_id": "",
+      "start_char": 20241,
+      "end_char": 20322,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18231152900759198,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "1 First, each thread starts by loading 32 input activation values along with their corresponding weights, which are four 32-bit bit-vectors.",
+      "section_id": "",
+      "start_char": 20323,
+      "end_char": 20463,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2714001680361229,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "2 Next, the four bit-vectors are rearranged so that the bits of each weight align contiguously.",
+      "section_id": "",
+      "start_char": 20464,
+      "end_char": 20559,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21000453642732173,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "This operation is equivalent to the bit-transpose of eight 4-by-4 bit matrices.",
+      "section_id": "",
+      "start_char": 20560,
+      "end_char": 20639,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23119973372477937,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "3 Subsequently, the bit-transposed bit-vectors are shifted and masked to obtain the indices for centroid lookup.",
+      "section_id": "",
+      "start_char": 20640,
+      "end_char": 20752,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2596138231656392,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "4 The dequantization process is then completed by fetching centroids from the table in the shared memory.",
+      "section_id": "",
+      "start_char": 20753,
+      "end_char": 20858,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2433878983666174,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "5 As the final step, Multiply-Accumulate (MAC) operations are conducted on the dequantized weights with the input activations.",
+      "section_id": "",
+      "start_char": 20859,
+      "end_char": 20985,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3131080906048197,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Threads iteratively execute these five steps until they collectively complete processing the channels assigned to them, alongside other threads in the warp.",
+      "section_id": "",
+      "start_char": 20986,
+      "end_char": 21142,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20721469499603368,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Evaluation\nThrough extensive experiments, we demonstrate that our proposal is an effective way of deploying multiple, different-sized LLMs by proving the following two arguments: \u2022 A set of quantized models generated from incremental upscaling, when integrated with the non-uniform quantization method, match the state-of-the-art quantization results at their respective bit-widths.",
+      "section_id": "",
+      "start_char": 21146,
+      "end_char": 21528,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3236443227645485,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "(Section 6.1) \u2022 Our specialized engine matches or even outperforms existing engines while providing memory-efficient any-precision support, a feature lacking in the existing engines.",
+      "section_id": "",
+      "start_char": 21529,
+      "end_char": 21711,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.31414148831020683,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "(Section 6.2 & Section 6.3) 6.1.",
+      "section_id": "",
+      "start_char": 21712,
+      "end_char": 21744,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.35814595804195315,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Any-Precision Quantization Results Methodology.",
+      "section_id": "",
+      "start_char": 21745,
+      "end_char": 21792,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.45906439885698924,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We evaluate 4 to 8-bit models obtained through incremental upscaling, using a 3-bit SqueezeLLM model as the seed model.",
+      "section_id": "",
+      "start_char": 21793,
+      "end_char": 21912,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23946488918959458,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The results are compared with the 4 to 8-bit SqueezeLLM models.",
+      "section_id": "",
+      "start_char": 21913,
+      "end_char": 21976,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3153585392967795,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We benchmark our method on LLaMA-2-7B (Touvron et al., 2023), Mistral-7B (Jiang et al., 2023), and three OPT models (6.7B, 2.7B, 1.3B) (Zhang et al., 2022).",
+      "section_id": "",
+      "start_char": 21977,
+      "end_char": 22133,
+      "cited_ref_ids": [
+        "(Touvron et al., 2023)",
+        "(Jiang et al., 2023)",
+        "(Zhang et al., 2022)"
+      ],
+      "evidence_similarity": 0.506860147094099,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We evaluate the models with two metrics: perplexity on three datasets (WikiText2 (Merity et al., 2016), PTB (Marcus et al., 1994), C4 (Raffel et al., 2023)) and zero-shot accuracy on five tasks (ARC-easy/challenge (Clark et al., 2018), HellaSwag (Zellers et al., 2019), PIQA (Tata & Patel, 2003), WinoGrande (Sakaguchi et al., 2021)).",
+      "section_id": "",
+      "start_char": 22134,
+      "end_char": 22468,
+      "cited_ref_ids": [
+        "(WikiText2 (Merity et al., 2016)",
+        "(Marcus et al., 1994)",
+        "(Raffel et al., 2023)",
+        "(ARC-easy/challenge (Clark et al., 2018)",
+        "(Zellers et al., 2019)",
+        "(Tata & Patel, 2003)",
+        "(Sakaguchi et al., 2021)"
+      ],
+      "evidence_similarity": 0.4100021159908104,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Experimental details are in Appendix A.",
+      "section_id": "",
+      "start_char": 22469,
+      "end_char": 22508,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18777816076793444,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Table 9 presents the results of our evaluation.",
+      "section_id": "",
+      "start_char": 22518,
+      "end_char": 22565,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26389223854051497,
+      "claim_type": "UNSUPPORTED"
+    }
+  ],
+  "uncited_claims": [
+    {
+      "text": "Real-world scenarios often demand the dynamic adaptation of multiple LLMs, each with distinct model quality/inference latency trade-offs.",
+      "section_id": "",
+      "start_char": 692,
+      "end_char": 829,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.239106968382085,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Despite these benefits, deploying multiple LLMs of varying sizes presents challenges.",
+      "section_id": "",
+      "start_char": 1102,
+      "end_char": 1187,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22894856937357597,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Any-precision DNN refers to an n-bit quantized model capable of generating lower bit quantized models ((n-1)-bit, (n-2)-bit, ...) simply by taking its most significant bits (MSBs).",
+      "section_id": "",
+      "start_char": 1575,
+      "end_char": 1755,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2914881308023849,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Meanwhile, two challenges need to be resolved for effective implementation of any-precision LLM.",
+      "section_id": "",
+      "start_char": 1971,
+      "end_char": 2067,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2743434515203843,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Consequently, with existing kernels, opting for a model with a lower bit-width does not reduce memory bandwidth usage.",
+      "section_id": "",
+      "start_char": 2598,
+      "end_char": 2716,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2182788515626526,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Thus, we in this paper make a strong case for any-precision LLM by addressing the two aforementioned issues.",
+      "section_id": "",
+      "start_char": 2717,
+      "end_char": 2825,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2696570726832312,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Utilizing a post-training quantization (PTQ) framework, it first generates a low-bit model and then incrementally upscales it to higher bit-widths, conserving the any-precision property.",
+      "section_id": "",
+      "start_char": 2902,
+      "end_char": 3088,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22393598257556235,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Our extensive experimental studies demonstrate that our solution is a powerful approach for the deployment of multiple, different-sized LLMs, achieving the following results: \u2022 Our solution efficiently packs LLMs quantized to varying bit-widths, such as 3, 4, ...",
+      "section_id": "",
+      "start_char": 3282,
+      "end_char": 3545,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2954491662178477,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "up to n bits, into a memory footprint comparable to a single n-bit LLM.",
+      "section_id": "",
+      "start_char": 3546,
+      "end_char": 3617,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21509997872595982,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "\u2022 Our solution yields a set of quantized LLMs of varying bit-widths that, while offering any-precision support, match the quality of the state-of-the-art quantization techniques at each bit-width.",
+      "section_id": "",
+      "start_char": 3618,
+      "end_char": 3814,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29636530550906154,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A part of the L1 cache can be configured as shared memory, providing a memory space that can be directly controlled by programmers.",
+      "section_id": "",
+      "start_char": 4386,
+      "end_char": 4517,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28760048155076456,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "GPUs use a large number of threads to execute operations, which are known as kernels.",
+      "section_id": "",
+      "start_char": 4535,
+      "end_char": 4620,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2431732579570614,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Threads are structured into thread blocks whose execution is scheduled on SMs.",
+      "section_id": "",
+      "start_char": 4621,
+      "end_char": 4699,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14184963934012293,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "All threads within a thread block share the same shared memory space.",
+      "section_id": "",
+      "start_char": 4700,
+      "end_char": 4769,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17549876558806582,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Within each thread block, threads are further organized into a set of warps, with each warp consisting of 32 consecutive threads.",
+      "section_id": "",
+      "start_char": 4770,
+      "end_char": 4899,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1877311627273142,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "All threads within a warp execute the same instruction at the same time.",
+      "section_id": "",
+      "start_char": 4900,
+      "end_char": 4972,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13620740742911155,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "GPTQ methodically quantizes each channel in iterations, simultaneously adjusting the remaining not-yet-quantized weights to correct for quantization-induced errors.",
+      "section_id": "",
+      "start_char": 5831,
+      "end_char": 5995,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2719205296736168,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, its practical utility is in question as it adds a substantial runtime overhead.",
+      "section_id": "",
+      "start_char": 6269,
+      "end_char": 6357,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19409178610417055,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "It enhances user experience by effectively handling queries with varying latency requirements.",
+      "section_id": "",
+      "start_char": 7083,
+      "end_char": 7177,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12802467804704887,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Latency requirements become even more diverse when serving multiple different tasks concurrently, a common use case of LLMs.",
+      "section_id": "",
+      "start_char": 7324,
+      "end_char": 7448,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21998740353211285,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For instance, queries for interactive tasks like chatbots are mostly latency-sensitive, while tasks like document analysis, often handled in the background, allow for more relaxed response times.",
+      "section_id": "",
+      "start_char": 7449,
+      "end_char": 7644,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23275290298078963,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Another scenario that necessitates multiple LLMs of varying sizes is speculative decoding.",
+      "section_id": "",
+      "start_char": 7916,
+      "end_char": 8006,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21309753254481748,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As LLMs are typically substantial in size, maintaining even a few additional smaller models incurs significant costs.",
+      "section_id": "",
+      "start_char": 8454,
+      "end_char": 8571,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23117523213128383,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Most open-source LLMs offer only one to three variants, limiting their versatility across different use scenarios.",
+      "section_id": "",
+      "start_char": 9007,
+      "end_char": 9121,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25339494435076154,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "If a model in the desired size is unavailable, users must create it by themselves.",
+      "section_id": "",
+      "start_char": 9122,
+      "end_char": 9204,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24631911566947484,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While this approach reduces computation costs, it still entails non-trivial engineering challenges, including the need to assemble a proper set of training data and finding favorable hyperparameters for training.",
+      "section_id": "",
+      "start_char": 9531,
+      "end_char": 9743,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25526908765438705,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These two challenges become particularly prominent when individuals run LLMs on personal platforms like desktops and mobile devices.",
+      "section_id": "",
+      "start_char": 9744,
+      "end_char": 9876,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25208290681781104,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In these scenarios \u2014 unlike with datacenter-scale inference \u2014 compute, memory, and even engineering resources are severely limited.",
+      "section_id": "",
+      "start_char": 9877,
+      "end_char": 10008,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1872358705411609,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The core is to derive smaller models (7-bit, 6-bit quantized model, ...) from a large model (8-bit quantized model), referred to as the parent model, by taking only the upper bits of its parameters.",
+      "section_id": "",
+      "start_char": 10426,
+      "end_char": 10624,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29820123180478236,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "centroid values) associated with each supported bit-width, relatively small in size.",
+      "section_id": "",
+      "start_char": 11050,
+      "end_char": 11134,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16448859710910296,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Also, there is no need to train multiple models.",
+      "section_id": "",
+      "start_char": 11135,
+      "end_char": 11183,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2557274995172551,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "First, it is a quantization-aware training (QAT) scheme, requiring models to be trained from scratch.",
+      "section_id": "",
+      "start_char": 12085,
+      "end_char": 12186,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25280114902074413,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "During training, the forward pass quantizes parameters to varying bit-widths so that the resulting model is robust to any-precision quantization.",
+      "section_id": "",
+      "start_char": 12187,
+      "end_char": 12332,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2783355039813614,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Second, this work has no regard for memory bandwidth saving.",
+      "section_id": "",
+      "start_char": 12394,
+      "end_char": 12454,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28980071190792944,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The entire n-bit parameters of the parent model are loaded into memory, only then being further quantized into lower bit-width weights by bit-shifting as needed.",
+      "section_id": "",
+      "start_char": 12455,
+      "end_char": 12616,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22806123524324137,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This strategy makes sense for CNN models, which are usually compute-bound.",
+      "section_id": "",
+      "start_char": 12617,
+      "end_char": 12691,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2398113659631165,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On the other hand, on-device LLM inference is highly memory-bound due to its low arithmetic intensity.",
+      "section_id": "",
+      "start_char": 12692,
+      "end_char": 12794,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28623790201936916,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A new solution is required for LLMs, one that incorporates both a low-cost any-precision quantization method and a specialized software engine wherein reduced precision inference directly translates to actual speed-ups.",
+      "section_id": "",
+      "start_char": 13079,
+      "end_char": 13298,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2988092358471973,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Incremental Upscaling We propose a novel approach to any-precision quantization of LLMs, termed incremental upscaling.",
+      "section_id": "",
+      "start_char": 13342,
+      "end_char": 13460,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2564308497663491,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 2 illustrates the two-stage flow of the any-precision quantization, utilizing incremental upscaling.",
+      "section_id": "",
+      "start_char": 13461,
+      "end_char": 13568,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2694594339654086,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Assuming a list of candidate bit-widths ({nk}Kk=1), the initial step quantizes the model to the minimum supported bit-width (n1), which we refer to as seed model.",
+      "section_id": "",
+      "start_char": 13569,
+      "end_char": 13731,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24561190195827642,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Subsequently, we incrementally upscale the seed model one bit at a time, until we obtain the final nK-bit parent model.",
+      "section_id": "",
+      "start_char": 13732,
+      "end_char": 13851,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1666801168012208,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For every incremental upscale from an ni-bit model to an ni+1-bit model, all parameters of the ni-bit model are inherited to the ni+1-bit model, and a single additional bit is appended to the end of each parameter.",
+      "section_id": "",
+      "start_char": 13852,
+      "end_char": 14066,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2992759055362223,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While any PTQ method can be employed for this purpose, we rule out the use of QAT method to ensure that our solution does not involve an expensive training process.",
+      "section_id": "",
+      "start_char": 14337,
+      "end_char": 14501,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.27179517901542977,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "It delivers state-of-the-art results and is readily compatible with incremental upscaling.",
+      "section_id": "",
+      "start_char": 14877,
+      "end_char": 14967,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29880715233359845,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In SqueezeLLM, quantization is a process of clustering the parameters, where values within each cluster are rounded to its centroid.",
+      "section_id": "",
+      "start_char": 15056,
+      "end_char": 15188,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29444067971397647,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In this light, incremental upscaling can be achieved by further dividing each cluster into two sub-clusters.",
+      "section_id": "",
+      "start_char": 15189,
+      "end_char": 15297,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1338436317674863,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, we perform a weighted K-means clustering on the values of each cluster to generate the two sub-clusters.",
+      "section_id": "",
+      "start_char": 15298,
+      "end_char": 15416,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29555356088707785,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A sensitivity metric based on an approximated second-order derivative is used during clustering, like in the original method.",
+      "section_id": "",
+      "start_char": 15417,
+      "end_char": 15542,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23289360122471348,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 3 visualizes the upscaling process on the clustering-based non-uniform quantization method, assuming the case of producing a 3-bit model from a 2-bit model.",
+      "section_id": "",
+      "start_char": 15543,
+      "end_char": 15706,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2800696414127276,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In this instance, three weight parameters (w1, w3, w4) initially assigned to cluster01 \u2014 previously rounded to its centroidc01 \u2014 are now divided into two new sub-clusters, namely 010 and 011, each with its respective centroids c010 and c011.",
+      "section_id": "",
+      "start_char": 15707,
+      "end_char": 15948,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20283028667904918,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The same process is applied to the remaining three clusters (00, 10, 11), resulting in a final total of eight sub-clusters.",
+      "section_id": "",
+      "start_char": 15949,
+      "end_char": 16072,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.27907752469967234,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The upscaled models consistently underperform the independently quantized models, showing unacceptable degradation at low bit-widths such as 4.",
+      "section_id": "",
+      "start_char": 16521,
+      "end_char": 16664,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20656668698986047,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While demonstrating promising performance, most of these existing implementations cannot support any-precision quantization because of their way of representing quantized weights.",
+      "section_id": "",
+      "start_char": 17114,
+      "end_char": 17293,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24713895265044972,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "They use a bitpacking-based representation, illustrated in Figure 4-(a).",
+      "section_id": "",
+      "start_char": 17294,
+      "end_char": 17366,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17495030178769325,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Bitpacking-based representations store quantized weights sequentially in a single 1-D array.",
+      "section_id": "",
+      "start_char": 17367,
+      "end_char": 17459,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18471208472594228,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "With this representation, the entire weight array has to be loaded even when running a model in a reduced bit-width.",
+      "section_id": "",
+      "start_char": 17460,
+      "end_char": 17576,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2645627196126412,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This is because of the coarse-grained memory access granularity of GPUs, typically 128 bytes.",
+      "section_id": "",
+      "start_char": 17701,
+      "end_char": 17794,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2895713275367364,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Bitplane-based representation decomposes quantized weights into n bit-vectors, where n is the bit-width.",
+      "section_id": "",
+      "start_char": 17949,
+      "end_char": 18053,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16932575016260362,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Each bit-vector is formed by taking each bit position of the quantized values.",
+      "section_id": "",
+      "start_char": 18054,
+      "end_char": 18132,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20166625555845827,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "In this representation, any runtime request of reduced bit-width directly translates into proportional speedup, as we can simply load the specified amount of bits.",
+      "section_id": "",
+      "start_char": 18193,
+      "end_char": 18356,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26602232036254947,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "More importantly, LUT-GEMM strictly requires weights to adhere to a specific format called BCQ (binary-coding quantization) \u2014 BCQ cannot support the codebook-based non-uniform quantization method, which we identify as optimal for any-precision LLM.",
+      "section_id": "",
+      "start_char": 18815,
+      "end_char": 19063,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28322590838814143,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This figure assumes a scenario where support for 3, 4 and 8-bit is available, and the engine is requested to run a 4-bit model.",
+      "section_id": "",
+      "start_char": 19279,
+      "end_char": 19406,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2731202442831199,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For simplicity, we show only a single linear operation.",
+      "section_id": "",
+      "start_char": 19407,
+      "end_char": 19462,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22146651102821568,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Weight matrix bitplanes of bit 0 to bit 7, along with tables containing centroid values for the supported bit-widths (3, 4, 8-bit), are stored in memory.",
+      "section_id": "",
+      "start_char": 19463,
+      "end_char": 19616,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29137655788891836,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For each operation, only necessary data is loaded from memory, which in this case includes the centroid table for 4-bit and the bitplanes for bit 4, 5, 6, and 7 in this example.",
+      "section_id": "",
+      "start_char": 19796,
+      "end_char": 19973,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24143315690145226,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The rows of the centroid table are scattered across the shared memory of different thread blocks since they are frequently accessed by all the threads in the block.",
+      "section_id": "",
+      "start_char": 19974,
+      "end_char": 20138,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.28312825519162105,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Meanwhile, the threads load non-overlapping regions of the weight bitplanes.",
+      "section_id": "",
+      "start_char": 20139,
+      "end_char": 20215,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25677025310976814,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 6 depicts the five step thread-level operation, assuming a bit-width of 4.",
+      "section_id": "",
+      "start_char": 20241,
+      "end_char": 20322,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18231152900759198,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "1 First, each thread starts by loading 32 input activation values along with their corresponding weights, which are four 32-bit bit-vectors.",
+      "section_id": "",
+      "start_char": 20323,
+      "end_char": 20463,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2714001680361229,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "2 Next, the four bit-vectors are rearranged so that the bits of each weight align contiguously.",
+      "section_id": "",
+      "start_char": 20464,
+      "end_char": 20559,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21000453642732173,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "This operation is equivalent to the bit-transpose of eight 4-by-4 bit matrices.",
+      "section_id": "",
+      "start_char": 20560,
+      "end_char": 20639,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23119973372477937,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "3 Subsequently, the bit-transposed bit-vectors are shifted and masked to obtain the indices for centroid lookup.",
+      "section_id": "",
+      "start_char": 20640,
+      "end_char": 20752,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2596138231656392,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "4 The dequantization process is then completed by fetching centroids from the table in the shared memory.",
+      "section_id": "",
+      "start_char": 20753,
+      "end_char": 20858,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2433878983666174,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Threads iteratively execute these five steps until they collectively complete processing the channels assigned to them, alongside other threads in the warp.",
+      "section_id": "",
+      "start_char": 20986,
+      "end_char": 21142,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20721469499603368,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We evaluate 4 to 8-bit models obtained through incremental upscaling, using a 3-bit SqueezeLLM model as the seed model.",
+      "section_id": "",
+      "start_char": 21793,
+      "end_char": 21912,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23946488918959458,
+      "claim_type": "UNSUPPORTED"
+    }
+  ],
+  "low_similarity_citations": [
+    {
+      "text": "\u2022 Our solution, despite having to adopt a bit-interleaved (bitplane) memory layout for the support of any-precision, showcases high inference throughput, matching or even outperforming that of state-of-the-art quantized matrix-vector multiplication engines that do not support any-precision (Kim et al., 2023b).",
+      "section_id": "",
+      "start_char": 3815,
+      "end_char": 4126,
+      "cited_ref_ids": [
+        "(Kim et al., 2023b)"
+      ],
+      "evidence_similarity": 0.2743556470361031,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Somewhat orthogonal to the aforementioned studies that primarily focus on rounding schemes, there are also proposals to use mixed precision as a way of allocating more bits to sensitive weights (Kim et al., 2023b; Dettmers et al., 2024; Lee et al., 2024).",
+      "section_id": "",
+      "start_char": 6675,
+      "end_char": 6930,
+      "cited_ref_ids": [
+        "(Kim et al., 2023b; Dettmers et al., 2024; Lee et al., 2024)"
+      ],
+      "evidence_similarity": 0.2935050627065895,
+      "claim_type": "UNSUPPORTED"
+    }
+  ]
+}

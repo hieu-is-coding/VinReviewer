@@ -1,0 +1,136 @@
+{
+  "values": {
+    "lsa_coherence": {
+      "id": "lsa_coherence",
+      "raw_value": 0.1708976770740204,
+      "z_score": -3.0,
+      "label": "LSA coherence (sentence-transformer)"
+    },
+    "taaco_adjacent_overlap": {
+      "id": "taaco_adjacent_overlap",
+      "raw_value": 0.0734827264239029,
+      "z_score": -3.0,
+      "label": "Adjacent sentence overlap"
+    },
+    "taaco_paragraph_overlap": {
+      "id": "taaco_paragraph_overlap",
+      "raw_value": 0.2225801343405214,
+      "z_score": -1.5927483207434823,
+      "label": "Paragraph-level overlap"
+    },
+    "mdd_mean": {
+      "id": "mdd_mean",
+      "raw_value": 2.1,
+      "z_score": -1.7499999999999993,
+      "label": "Mean dependency distance"
+    },
+    "mdd_variance": {
+      "id": "mdd_variance",
+      "raw_value": 0.8,
+      "z_score": 3.0,
+      "label": "Dependency distance variance"
+    },
+    "mean_sentence_length": {
+      "id": "mean_sentence_length",
+      "raw_value": 22.5,
+      "z_score": 0.125,
+      "label": "Mean sentence length (tokens)"
+    },
+    "subordination_ratio": {
+      "id": "subordination_ratio",
+      "raw_value": 0.2,
+      "z_score": -2.666666666666667,
+      "label": "Subordination ratio"
+    },
+    "taales_academic_word": {
+      "id": "taales_academic_word",
+      "raw_value": 0.1,
+      "z_score": 3.0,
+      "label": "Academic word frequency"
+    },
+    "mtld": {
+      "id": "mtld",
+      "raw_value": 114.49,
+      "z_score": 0.5795999999999998,
+      "label": "MTLD"
+    },
+    "hdd": {
+      "id": "hdd",
+      "raw_value": 0.8583905988107393,
+      "z_score": 2.6398433135123227,
+      "label": "HD-D"
+    },
+    "maas": {
+      "id": "maas",
+      "raw_value": 0.013894041972158303,
+      "z_score": -1.2211916055683394,
+      "label": "Maas index"
+    },
+    "yulek": {
+      "id": "yulek",
+      "raw_value": 89.09075028386759,
+      "z_score": -1.0303083238710802,
+      "label": "Yule's K"
+    },
+    "errors_per_100w": {
+      "id": "errors_per_100w",
+      "raw_value": 1.680672268907563,
+      "z_score": 0.2258403361344538,
+      "label": "Errors per 100 words"
+    },
+    "grammar_errors": {
+      "id": "grammar_errors",
+      "raw_value": 0.0,
+      "z_score": -2.0,
+      "label": "Grammar error count"
+    },
+    "spelling_errors": {
+      "id": "spelling_errors",
+      "raw_value": 0.0,
+      "z_score": -1.3333333333333333,
+      "label": "Spelling error count"
+    },
+    "punctuation_errors": {
+      "id": "punctuation_errors",
+      "raw_value": 0.0,
+      "z_score": -1.5,
+      "label": "Punctuation error count"
+    },
+    "style_suggestions": {
+      "id": "style_suggestions",
+      "raw_value": 2.0,
+      "z_score": 3.0,
+      "label": "Style suggestion count"
+    },
+    "citation_count": {
+      "id": "citation_count",
+      "raw_value": 2.0,
+      "z_score": -2.0,
+      "label": "Total citations"
+    },
+    "citation_density": {
+      "id": "citation_density",
+      "raw_value": 16.80672268907563,
+      "z_score": 2.935574229691877,
+      "label": "Citations per 1000 words"
+    },
+    "unique_sources": {
+      "id": "unique_sources",
+      "raw_value": 2.0,
+      "z_score": -2.0,
+      "label": "Unique sources cited"
+    },
+    "self_citation_ratio": {
+      "id": "self_citation_ratio",
+      "raw_value": 0.0,
+      "z_score": -1.6666666666666667,
+      "label": "Self-citation ratio"
+    },
+    "citation_recency_median": {
+      "id": "citation_recency_median",
+      "raw_value": 10.0,
+      "z_score": 1.3333333333333333,
+      "label": "Median citation recency (years)"
+    }
+  }
+}

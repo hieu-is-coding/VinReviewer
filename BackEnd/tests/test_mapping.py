@@ -59,16 +59,16 @@ def test_map_pipeline_to_evaluation(mock_pipeline_state):
         {"id": "crit-2", "name": "Depth", "weight": 3, "max_score": 10, "sort_order": 1},
     ]
 
-    payload = map_pipeline_to_evaluation(mock_pipeline_state, criteria, "sub-uuid-123")
+    payload = map_pipeline_to_evaluation(mock_pipeline_state, criteria, "sub-uuid-123", "user-uuid-456")
 
     assert payload["submission_id"] == "sub-uuid-123"
-    assert payload["total_score"] == pytest.approx(10.5)  # 0.7 calibrated_score * 15 max total score
+    assert payload["user_id"] == "user-uuid-456"
+    assert payload["total_score"] == pytest.approx(12.6)  # 10.5 * 1.2
     assert payload["max_possible_score"] == 15
     assert payload["confidence"] == 100  # 1.0 confidence * 100
     assert payload["overall_feedback"] == "Good overall paper"
     assert payload["content_feedback"] == "• Strong methodology\n• Good flow"
     assert payload["structure_feedback"] == "• Needs details in section 3"
-    assert payload["evaluation_type"] == "agentic"
     assert payload["status"] == "completed"
 
 
@@ -87,16 +87,16 @@ def test_map_pipeline_to_criteria_scores(mock_pipeline_state):
     # crit-1
     assert rows[0]["evaluation_id"] == "eval-uuid-123"
     assert rows[0]["criterion_id"] == "crit-1"
-    assert rows[0]["score"] == pytest.approx(4.0)  # 0.8 * 5
-    assert rows[0]["ai_score"] == pytest.approx(4.0)
+    assert rows[0]["score"] == pytest.approx(4.8)  # 4.0 * 1.2
+    assert rows[0]["ai_score"] == pytest.approx(4.8)
     assert rows[0]["explanation"] == "Clear explanation"
     assert rows[0]["evidence"] == "None"
 
     # crit-2
     assert rows[1]["evaluation_id"] == "eval-uuid-123"
     assert rows[1]["criterion_id"] == "crit-2"
-    assert rows[1]["score"] == pytest.approx(6.0)  # 0.6 * 10
-    assert rows[1]["ai_score"] == pytest.approx(6.0)
+    assert rows[1]["score"] == pytest.approx(7.2)  # 6.0 * 1.2
+    assert rows[1]["ai_score"] == pytest.approx(7.2)
     assert rows[1]["explanation"] == "Moderate depth"
     assert rows[1]["evidence"] == "Add details"
 
@@ -104,9 +104,10 @@ def test_map_pipeline_to_criteria_scores(mock_pipeline_state):
 def test_map_pipeline_to_details(mock_pipeline_state):
     from src.mapping.result import map_pipeline_to_details
 
-    details = map_pipeline_to_details(mock_pipeline_state, "eval-uuid-123")
+    details = map_pipeline_to_details(mock_pipeline_state, "eval-uuid-123", "user-uuid-456")
 
     assert details["evaluation_id"] == "eval-uuid-123"
+    assert details["user_id"] == "user-uuid-456"
     assert details["novelty_score"] == 85.0
     assert details["novelty_claims"][0]["claim_text"] == "New method"
     assert details["novelty_claims"][0]["classification"] == "NOVEL"

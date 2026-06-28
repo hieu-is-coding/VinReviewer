@@ -1,6 +1,6 @@
-# VinReviewer AI Block (GradingSystem) Specifications
+# GradioAI AI Block (GradingSystem) Specifications
 
-This document describes the technical specifications of the **VinReviewer AI Block (`GradingSystem`)**, detailing the input/output boundaries, the orchestration graph state model, the internal agent workflows, and the integration endpoints connecting the AI block with the BackEnd and FrontEnd layers.
+This document describes the technical specifications of the **GradioAI AI Block (`GradingSystem`)**, detailing the input/output boundaries, the orchestration graph state model, the internal agent workflows, and the integration endpoints connecting the AI block with the BackEnd and FrontEnd layers.
 
 ---
 
@@ -51,10 +51,10 @@ The `GradingSystem` is packaged as a local Python module that runs as a dependen
 
 ## 2. API Contract & Data Schema (models.py)
 
-All data exchanged between the BackEnd orchestrator and the AI pipeline is structured using Pydantic models defined in [models.py](file:///e:/VinReviewer/GradingSystem/src/models.py).
+All data exchanged between the BackEnd orchestrator and the AI pipeline is structured using Pydantic models defined in [models.py](file:///e:/GradioAI/GradingSystem/src/models.py).
 
 ### 2.1 Pipeline Inputs (graph.py Entry Point)
-The BackEnd invokes the pipeline by calling `run_pipeline()` in [graph.py](file:///e:/VinReviewer/GradingSystem/src/orchestration/graph.py):
+The BackEnd invokes the pipeline by calling `run_pipeline()` in [graph.py](file:///e:/GradioAI/GradingSystem/src/orchestration/graph.py):
 ```python
 def run_pipeline(
     manuscript_path: str,
@@ -178,7 +178,7 @@ The pipeline uses **LangGraph** to coordinate parallel execution, verify rules, 
 
 ## 4. Integration Mapping to Database
 
-When `run_pipeline` completes, [evaluator.py](file:///e:/VinReviewer/BackEnd/src/services/evaluator.py) extracts variables from `PipelineState` and saves them to Supabase using [result.py](file:///e:/VinReviewer/BackEnd/src/mapping/result.py):
+When `run_pipeline` completes, [evaluator.py](file:///e:/GradioAI/BackEnd/src/services/evaluator.py) extracts variables from `PipelineState` and saves them to Supabase using [result.py](file:///e:/GradioAI/BackEnd/src/mapping/result.py):
 
 ```python
 # 1. Map core evaluations summary

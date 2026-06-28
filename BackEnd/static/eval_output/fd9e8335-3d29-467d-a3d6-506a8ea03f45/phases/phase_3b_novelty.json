@@ -1,0 +1,33 @@
+{
+  "claims": [
+    {
+      "claim_text": "We present TTX, a Triton tuning framework that utilizes an XGBoost-based performance predictor to estimate kernel latency based on input shapes, tuning parameters, and IR-level features.",
+      "max_similarity": 0.0,
+      "closest_paper_id": "",
+      "closest_paper_title": "",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "TTX achieves approximately 10% Mean Absolute Percentage Error (MAPE) on latency predictions for various operators, including matrix multiplication, batched matrix multiplication, and convolution across multiple GPUs.",
+      "max_similarity": 0.0,
+      "closest_paper_id": "",
+      "closest_paper_title": "",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "Our framework selects promising candidates for further tuning, reaching about 80% of the best performance with the top-1 candidate and over 95% with the top-50 candidates.",
+      "max_similarity": 0.0,
+      "closest_paper_id": "",
+      "closest_paper_title": "",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "We analyze cross-kernel generalization and identify a fundamental asymmetry in kernel transferability, showing that pointwise and normalization kernels transfer cleanly across kernel boundaries while compute-bound kernels do not.",
+      "max_similarity": 0.0,
+      "closest_paper_id": "",
+      "closest_paper_title": "",
+      "classification": "NOVEL"
+    }
+  ],
+  "overall_novelty_score": 1.0
+}

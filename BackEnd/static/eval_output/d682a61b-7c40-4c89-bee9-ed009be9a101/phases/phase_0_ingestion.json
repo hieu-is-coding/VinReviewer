@@ -1,0 +1,17 @@
+{
+  "source_path": "C:\\Users\\ASUS\\AppData\\Local\\Temp\\tmpywmjaby2.txt",
+  "language": "en",
+  "title": "tmpywmjaby2",
+  "abstract": "",
+  "sections": [
+    {
+      "heading": "Body",
+      "body": "1. Introduction\nNeural machine translation has revolutionized language processing tasks. Our method builds upon the foundational work of Vaswani et al. (2017) and extends it with multi-head cross-attention layers.\n\n2. Methodology\nWe train our model on 4.5M sentence pairs using the Adam optimizer with a learning rate of 0.0001 and batch size of 32. The model architecture consists of 6 encoder and 6 decoder layers with 8 attention heads.\n\n3. Results\nOur model achieves a BLEU score of 28.4 on WMT14 En-De, surpassing the baseline by 2.1 points. Ablation studies confirm the importance of each component.\n\n4. Conclusion\nWe have demonstrated a new state-of-the-art result for neural machine translation. Future work will explore larger datasets and multilingual transfer learning.",
+      "level": 1
+    }
+  ],
+  "full_text": "1. Introduction\nNeural machine translation has revolutionized language processing tasks. Our method builds upon the foundational work of Vaswani et al. (2017) and extends it with multi-head cross-attention layers.\n\n2. Methodology\nWe train our model on 4.5M sentence pairs using the Adam optimizer with a learning rate of 0.0001 and batch size of 32. The model architecture consists of 6 encoder and 6 decoder layers with 8 attention heads.\n\n3. Results\nOur model achieves a BLEU score of 28.4 on WMT14 En-De, surpassing the baseline by 2.1 points. Ablation studies confirm the importance of each component.\n\n4. Conclusion\nWe have demonstrated a new state-of-the-art result for neural machine translation. Future work will explore larger datasets and multilingual transfer learning.",
+  "references": [],
+  "inline_citations": [],
+  "word_count": 119
+}

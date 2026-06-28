@@ -1,7 +1,7 @@
 [project]
-name = "vinreviewer-backend"
+name = "GradioAI-backend"
 version = "0.1.0"
-description = "FastAPI orchestration service bridging VinReviewer FrontEnd and GradingSystem"
+description = "FastAPI orchestration service bridging GradioAI FrontEnd and GradingSystem"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.111",
@@ -28,3 +28,9 @@ include = ["src*"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+addopts = "-s"
+log_cli = true
+log_cli_level = "INFO"
+markers = [
+    "e2e: mark test as end-to-end integration test (requires live Supabase + backend)",
+]

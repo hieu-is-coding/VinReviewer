@@ -4,6 +4,9 @@ import {
   BarChart3,
   Bot,
   Settings,
+  LogOut,
+  UserCircle,
+  Home,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -18,9 +21,12 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const mainNav = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Home", url: "/", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Classes", url: "/classes", icon: BookOpen },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Settings", url: "/settings", icon: Settings },
@@ -43,13 +49,11 @@ function NavSection({ items }: { items: typeof mainNav }) {
                 <SidebarMenuButton
                   onClick={() => navigate(item.url)}
                   tooltip={item.title}
-                  className={`flex items-center rounded-lg text-sm transition-colors ${
-                    collapsed ? "justify-center" : "gap-3 px-3"
-                  } py-2 ${
-                    active
+                  className={`flex items-center rounded-lg text-sm transition-colors ${collapsed ? "justify-center" : "gap-3 px-3"
+                    } py-2 ${active
                       ? "bg-primary/10 text-primary font-medium"
                       : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   <item.icon className="h-4 w-4 shrink-0" />
                   {!collapsed && <span>{item.title}</span>}
@@ -66,6 +70,25 @@ function NavSection({ items }: { items: typeof mainNav }) {
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate("/login");
+      toast.success("Signed out successfully");
+    } catch {
+      toast.error("Failed to sign out");
+    }
+  };
+
+  // Derive a short display name from the user object
+  const displayName =
+    (user?.user_metadata?.full_name as string | undefined) ||
+    user?.email?.split("@")[0] ||
+    "User";
+  const email = user?.email ?? "";
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
@@ -87,16 +110,39 @@ export function AppSidebar() {
         <NavSection items={mainNav} />
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
-        {!collapsed && (
+      <SidebarFooter className="p-3 space-y-2">
+        {/* User info */}
+        {!collapsed ? (
           <div className="rounded-lg bg-accent p-3">
-            <p className="text-xs font-medium text-foreground">Free Plan</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">12/50 evaluations used</p>
-            <div className="mt-2 h-1.5 rounded-full bg-border overflow-hidden">
-              <div className="h-full w-[24%] rounded-full bg-primary" />
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="h-7 w-7 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                <UserCircle className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium text-foreground truncate">{displayName}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{email}</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <div className="h-7 w-7 rounded-full bg-primary/20 flex items-center justify-center">
+              <UserCircle className="h-4 w-4 text-primary" />
             </div>
           </div>
         )}
+
+        {/* Sign Out button */}
+        <SidebarMenuButton
+          id="signout-btn"
+          onClick={handleSignOut}
+          tooltip="Sign Out"
+          className={`flex items-center rounded-lg text-sm transition-colors text-muted-foreground hover:bg-destructive/10 hover:text-destructive w-full ${collapsed ? "justify-center px-2" : "gap-3 px-3"
+            } py-2`}
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Sign Out</span>}
+        </SidebarMenuButton>
       </SidebarFooter>
     </Sidebar>
   );

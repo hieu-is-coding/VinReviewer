@@ -1,12 +1,12 @@
-# VinReviewer FrontEnd Architecture & Design Specifications
+# GradioAI FrontEnd Architecture & Design Specifications
 
-This document provides a detailed description of the functionalities, data entities, system designs, workflows, aesthetics, and testing strategies of the VinReviewer FrontEnd application.
+This document provides a detailed description of the functionalities, data entities, system designs, workflows, aesthetics, and testing strategies of the GradioAI FrontEnd application.
 
 ---
 
 ## 1. Overview & Selected Technology Stack
 
-The VinReviewer FrontEnd is designed as an instructor-facing Single Page Application (SPA) that acts as the control center for classroom student assignments, rubric management, AI-assisted grading, and learning analytics. 
+The GradioAI FrontEnd is designed as an instructor-facing Single Page Application (SPA) that acts as the control center for classroom student assignments, rubric management, AI-assisted grading, and learning analytics. 
 
 ### Technology Stack Selection
 
@@ -42,7 +42,7 @@ The application layout is structured around a responsive sidebar navigation wrap
 
 ## 3. Data Entities & TypeScript Interface Models
 
-All data communication between Supabase PostgreSQL tables and the React frontend is strongly typed. The models are declared in [database.ts](file:///e:/VinReviewer/FrontEnd/src/types/database.ts):
+All data communication between Supabase PostgreSQL tables and the React frontend is strongly typed. The models are declared in [database.ts](file:///e:/GradioAI/FrontEnd/src/types/database.ts):
 
 ### 3.1 Course & Student Entities
 *   **`Class`:** Represents an instructor's course.

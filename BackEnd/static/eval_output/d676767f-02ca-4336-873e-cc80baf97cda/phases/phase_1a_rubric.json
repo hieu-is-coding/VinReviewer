@@ -1,0 +1,155 @@
+{
+  "dimensions": [
+    {
+      "id": "thesis_scope",
+      "label": "Thesis & Scope",
+      "weight": 0.25,
+      "children": [
+        {
+          "id": "thesis_clarity",
+          "label": "Thesis clarity & specificity",
+          "weight": 0.5,
+          "children": []
+        },
+        {
+          "id": "scope_appropriateness",
+          "label": "Scope appropriateness",
+          "weight": 0.3,
+          "children": []
+        },
+        {
+          "id": "research_question",
+          "label": "Research question alignment",
+          "weight": 0.2,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "evidence_use",
+      "label": "Evidence Use",
+      "weight": 0.25,
+      "children": [
+        {
+          "id": "source_quality",
+          "label": "Source quality & relevance",
+          "weight": 0.35,
+          "children": []
+        },
+        {
+          "id": "evidence_integration",
+          "label": "Evidence integration",
+          "weight": 0.35,
+          "children": []
+        },
+        {
+          "id": "citation_accuracy",
+          "label": "Citation accuracy & completeness",
+          "weight": 0.3,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "structure_cohesion",
+      "label": "Structure & Cohesion",
+      "weight": 0.2,
+      "children": [
+        {
+          "id": "organization",
+          "label": "Macro-organization (sections, flow)",
+          "weight": 0.4,
+          "children": []
+        },
+        {
+          "id": "paragraph_cohesion",
+          "label": "Paragraph-level cohesion",
+          "weight": 0.35,
+          "children": []
+        },
+        {
+          "id": "transitions",
+          "label": "Transition quality",
+          "weight": 0.25,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "style_mechanics",
+      "label": "Style & Mechanics",
+      "weight": 0.15,
+      "children": [
+        {
+          "id": "grammar_spelling",
+          "label": "Grammar & spelling",
+          "weight": 0.35,
+          "children": []
+        },
+        {
+          "id": "sentence_variety",
+          "label": "Sentence variety & readability",
+          "weight": 0.3,
+          "children": []
+        },
+        {
+          "id": "academic_register",
+          "label": "Academic register & tone",
+          "weight": 0.35,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "critical_analysis",
+      "label": "Critical Analysis",
+      "weight": 0.15,
+      "children": [
+        {
+          "id": "argument_depth",
+          "label": "Argument depth & originality",
+          "weight": 0.4,
+          "children": []
+        },
+        {
+          "id": "counterargument",
+          "label": "Counter-argument engagement",
+          "weight": 0.3,
+          "children": []
+        },
+        {
+          "id": "synthesis",
+          "label": "Cross-source synthesis",
+          "weight": 0.3,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "conventions",
+      "label": "Conventions",
+      "weight": 0.1,
+      "children": [
+        {
+          "id": "formatting",
+          "label": "Formatting compliance",
+          "weight": 0.4,
+          "children": []
+        },
+        {
+          "id": "citation_style",
+          "label": "Citation style consistency",
+          "weight": 0.35,
+          "children": []
+        },
+        {
+          "id": "word_count",
+          "label": "Length / word-count compliance",
+          "weight": 0.25,
+          "children": []
+        }
+      ]
+    }
+  ],
+  "depth": 2
+}

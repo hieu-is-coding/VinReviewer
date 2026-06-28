@@ -6,7 +6,7 @@ import json
 import logging
 from pathlib import Path
 
-from scipy import stats
+import math
 
 from grading_system_src.agents.objective import get_venue_profile
 from grading_system_src.models import ComparativePosition, RubricTree, LeafVerdict
@@ -24,6 +24,12 @@ def _load_tier_baselines() -> dict:
     with open(venues_path, encoding="utf-8") as f:
         config = yaml.safe_load(f) or {}
     return config.get("tier_baselines", {})
+
+
+def _norm_cdf(x: float, loc: float, scale: float) -> float:
+    if scale <= 0:
+        return 0.5
+    return 0.5 * (1.0 + math.erf((x - loc) / (scale * math.sqrt(2.0))))
 
 
 def compute_comparative_position(
@@ -57,7 +63,7 @@ def compute_comparative_position(
 
     # Compute overall percentile
     if std > 0:
-        overall_percentile = float(stats.norm.cdf(calibrated_score, loc=mean, scale=std) * 100)
+        overall_percentile = float(_norm_cdf(calibrated_score, loc=mean, scale=std) * 100)
     else:
         overall_percentile = 50.0
 
@@ -65,7 +71,7 @@ def compute_comparative_position(
     dimension_percentiles: dict[str, float] = {}
     for verdict in verdicts:
         if std > 0:
-            pctile = float(stats.norm.cdf(verdict.score, loc=mean, scale=std) * 100)
+            pctile = float(_norm_cdf(verdict.score, loc=mean, scale=std) * 100)
         else:
             pctile = 50.0
         dimension_percentiles[verdict.leaf_id] = round(pctile, 1)

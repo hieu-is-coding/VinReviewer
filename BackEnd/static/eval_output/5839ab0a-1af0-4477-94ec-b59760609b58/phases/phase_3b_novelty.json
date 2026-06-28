@@ -1,0 +1,33 @@
+{
+  "claims": [
+    {
+      "claim_text": "We introduce the any-precision LLM framework, which extends the concept of any-precision DNN to enable low-cost deployment of multiple, different-sized LLMs.",
+      "max_similarity": 0.5854595958691755,
+      "closest_paper_id": "b3c99575f91c551704d4a31d703d5ceb4b616dd1",
+      "closest_paper_title": "Any-Precision LLM: Low-Cost Deployment of Multiple, Different-Sized LLMs",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "We propose a lightweight method for any-precision quantization of LLMs using a post-training quantization framework.",
+      "max_similarity": 0.40647890761674554,
+      "closest_paper_id": "b3c99575f91c551704d4a31d703d5ceb4b616dd1",
+      "closest_paper_title": "Any-Precision LLM: Low-Cost Deployment of Multiple, Different-Sized LLMs",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "We develop a specialized software engine for efficient serving of LLMs quantized to varying bit-widths, achieving a memory footprint comparable to a single n-bit LLM.",
+      "max_similarity": 0.47885850686872206,
+      "closest_paper_id": "b3c99575f91c551704d4a31d703d5ceb4b616dd1",
+      "closest_paper_title": "Any-Precision LLM: Low-Cost Deployment of Multiple, Different-Sized LLMs",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "Our solution demonstrates state-of-the-art model quality and inference throughput across all supported LLMs with varying bit-widths.",
+      "max_similarity": 0.46041510966833177,
+      "closest_paper_id": "b3c99575f91c551704d4a31d703d5ceb4b616dd1",
+      "closest_paper_title": "Any-Precision LLM: Low-Cost Deployment of Multiple, Different-Sized LLMs",
+      "classification": "NOVEL"
+    }
+  ],
+  "overall_novelty_score": 1.0
+}

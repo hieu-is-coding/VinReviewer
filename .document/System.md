@@ -1,16 +1,16 @@
 # CHAPTER 3: SYSTEM DESCRIPTION
 
-This chapter presents the detailed system description of VinReviewer, an AI-powered academic submission review platform. The system is decomposed into three principal blocks: FrontEnd, BackEnd, and AI (GradingSystem). For each block, the chapter covers the block diagram of the overall system, the design of each block with alternatives considered, the testing strategy employed, and the system implementation details.
+This chapter presents the detailed system description of GradioAI, an AI-powered academic submission review platform. The system is decomposed into three principal blocks: FrontEnd, BackEnd, and AI (GradingSystem). For each block, the chapter covers the block diagram of the overall system, the design of each block with alternatives considered, the testing strategy employed, and the system implementation details.
 
 ---
 
 ## 3.1 Block Diagram of the System
 
-VinReviewer follows a three-tier architecture in which each block has a clearly defined responsibility and communicates with the others through well-defined interfaces. Figure 3.1 illustrates the high-level block diagram.
+GradioAI follows a three-tier architecture in which each block has a clearly defined responsibility and communicates with the others through well-defined interfaces. Figure 3.1 illustrates the high-level block diagram.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                          VinReviewer Platform                          │
+│                          GradioAI Platform                          │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │   ┌──────────────────┐          ┌──────────────────┐                    │
@@ -46,7 +46,7 @@ VinReviewer follows a three-tier architecture in which each block has a clearly 
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
-**Figure 3.1** — High-level block diagram of VinReviewer
+**Figure 3.1** — High-level block diagram of GradioAI
 
 ### Data Flow Overview
 
@@ -230,7 +230,7 @@ The mapping layer translates between the database schema and the GradingSystem's
 
 #### Purpose
 
-The AI block is the core intelligence of VinReviewer. It is a multi-agent diagnostic pipeline that evaluates academic manuscripts by combining deterministic linguistic feature extraction, literature-grounded evidence checking, and rubric-driven LLM synthesis under red-line supervision.
+The AI block is the core intelligence of GradioAI. It is a multi-agent diagnostic pipeline that evaluates academic manuscripts by combining deterministic linguistic feature extraction, literature-grounded evidence checking, and rubric-driven LLM synthesis under red-line supervision.
 
 #### Alternative Analysis
 

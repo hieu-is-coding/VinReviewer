@@ -1,0 +1,120 @@
+{
+  "claims": [
+    {
+      "text": "Introduction\nNeural machine translation has revolutionized language processing tasks.",
+      "section_id": "",
+      "start_char": 3,
+      "end_char": 88,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.38278927918257455,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Our method builds upon the foundational work of Vaswani et al.",
+      "section_id": "",
+      "start_char": 89,
+      "end_char": 151,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22183673633890225,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "(2017) and extends it with multi-head cross-attention layers.",
+      "section_id": "",
+      "start_char": 152,
+      "end_char": 213,
+      "cited_ref_ids": [
+        "(2017)"
+      ],
+      "evidence_similarity": 0.2299758657005318,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Methodology\nWe train our model on 4.5M sentence pairs using the Adam optimizer with a learning rate of 0.0001 and batch size of 32.",
+      "section_id": "",
+      "start_char": 217,
+      "end_char": 348,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.31156404742716615,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The model architecture consists of 6 encoder and 6 decoder layers with 8 attention heads.",
+      "section_id": "",
+      "start_char": 349,
+      "end_char": 438,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.38771704848872485,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Results\nOur model achieves a BLEU score of 28.4 on WMT14 En-De, surpassing the baseline by 2.1 points.",
+      "section_id": "",
+      "start_char": 442,
+      "end_char": 544,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3184546381590063,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Ablation studies confirm the importance of each component.",
+      "section_id": "",
+      "start_char": 545,
+      "end_char": 603,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24202631640238853,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Conclusion\nWe have demonstrated a new state-of-the-art result for neural machine translation.",
+      "section_id": "",
+      "start_char": 607,
+      "end_char": 700,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.4014559221940503,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Future work will explore larger datasets and multilingual transfer learning.",
+      "section_id": "",
+      "start_char": 701,
+      "end_char": 777,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19248444852684146,
+      "claim_type": "UNSUPPORTED"
+    }
+  ],
+  "uncited_claims": [
+    {
+      "text": "Our method builds upon the foundational work of Vaswani et al.",
+      "section_id": "",
+      "start_char": 89,
+      "end_char": 151,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22183673633890225,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Future work will explore larger datasets and multilingual transfer learning.",
+      "section_id": "",
+      "start_char": 701,
+      "end_char": 777,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19248444852684146,
+      "claim_type": "UNSUPPORTED"
+    }
+  ],
+  "low_similarity_citations": [
+    {
+      "text": "(2017) and extends it with multi-head cross-attention layers.",
+      "section_id": "",
+      "start_char": 152,
+      "end_char": 213,
+      "cited_ref_ids": [
+        "(2017)"
+      ],
+      "evidence_similarity": 0.2299758657005318,
+      "claim_type": "SYNTHESIS"
+    }
+  ]
+}

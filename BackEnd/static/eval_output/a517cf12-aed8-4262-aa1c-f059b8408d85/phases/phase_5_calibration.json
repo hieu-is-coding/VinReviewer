@@ -1,0 +1,25 @@
+{
+  "calibration": {
+    "slope": 0.9999999999999986,
+    "intercept": -0.1999999999999989,
+    "lower_bound": 0.4499999999999997,
+    "upper_bound": 0.45000000000000023
+  },
+  "raw_score": 0.5417,
+  "calibrated_score": 0.4417000000000003,
+  "comparative": {
+    "overall_percentile": 0.0,
+    "dimension_percentiles": {
+      "clarity": 0.1,
+      "novelty": 6.7,
+      "methodological_rigor": 13.9,
+      "data_analysis": 0.3
+    },
+    "venue_tier": "top_conference",
+    "comparative_statements": [
+      "This paper scores in the 0th percentile relative to submissions at top conference venues.",
+      "Weakest aspect: 'clarity' (0th percentile) \u2014 below average for top conference submissions.",
+      "This paper is below the typical acceptance threshold for this venue tier."
+    ]
+  }
+}

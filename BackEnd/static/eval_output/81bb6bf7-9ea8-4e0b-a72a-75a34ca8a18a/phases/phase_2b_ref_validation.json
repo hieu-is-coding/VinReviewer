@@ -1,0 +1,20 @@
+{
+  "results": [
+    {
+      "ref_id": "b1",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.65215/nxvz2v36",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b2",
+      "status": "likely_valid",
+      "source": "crossref",
+      "matched_doi": "10.18653/v1/2021.emnlp-main.1",
+      "confidence": 0.7666666666666667
+    }
+  ],
+  "verified_ratio": 1.0,
+  "fabricated_refs": []
+}

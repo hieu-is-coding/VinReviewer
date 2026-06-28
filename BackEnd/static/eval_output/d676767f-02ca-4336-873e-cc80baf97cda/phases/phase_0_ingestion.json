@@ -1,0 +1,48 @@
+{
+  "source_path": "E:\\VinReviewer\\BackEnd\\src\\services\\..\\..\\static\\pdfs\\d676767f-02ca-4336-873e-cc80baf97cda.pdf",
+  "language": "en",
+  "title": "Mid-term Essay International Relations (HASS1100)",
+  "abstract": "This essay examines the Ukraine-Russia conflict through the lens of defensive realism. It argues that the security dilemma and NATO's eastward expansion created systemic pressures that led to conflict, in line with Waltz's structural realism.",
+  "sections": [
+    {
+      "heading": "Introduction",
+      "body": "The conflict between Ukraine and Russia represents a significant challenge to the international order. To understand the root causes of this conflict, we can look through the lens of defensive realism. According to John Mearsheimer and Kenneth Waltz, states are security maximizers that seek to maintain their position in the system rather than pursue hegemony (Waltz, 1979). NATO's expansion represents a key trigger in this security dilemma.",
+      "level": 1
+    },
+    {
+      "heading": "The Security Dilemma",
+      "body": "Under defensive realism, the security dilemma asserts that actions taken by a state to increase its security are perceived as offensive threats by other states (Jervis, 1978). As NATO expanded eastward, Russia perceived this security alliance as a direct threat. This led to defensive mobilization and eventual conflict, demonstrating the tragic nature of structural pressures.",
+      "level": 2
+    },
+    {
+      "heading": "Discussion",
+      "body": "Some scholars argue that offensive realism provides a better explanation, claiming that Russia acted to maximize its power. However, a defensive realist interpretation suggests that Russia's primary goal was security and preventing encroachment. Policy makers must understand these dynamics to avoid future escalating security dilemmas.",
+      "level": 3
+    }
+  ],
+  "full_text": "Introduction\nThe conflict between Ukraine and Russia represents a significant challenge to the international order. To understand the root causes of this conflict, we can look through the lens of defensive realism. According to John Mearsheimer and Kenneth Waltz, states are security maximizers that seek to maintain their position in the system rather than pursue hegemony (Waltz, 1979). NATO's expansion represents a key trigger in this security dilemma.\n\nThe Security Dilemma\nUnder defensive realism, the security dilemma asserts that actions taken by a state to increase its security are perceived as offensive threats by other states (Jervis, 1978). As NATO expanded eastward, Russia perceived this security alliance as a direct threat. This led to defensive mobilization and eventual conflict, demonstrating the tragic nature of structural pressures.\n\nDiscussion\nSome scholars argue that offensive realism provides a better explanation, claiming that Russia acted to maximize its power. However, a defensive realist interpretation suggests that Russia's primary goal was security and preventing encroachment. Policy makers must understand these dynamics to avoid future escalating security dilemmas.",
+  "references": [
+    {
+      "id": "b0",
+      "title": "Theory of International Politics",
+      "authors": [
+        "Kenneth Waltz"
+      ],
+      "year": 1979,
+      "doi": null,
+      "raw": "<ns0:biblStruct xmlns:ns0=\"http://www.tei-c.org/ns/1.0\" xml:id=\"b0\">\n          <ns0:analytic>\n            <ns0:title>Theory of International Politics</ns0:title>\n            <ns0:author><ns0:persName><ns0:forename>Kenneth</ns0:forename><ns0:surname>Waltz</ns0:surname></ns0:persName></ns0:author>\n          </ns0:analytic>\n          <ns0:monogr><ns0:imprint><ns0:date when=\"1979\" /></ns0:imprint></ns0:monogr>\n        </ns0:biblStruct>\n        "
+    },
+    {
+      "id": "b1",
+      "title": "Cooperation under the Security Dilemma",
+      "authors": [
+        "Robert Jervis"
+      ],
+      "year": 1978,
+      "doi": null,
+      "raw": "<ns0:biblStruct xmlns:ns0=\"http://www.tei-c.org/ns/1.0\" xml:id=\"b1\">\n          <ns0:analytic>\n            <ns0:title>Cooperation under the Security Dilemma</ns0:title>\n            <ns0:author><ns0:persName><ns0:forename>Robert</ns0:forename><ns0:surname>Jervis</ns0:surname></ns0:persName></ns0:author>\n          </ns0:analytic>\n          <ns0:monogr><ns0:imprint><ns0:date when=\"1978\" /></ns0:imprint></ns0:monogr>\n        </ns0:biblStruct>\n      "
+    }
+  ],
+  "inline_citations": [],
+  "word_count": 172
+}

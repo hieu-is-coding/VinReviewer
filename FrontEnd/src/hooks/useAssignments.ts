@@ -1,6 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+/** Returns the authenticated user's UUID, or throws if not signed in. */
+async function getUserId(): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+  return user.id;
+}
+
 export function useAssignments(classId?: string) {
   return useQuery({
     queryKey: ["assignments", classId],
@@ -37,7 +44,8 @@ export function useCreateAssignment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: { class_id: string; title: string; description?: string; rubric_id?: string | null }) => {
-      const { data, error } = await supabase.from("assignments").insert(values).select().single();
+      const user_id = await getUserId();
+      const { data, error } = await supabase.from("assignments").insert({ ...values, user_id }).select().single();
       if (error) throw error;
       return data;
     },
@@ -102,7 +110,8 @@ export function useCreateAssignmentSubmission() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: { student_id: string; class_id: string; assignment_id: string; rubric_id?: string | null; title?: string; content: string; pdf_path?: string | null }) => {
-      const { data, error } = await supabase.from("submissions").insert(values).select().single();
+      const user_id = await getUserId();
+      const { data, error } = await supabase.from("submissions").insert({ ...values, user_id }).select().single();
       if (error) throw error;
       return data;
     },

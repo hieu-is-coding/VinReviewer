@@ -1,0 +1,286 @@
+{
+  "results": [
+    {
+      "ref_id": "b0",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b1",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b2",
+      "status": "likely_valid",
+      "source": "crossref",
+      "matched_doi": "10.18653/v1/2025.findings-emnlp.943",
+      "confidence": 0.6976744186046512
+    },
+    {
+      "ref_id": "b3",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b4",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b5",
+      "status": "likely_valid",
+      "source": "crossref",
+      "matched_doi": "10.2478/udt-2018-0009",
+      "confidence": 0.7238095238095238
+    },
+    {
+      "ref_id": "b6",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b7",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b8",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b9",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b10",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b11",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.18653/v1/2025.naacl-tutorial.4",
+      "confidence": 0.8571428571428571
+    },
+    {
+      "ref_id": "b12",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b13",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b14",
+      "status": "likely_valid",
+      "source": "crossref",
+      "matched_doi": "10.52202/068431-0657",
+      "confidence": 0.6545454545454545
+    },
+    {
+      "ref_id": "b15",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b16",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b17",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b18",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b19",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b20",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b21",
+      "status": "likely_valid",
+      "source": "crossref",
+      "matched_doi": "10.18653/v1/p19-1472",
+      "confidence": 0.848
+    },
+    {
+      "ref_id": "b22",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b23",
+      "status": "likely_valid",
+      "source": "crossref",
+      "matched_doi": "10.1609/aaai.v34i05.6399",
+      "confidence": 0.7761194029850746
+    },
+    {
+      "ref_id": "b24",
+      "status": "likely_valid",
+      "source": "crossref",
+      "matched_doi": "10.1145/3717512.3717514",
+      "confidence": 0.691358024691358
+    },
+    {
+      "ref_id": "b25",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b26",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b27",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b28",
+      "status": "likely_valid",
+      "source": "crossref",
+      "matched_doi": "10.1007/978-3-662-45483-1_1",
+      "confidence": 0.65
+    },
+    {
+      "ref_id": "b29",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b30",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b31",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b32",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b33",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b34",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.18653/v1/2025.naacl-tutorial.4",
+      "confidence": 0.8571428571428571
+    },
+    {
+      "ref_id": "b35",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b36",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b37",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b38",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b39",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    }
+  ],
+  "verified_ratio": 0.225,
+  "fabricated_refs": []
+}

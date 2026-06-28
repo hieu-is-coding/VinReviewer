@@ -1,0 +1,146 @@
+{
+  "claims": [
+    {
+      "text": "Introduction\nThe conflict between Ukraine and Russia represents a significant challenge to the international order.",
+      "section_id": "",
+      "start_char": 0,
+      "end_char": 115,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.4264567133782474,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To understand the root causes of this conflict, we can look through the lens of defensive realism.",
+      "section_id": "",
+      "start_char": 116,
+      "end_char": 214,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.34892440664044544,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "According to John Mearsheimer and Kenneth Waltz, states are security maximizers that seek to maintain their position in the system rather than pursue hegemony (Waltz, 1979).",
+      "section_id": "",
+      "start_char": 215,
+      "end_char": 388,
+      "cited_ref_ids": [
+        "(Waltz, 1979)"
+      ],
+      "evidence_similarity": 0.31991240157143086,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "NATO's expansion represents a key trigger in this security dilemma.",
+      "section_id": "",
+      "start_char": 389,
+      "end_char": 456,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19122052764016484,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The Security Dilemma\nUnder defensive realism, the security dilemma asserts that actions taken by a state to increase its security are perceived as offensive threats by other states (Jervis, 1978).",
+      "section_id": "",
+      "start_char": 457,
+      "end_char": 653,
+      "cited_ref_ids": [
+        "(Jervis, 1978)"
+      ],
+      "evidence_similarity": 0.3106039909607976,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "As NATO expanded eastward, Russia perceived this security alliance as a direct threat.",
+      "section_id": "",
+      "start_char": 654,
+      "end_char": 740,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1589384828757805,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This led to defensive mobilization and eventual conflict, demonstrating the tragic nature of structural pressures.",
+      "section_id": "",
+      "start_char": 741,
+      "end_char": 855,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.34890947729039773,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Discussion\nSome scholars argue that offensive realism provides a better explanation, claiming that Russia acted to maximize its power.",
+      "section_id": "",
+      "start_char": 856,
+      "end_char": 990,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16469215503373694,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, a defensive realist interpretation suggests that Russia's primary goal was security and preventing encroachment.",
+      "section_id": "",
+      "start_char": 991,
+      "end_char": 1112,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19999154343660952,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Policy makers must understand these dynamics to avoid future escalating security dilemmas.",
+      "section_id": "",
+      "start_char": 1113,
+      "end_char": 1203,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1079262874883683,
+      "claim_type": "UNSUPPORTED"
+    }
+  ],
+  "uncited_claims": [
+    {
+      "text": "NATO's expansion represents a key trigger in this security dilemma.",
+      "section_id": "",
+      "start_char": 389,
+      "end_char": 456,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19122052764016484,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As NATO expanded eastward, Russia perceived this security alliance as a direct threat.",
+      "section_id": "",
+      "start_char": 654,
+      "end_char": 740,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1589384828757805,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Discussion\nSome scholars argue that offensive realism provides a better explanation, claiming that Russia acted to maximize its power.",
+      "section_id": "",
+      "start_char": 856,
+      "end_char": 990,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16469215503373694,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, a defensive realist interpretation suggests that Russia's primary goal was security and preventing encroachment.",
+      "section_id": "",
+      "start_char": 991,
+      "end_char": 1112,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19999154343660952,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Policy makers must understand these dynamics to avoid future escalating security dilemmas.",
+      "section_id": "",
+      "start_char": 1113,
+      "end_char": 1203,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1079262874883683,
+      "claim_type": "UNSUPPORTED"
+    }
+  ],
+  "low_similarity_citations": []
+}

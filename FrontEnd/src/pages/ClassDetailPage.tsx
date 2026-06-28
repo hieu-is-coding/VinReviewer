@@ -73,10 +73,13 @@ const ClassDetailPage = () => {
     if (!newStudentName.trim() || !classId) return toast.error("Student name is required");
     setAddingStudent(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       // Create student
       const { data: student, error: studentErr } = await supabase
         .from("students")
-        .insert({ name: newStudentName.trim(), email: newStudentEmail.trim() || null })
+        .insert({ name: newStudentName.trim(), email: newStudentEmail.trim() || null, user_id: user.id })
         .select()
         .single();
       if (studentErr) throw studentErr;
@@ -178,16 +181,19 @@ const ClassDetailPage = () => {
         return;
       }
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       // Batch insert students
       const { data: students, error: insertErr } = await supabase
         .from("students")
-        .insert(rows.map(r => ({ name: r.name, email: r.email || null })))
+        .insert(rows.map(r => ({ name: r.name, email: r.email || null, user_id: user.id })))
         .select();
       if (insertErr) throw insertErr;
 
       // Enroll all into class
       if (students && students.length > 0) {
-        const enrollments = students.map(s => ({ class_id: classId, student_id: s.id }));
+        const enrollments = students.map(s => ({ class_id: classId, student_id: s.id, user_id: user.id }));
         const { error: enrollErr } = await supabase.from("class_students").insert(enrollments);
         if (enrollErr) throw enrollErr;
       }

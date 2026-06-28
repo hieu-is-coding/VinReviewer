@@ -53,9 +53,26 @@ def check_red_lines(
 
     passed = len(violations) == 0
 
+    # Determine if any violation requires immediate human flagging
+    human_flag = False
+    try:
+        config = load_red_lines_config()
+        rules_config = config.get("rules", {})
+        for v in violations:
+            v_id = getattr(v.rule_id, "value", v.rule_id)
+            for r_cfg in rules_config.values():
+                if r_cfg.get("id") == v_id:
+                    if r_cfg.get("action_on_violation") == "flag":
+                        human_flag = True
+                    break
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("Failed to determine human_flag from config: %s", e)
+
     return SupervisorResult(
         passed=passed,
         violations=violations,
+        human_flag=human_flag,
     )
 
 

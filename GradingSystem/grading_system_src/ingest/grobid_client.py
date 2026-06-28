@@ -75,30 +75,113 @@ _FALLBACK_TEI = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
+from pydantic import BaseModel, Field
+from langchain_core.messages import HumanMessage, SystemMessage
+
+class ParsedReference(BaseModel):
+    id: str = Field(description="Unique reference ID, e.g. 'b0', 'b1'")
+    title: str = Field(description="Title of the referenced paper or book")
+    authors: list[str] = Field(default_factory=list, description="List of authors (Surname and First Initial or Full name)")
+    year: int | None = Field(None, description="Year of publication")
+    doi: str | None = Field(None, description="DOI if available")
+
+class ParsedSection(BaseModel):
+    heading: str = Field(description="Heading of the section, e.g. '1. Introduction'")
+    body: str = Field(description="Body text of the section")
+    level: int = Field(1, description="Section level (1 for main, 2 for subsection, etc.)")
+
+class ParsedManuscript(BaseModel):
+    title: str = Field(description="Title of the manuscript")
+    abstract: str = Field(description="Abstract of the manuscript")
+    sections: list[ParsedSection] = Field(description="List of sections in the manuscript body")
+    references: list[ParsedReference] = Field(default_factory=list, description="Bibliography references list")
+    inline_citations: list[str] = Field(default_factory=list, description="List of reference IDs (like 'b0', 'b1') cited in the body")
+
+
 def process_pdf(pdf_path: str | Path, language: Language) -> Manuscript:
-    """Send a PDF to GROBID's processFulltextDocument endpoint and parse the result."""
+    """Parse a PDF using pypdf and gpt-4o-mini structured output.
+
+    Falls back to TEI/XML parse if pypdf or LLM call fails.
+    """
     pdf_path = Path(pdf_path)
-    url = f"{GROBID_URL}/api/processFulltextDocument"
 
     try:
-        with open(pdf_path, "rb") as fh:
-            resp = requests.post(
-                url,
-                files={"input": (pdf_path.name, fh, "application/pdf")},
-                timeout=GROBID_TIMEOUT,
-            )
-        resp.raise_for_status()
-        tei_xml = resp.text
-    except Exception as e:
-        logger.warning(
-            "Failed to connect to GROBID server at %s: %s. "
-            "Falling back to local parsed TEI representation.",
-            url,
-            e,
-        )
-        tei_xml = _FALLBACK_TEI
+        import pypdf
+        reader = pypdf.PdfReader(pdf_path)
+        pages_text = []
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                pages_text.append(text)
+        raw_text = "\n\n".join(pages_text)
 
-    return _parse_tei(tei_xml, source_path=str(pdf_path), language=language)
+        if not raw_text.strip():
+            raise ValueError("No text could be extracted from PDF")
+
+        from grading_system_src.llm import get_llm
+        llm = get_llm(model="gpt-4o-mini", temperature=0.0)
+        structured_llm = llm.with_structured_output(ParsedManuscript)
+
+        system_prompt = (
+            "You are an expert academic document parser. Parse the provided raw text from a PDF "
+            "into a structured representation including title, abstract, sections (headings and body text), "
+            "references, and inline citation IDs matching the references list."
+        )
+
+        if len(raw_text) > 45_000:
+            sample_text = raw_text[:35_000] + "\n\n[... TRUNCATED ...]\n\n" + raw_text[-10_000:]
+        else:
+            sample_text = raw_text
+
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=f"Raw text of the academic paper:\n\n{sample_text}"),
+        ]
+
+        parsed = structured_llm.invoke(messages)
+
+        sections = [
+            Section(heading=s.heading, body=s.body, level=s.level)
+            for s in parsed.sections
+        ]
+
+        full_text = "\n\n".join(
+            f"{s.heading}\n{s.body}" if s.heading else s.body for s in sections
+        )
+
+        references = [
+            Reference(
+                id=r.id,
+                title=r.title,
+                authors=r.authors,
+                year=r.year,
+                doi=r.doi,
+                raw=f"{', '.join(r.authors)}. {r.title}. {r.year or ''}"
+            )
+            for r in parsed.references
+        ]
+
+        word_count = len(full_text.split())
+
+        return Manuscript(
+            source_path=str(pdf_path),
+            language=language,
+            title=parsed.title,
+            abstract=parsed.abstract,
+            sections=sections,
+            full_text=full_text,
+            references=references,
+            inline_citations=parsed.inline_citations,
+            word_count=word_count,
+        )
+
+    except Exception as exc:
+        logger.warning(
+            "pypdf + LLM parsing failed for %s: %s. Falling back to local parsed TEI representation.",
+            pdf_path.name,
+            exc,
+        )
+        return _parse_tei(_FALLBACK_TEI, source_path=str(pdf_path), language=language)
 
 
 def _parse_tei(xml_text: str, *, source_path: str, language: Language) -> Manuscript:

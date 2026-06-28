@@ -57,6 +57,7 @@ async def test_evaluate_fails_when_no_rubric_id(mock_supabase, mock_job_manager)
 async def test_evaluate_fails_when_no_criteria(mock_supabase, mock_job_manager):
     mock_supabase["fetch_submission"].return_value = {
         "id": "sub-1",
+        "user_id": "user-1",
         "rubric_id": "rub-1",
         "content": "Test content",
         "assignments": {"description": "Test", "target_venue": ""},

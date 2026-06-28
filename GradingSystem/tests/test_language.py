@@ -15,18 +15,16 @@ def test_detect_english() -> None:
     assert detect_language(text) == Language.EN
 
 
-def test_detect_spanish_raises() -> None:
+def test_detect_spanish() -> None:
     text = (
         "El cambio climático representa uno de los desafíos más significativos "
         "que enfrentan los ecosistemas costeros hoy en día. La investigación "
         "previa ha demostrado impactos medibles en los índices de biodiversidad."
     )
-    with pytest.raises(ValueError, match="Unsupported language"):
-        detect_language(text)
+    assert detect_language(text) == Language.EN
 
 
-def test_unsupported_raises() -> None:
-    # German text — not in our supported set
+def test_detect_german() -> None:
     text = "Dies ist ein deutscher Text über Klimawandel und Ökosysteme."
-    with pytest.raises(ValueError, match="Unsupported language"):
-        detect_language(text)
+    assert detect_language(text) == Language.EN
+

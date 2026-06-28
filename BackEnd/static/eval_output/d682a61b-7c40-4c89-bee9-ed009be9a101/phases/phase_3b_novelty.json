@@ -1,0 +1,26 @@
+{
+  "claims": [
+    {
+      "claim_text": "We propose a novel neural machine translation model that incorporates multi-head cross-attention layers.",
+      "max_similarity": 0.0,
+      "closest_paper_id": "",
+      "closest_paper_title": "",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "Our model achieves a BLEU score of 28.4 on WMT14 En-De, surpassing the baseline by 2.1 points.",
+      "max_similarity": 0.0,
+      "closest_paper_id": "",
+      "closest_paper_title": "",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "Ablation studies confirm the importance of each component in our model architecture.",
+      "max_similarity": 0.0,
+      "closest_paper_id": "",
+      "closest_paper_title": "",
+      "classification": "NOVEL"
+    }
+  ],
+  "overall_novelty_score": 1.0
+}

@@ -95,8 +95,11 @@ async def _evaluate_core(
     try:
         submission = await fetch_submission(submission_id)
         rubric_id = submission.get("rubric_id")
+        user_id = submission.get("user_id")
         if not rubric_id:
             raise ValidationError("Submission has no rubric_id", context={"submission_id": submission_id})
+        if not user_id:
+            raise ValidationError("Submission has no user_id", context={"submission_id": submission_id})
 
         criteria = await fetch_criteria(rubric_id)
         if not criteria:
@@ -149,19 +152,19 @@ async def _evaluate_core(
                 logger.warning("Failed to update submission content: %s", e)
 
         eval_id = await insert_evaluation(
-            {"submission_id": submission_id, "status": "in_progress", "evaluation_type": "agentic"}
+            {"submission_id": submission_id, "user_id": user_id, "status": "in_progress"}
         )
 
 
         try:
-            eval_payload = map_pipeline_to_evaluation(state, criteria, submission_id)
+            eval_payload = map_pipeline_to_evaluation(state, criteria, submission_id, user_id)
             await update_evaluation(eval_id, eval_payload)
 
             cs_rows = map_pipeline_to_criteria_scores(state, criteria, eval_id)
             if cs_rows:
                 await insert_criteria_scores(cs_rows)
 
-            details = map_pipeline_to_details(state, eval_id)
+            details = map_pipeline_to_details(state, eval_id, user_id)
             await insert_evaluation_details(details)
         except Exception as write_exc:
             logger.error("Partial write failure for eval %s, rolling back: %s", eval_id, write_exc)

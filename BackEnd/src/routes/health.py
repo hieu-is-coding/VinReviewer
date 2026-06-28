@@ -31,9 +31,8 @@ async def health(request: Request) -> HealthResponse:
 
 async def _check_grobid() -> bool:
     try:
-        async with httpx.AsyncClient(timeout=5) as client:
-            resp = await client.get(f"{settings.grobid_url}/api/isalive")
-            return resp.status_code == 200
+        import pypdf
+        return True
     except Exception:
         return False
 

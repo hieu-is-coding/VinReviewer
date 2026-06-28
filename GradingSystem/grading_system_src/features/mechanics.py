@@ -1,62 +1,73 @@
 """Mechanics feature extraction (Phase 2.4).
 
-Uses language-tool-python for grammar/spelling/punctuation error counts.
+Uses gpt-4o-mini structured output to count grammar/spelling/punctuation errors.
 English only.
 """
 
 from __future__ import annotations
 
-import language_tool_python
+import logging
+from pydantic import BaseModel, Field
+from langchain_core.messages import HumanMessage, SystemMessage
 
-from grading_system_src.models import FeatureValue, Language, Manuscript
+from grading_system_src.llm import get_llm
+from grading_system_src.models import FeatureValue, Manuscript
 
-_TOOL_CACHE: dict[str, language_tool_python.LanguageTool] = {}
-
-
-def _get_tool(lang: Language) -> language_tool_python.LanguageTool:
-    if "en-US" not in _TOOL_CACHE:
-        _TOOL_CACHE["en-US"] = language_tool_python.LanguageTool("en-US")
-    return _TOOL_CACHE["en-US"]
+logger = logging.getLogger(__name__)
 
 
-# Mapping from LanguageTool categories to our feature IDs
-_CATEGORY_MAP = {
-    "GRAMMAR": "grammar_errors",
-    "TYPOS": "spelling_errors",
-    "SPELLING": "spelling_errors",
-    "PUNCTUATION": "punctuation_errors",
-    "STYLE": "style_suggestions",
-}
+class MechanicsCounts(BaseModel):
+    grammar_errors: int = Field(description="Count of grammatical errors in the text snippet")
+    spelling_errors: int = Field(description="Count of spelling errors/typos in the text snippet")
+    punctuation_errors: int = Field(description="Count of punctuation errors in the text snippet")
+    style_suggestions: int = Field(description="Count of style suggestion flags in the text snippet")
 
 
 def extract_mechanics_features(manuscript: Manuscript) -> dict[str, FeatureValue]:
-    """Extract mechanics features via LanguageTool."""
+    """Extract mechanics features via gpt-4o-mini structured output."""
     features: dict[str, FeatureValue] = {}
     text = manuscript.full_text
 
     if not text.strip():
         return features
 
-    tool = _get_tool(manuscript.language)
-    # Limit to first 50k chars for performance
-    matches = tool.check(text[:50_000])
+    # Limit to first 20k chars for prompt efficiency (approx 3,000 words)
+    sample_text = text[:20_000]
 
-    # Count by category
-    counts: dict[str, int] = {
-        "grammar_errors": 0,
-        "spelling_errors": 0,
-        "punctuation_errors": 0,
-        "style_suggestions": 0,
-    }
+    try:
+        llm = get_llm(model="gpt-4o-mini", temperature=0.0)
+        structured_llm = llm.with_structured_output(MechanicsCounts)
+        
+        system_prompt = (
+            "You are an expert academic copyeditor. Analyze the provided manuscript excerpt "
+            "and count the occurrences of errors in grammar, spelling/typos, punctuation, "
+            "and style suggestions. Be realistic and precise."
+        )
+        
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=f"Manuscript excerpt:\n\n{sample_text}"),
+        ]
+        
+        result = structured_llm.invoke(messages)
+        counts = {
+            "grammar_errors": result.grammar_errors,
+            "spelling_errors": result.spelling_errors,
+            "punctuation_errors": result.punctuation_errors,
+            "style_suggestions": result.style_suggestions,
+        }
+    except Exception as exc:
+        logger.warning("Failed to invoke mechanics extraction LLM: %s. Using default 0s.", exc)
+        counts = {
+            "grammar_errors": 0,
+            "spelling_errors": 0,
+            "punctuation_errors": 0,
+            "style_suggestions": 0,
+        }
 
-    for match in matches:
-        cat = match.category or ""
-        feature_id = _CATEGORY_MAP.get(cat.upper(), "grammar_errors")
-        counts[feature_id] += 1
-
+    sample_word_count = max(len(sample_text.split()), 1)
     total_errors = sum(counts.values())
-    word_count = max(manuscript.word_count, 1)
-    errors_per_100w = (total_errors / word_count) * 100
+    errors_per_100w = (total_errors / sample_word_count) * 100
 
     features["errors_per_100w"] = FeatureValue(
         id="errors_per_100w",
@@ -71,11 +82,16 @@ def extract_mechanics_features(manuscript: Manuscript) -> dict[str, FeatureValue
         "style_suggestions": "Style suggestion count",
     }
 
+    full_word_count = max(manuscript.word_count, 1)
+    scale_factor = full_word_count / sample_word_count
+
     for fid, count in counts.items():
+        scaled_count = float(round(count * scale_factor))
         features[fid] = FeatureValue(
             id=fid,
-            raw_value=float(count),
+            raw_value=scaled_count,
             label=label_map[fid],
         )
 
     return features
+

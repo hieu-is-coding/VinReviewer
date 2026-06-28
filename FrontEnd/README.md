@@ -1,6 +1,6 @@
-# VinReviewer FrontEnd
+# GradioAI FrontEnd
 
-React 18 instructor-facing web application for VinReviewer — an AI-powered academic submission review platform.
+React 18 instructor-facing web application for GradioAI — an AI-powered academic submission review platform.
 
 > React 18 + TypeScript + Vite + Tailwind CSS + shadcn/ui + Supabase + React Query
 

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { ArrowLeft, Brain, BookOpen, Lightbulb, CheckCircle, AlertTriangle, Edit3, Save, X, Star, Shield, Quote, ArrowUp, ScanSearch, Clock, Loader2, Play, ChevronDown, ChevronUp, Terminal, FileText, Settings, Database, Activity, Check, Cpu, Network, RefreshCw } from "lucide-react";
 import { escapeHtml } from "@/lib/sanitize";
 import { Button } from "@/components/ui/button";
@@ -123,6 +123,17 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
   const [phaseData, setPhaseData] = useState<Record<string, any>>({});
   const [prevStatus, setPrevStatus] = useState(submission.status);
 
+  const phaseDataRef = useRef(phaseData);
+  useEffect(() => {
+    phaseDataRef.current = phaseData;
+  }, [phaseData]);
+
+  const fetchingKeysRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    fetchingKeysRef.current.clear();
+  }, [submission.id, submission.status]);
+
   useEffect(() => {
     if (submission.status === "evaluating" && prevStatus !== "evaluating") {
       setPhaseData({});
@@ -143,33 +154,39 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
     let interval: any;
 
     const checkPhases = async () => {
-      setPhaseData((current) => {
-        const missingKeys = PHASES.filter(p => !current[p.key]).map(p => p.key);
-        if (missingKeys.length === 0) {
-          if (interval) clearInterval(interval);
-          return current;
-        }
+      const current = phaseDataRef.current;
+      const missingKeys = PHASES.filter(p => !current[p.key]).map(p => p.key);
+      if (missingKeys.length === 0) {
+        if (interval) clearInterval(interval);
+        return;
+      }
 
-        Promise.all(
-          missingKeys.map(async (key) => {
-            try {
-              const res = await fetch(`${origin}/static/eval_output/${submission.id}/phases/${key}.json`);
-              if (res.ok) {
-                const json = await res.json();
-                if (isMounted) {
-                  setPhaseData(prev => ({
-                    ...prev,
-                    [key]: json
-                  }));
-                }
+      // Filter out keys that are currently being fetched
+      const keysToFetch = missingKeys.filter(k => !fetchingKeysRef.current.has(k));
+      if (keysToFetch.length === 0) {
+        return;
+      }
+
+      keysToFetch.forEach((key) => {
+        fetchingKeysRef.current.add(key);
+        fetch(`${origin}/static/eval_output/${submission.id}/phases/${key}.json`)
+          .then(async (res) => {
+            if (res.ok) {
+              const json = await res.json();
+              if (isMounted) {
+                setPhaseData(prev => ({
+                  ...prev,
+                  [key]: json
+                }));
               }
-            } catch (err) {
-              // not ready yet
+            } else {
+              // Not ok, remove from fetching keys so we try again next interval
+              fetchingKeysRef.current.delete(key);
             }
           })
-        );
-
-        return current;
+          .catch(() => {
+            fetchingKeysRef.current.delete(key);
+          });
       });
     };
 

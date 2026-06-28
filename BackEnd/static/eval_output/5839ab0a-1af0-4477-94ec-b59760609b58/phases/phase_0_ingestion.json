@@ -1,0 +1,541 @@
+{
+  "source_path": "E:\\VinReviewer\\BackEnd\\src\\services\\..\\..\\static\\pdfs\\5839ab0a-1af0-4477-94ec-b59760609b58.pdf",
+  "language": "en",
+  "title": "Any-Precision LLM: Low-Cost Deployment of Multiple, Different-Sized LLMs",
+  "abstract": "Recently, considerable efforts have been directed towards compressing Large Language Models (LLMs), which showcase groundbreaking capabilities across diverse applications but entail significant deployment costs due to their large sizes. Meanwhile, much less attention has been given to mitigating the costs associated with deploying multiple LLMs of varying sizes despite its practical significance. Thus, this paper introduces any-precision LLM, extending the concept of any-precision DNN to LLMs. Addressing challenges in any-precision LLM, we propose a lightweight method for any-precision quantization of LLMs, leveraging a post-training quantization framework, and develop a specialized software engine for its efficient serving. As a result, our solution significantly reduces the high costs of deploying multiple, different-sized LLMs by overlaying LLMs quantized to varying bit-widths, such as 3, 4, ..., n bits, into a memory footprint comparable to a single n-bit LLM. All the supported LLMs with varying bit-widths demonstrate state-of-the-art model quality and inference throughput, proving itself to be a compelling option for deployment of multiple, different-sized LLMs. The code is available at https://github.com/SNU-ARC/any-precision-llm.",
+  "sections": [
+    {
+      "heading": "1. Introduction",
+      "body": "With the revolutionary success of Large Language Models (LLMs) across various applications, there have been many recent efforts to reduce the costs of their deployment. Specifically, there has been a considerable focus on compressing LLMs using techniques like pruning (Frantar & Alistarh, 2023; Zhang et al., 2023; Santacroce et al., 2023; Ma et al., 2023) or quantization (Lin et al., 2023; Frantar et al., 2023; Kim et al., 2023b), as the parameter size is the primary obstacle for their efficient deployment. Meanwhile, there has been limited discussion on mitigating the costs associated with deploying multiple LLMs of varying sizes, despite its practical significance. Real-world scenarios often demand the dynamic adaptation of multiple LLMs, each with distinct model quality/inference latency trade-offs. This approach enables the effective handling of queries with varied latency constraints, enhancing the user experience. Moreover, it supports a popular generation acceleration technique: speculative decoding (Leviathan et al., 2023; Chen et al., 2023; Kim et al., 2023d). Despite these benefits, deploying multiple LLMs of varying sizes presents challenges. First, it exacerbates the already high memory costs of LLM deployment, and second, it necessitates training of multiple model versions when models of desired sizes are not readily available as open-source. Any-precision LLM, an extension of the concept of any-precision DNN (Yu et al., 2021) to LLM, is a promising solution for the low-cost deployment of multiple, different-sized LLMs. Any-precision DNN refers to an n-bit quantized model capable of generating lower bit quantized models ((n-1)-bit, (n-2)-bit, ...) simply by taking its most significant bits (MSBs). Applying this concept to LLM enables the utilization of multiple LLMs with varying sizes by storing only a single large LLM (n-bit model) in memory, while avoiding the additional overhead of training multiple LLMs. Meanwhile, two challenges need to be resolved for effective implementation of any-precision LLM. First, a practical method for any-precision quantization of LLM is needed. The existing any-precision quantization method on DNN requires training the model from scratch, limiting its applicability to LLMs. Second, a new GPU kernel for quantized matrix-vector multiplication is required, which will translate the use of reduced bit-widths in any-precision LLMs into shorter inference times. Existing kernels for quantized matrix-vector multiplication are unable to load just a portion of each quantized weight value\u2019s bit-vector. Consequently, with existing kernels, opting for a model with a lower bit-width does not reduce memory bandwidth usage. Thus, we in this paper make a strong case for any-precision LLM by addressing the two aforementioned issues. First, we build a lightweight method for any-precision quantization of LLM. Utilizing a post-training quantization (PTQ) framework, it first generates a low-bit model and then incrementally upscales it to higher bit-widths, conserving the any-precision property. Second, we develop a new software engine specialized for any-precision support, that effectively saves memory bandwidth for serving any-precision LLMs by changing the memory layout of weights. Our extensive experimental studies demonstrate that our solution is a powerful approach for the deployment of multiple, different-sized LLMs, achieving the following results: \u2022 Our solution efficiently packs LLMs quantized to varying bit-widths, such as 3, 4, ... up to n bits, into a memory footprint comparable to a single n-bit LLM. \u2022 Our solution yields a set of quantized LLMs of varying bit-widths that, while offering any-precision support, match the quality of the state-of-the-art quantization techniques at each bit-width. \u2022 Our solution, despite having to adopt a bit-interleaved (bitplane) memory layout for the support of any-precision, showcases high inference throughput, matching or even outperforming that of state-of-the-art quantized matrix-vector multiplication engines that do not support any-precision (Kim et al., 2023b). ",
+      "level": 1
+    },
+    {
+      "heading": "2. Background",
+      "body": "2.1. GPU Basics GPU Architecture Fundamentals. A GPU, the de facto standard platform for executing LLMs, comprises a large number of processing elements called Streaming Multiprocessors (SMs). GPUs often include multi-level on-chip SRAM caches. A part of the L1 cache can be configured as shared memory, providing a memory space that can be directly controlled by programmers. Execution Model. GPUs use a large number of threads to execute operations, which are known as kernels. Threads are structured into thread blocks whose execution is scheduled on SMs. All threads within a thread block share the same shared memory space. Within each thread block, threads are further organized into a set of warps, with each warp consisting of 32 consecutive threads. All threads within a warp execute the same instruction at the same time. 2.2. LLM Quantization This section discusses recent advancements in LLM quantization with a specific emphasis on weight-only, post-training quantization (PTQ). In LLMs, there is a pronounced shift towards quantizing only the weights, as the dominant bottleneck in inference throughput is the memory constraint imposed by the size of weight parameters, rather than computational requirements. Moreover, Post-Training Quantization (PTQ) has become a favored method for quantizing LLMs due to its practicality. Although Quantization-Aware Training (QAT) typically yields superior performance, its high training expense frequently renders it impractical (Liu et al., 2023; Dettmers et al., 2023; Kim et al., 2023a). GPTQ (Frantar et al., 2023), a pioneering work on weight-only PTQ for LLM, formulates quantization as a layer-wise weight reconstruction problem. GPTQ methodically quantizes each channel in iterations, simultaneously adjusting the remaining not-yet-quantized weights to correct for quantization-induced errors. AWQ (Lin et al., 2023) performs per-channel scaling to safeguard a small fraction of salient weights as a preprocessing step. Similarly, QuIP (Chee et al., 2023) preprocesses weights to be more amenable to quantization, yielding impressive results even at 2-bit precision. However, its practical utility is in question as it adds a substantial runtime overhead. While the aforementioned methods employ uniform quantization, non-uniform quantization may be a more effective alternative as it better captures the weight distributions (Gholami et al., 2021). SqueezeLLM (Kim et al., 2023b) proposes a clustering-based LLM quantization that considers the sensitivity of each weight. Somewhat orthogonal to the aforementioned studies that primarily focus on rounding schemes, there are also proposals to use mixed precision as a way of allocating more bits to sensitive weights (Kim et al., 2023b; Dettmers et al., 2024; Lee et al., 2024). ",
+      "level": 1
+    },
+    {
+      "heading": "3. Motivation",
+      "body": "3.1. Need for Deploying Multiple, Different-sized LLMs Deploying a set of different-sized LLMs provides significant practical advantages. It enhances user experience by effectively handling queries with varying latency requirements. Depending on the specific needs of users and applications, some queries require quick responses, while others can tolerate slower response times. Latency requirements become even more diverse when serving multiple different tasks concurrently, a common use case of LLMs. For instance, queries for interactive tasks like chatbots are mostly latency-sensitive, while tasks like document analysis, often handled in the background, allow for more relaxed response times. In fact, the approach of adaptively selecting different DNN models with various accuracy-latency trade-offs has been widely studied as a way to effectively meet user requirements due to its practical significance (Wan et al., 2020; Zhang et al., 2020; Han et al., 2016). Another scenario that necessitates multiple LLMs of varying sizes is speculative decoding. This popular technique boosts the throughput of a large model by additionally utilizing one or more smaller draft models (Leviathan et al., 2023; Chen et al., 2023; Kim et al., 2023d; Miao et al., 2023). 3.2. Challenges of Deploying Multiple, Different-sized LLMs In deploying multiple LLMs, we face two practical challenges: memory overhead and training costs. Challenge 1: Memory Overhead. First, a large memory capacity overhead is introduced. As LLMs are typically substantial in size, maintaining even a few additional smaller models incurs significant costs. For example, deploying three tiers of LLMs with varying sizes \u2014 a large base model, a half-sized model, and a quarter-sized model \u2014 nearly doubles on the total memory requirement. Challenge 2: Training Costs. Acquiring multiple different-sized LLMs is challenging in itself. While some open-source LLMs such as OPT (Zhang et al., 2022) offer a comprehensive range of models with varying parameter counts, this is usually not the case. Most open-source LLMs offer only one to three variants, limiting their versatility across different use scenarios. If a model in the desired size is unavailable, users must create it by themselves. However, training an LLM is very costly due to its high computational needs and large corpus requirement. One approach is to distill the available large model into smaller ones instead of training smaller models from scratch (Hinton et al., 2015; Hsieh et al., 2023; Gu et al., 2024; Zhao et al., 2022; Agarwal et al., 2024). While this approach reduces computation costs, it still entails non-trivial engineering challenges, including the need to assemble a proper set of training data and finding favorable hyperparameters for training. These two challenges become particularly prominent when individuals run LLMs on personal platforms like desktops and mobile devices. In these scenarios \u2014 unlike with datacenter-scale inference \u2014 compute, memory, and even engineering resources are severely limited. Thus, this paper focuses on addressing the challenges associated with deploying multiple, different-sized LLMs for on-device inference. 3.3. Our Solution: Any-Precision LLM Concept. Any-precision quantization, initially introduced in prior work (Yu et al., 2021), is a promising solution to mitigate the costs of deploying multiple different-sized LLMs. Figure 1 visualizes the concept of any-precision quantization. The core is to derive smaller models (7-bit, 6-bit quantized model, ...) from a large model (8-bit quantized model), referred to as the parent model, by taking only the upper bits of its parameters. Of course, a special method tailored for any-precision quantization is required to ensure that taking just the prefixes of the parent model parameters does not result in significant quality drops. The any-precision approach is highly memory-efficient as it allows the utilization of varying bit-width models by only storing in memory 1) the quantized weights of the parent model and 2) a set of quantization parameters (e.g. centroid values) associated with each supported bit-width, relatively small in size. Also, there is no need to train multiple models. Table 1 gives a quantitative analysis on the memory savings of any-precision LLM, the application of any-precision quantization to LLMs. Without any-precision quantization, adaptively using models of different bit-widths requires the deployment of separate models, each taking up its own memory space. We refer to this strategy as separate deployment. We compare the required memory space of separate deployment against any-precision LLM, for various scenarios requiring different sets of bit-widths with the Llama-2-7B model. Any-precision LLM significantly reduces memory costs across a range of scenarios, achieving a maximum saving of 3.56\u00d7 when supporting all bit-widths from 3 to 8. Challenges of Any-Precision LLM. While the concept itself is appealing, there are critical issues in directly applying the method of the original work (Yu et al., 2021), which mainly targets CNN models, to LLMs. First, it is a quantization-aware training (QAT) scheme, requiring models to be trained from scratch. During training, the forward pass quantizes parameters to varying bit-widths so that the resulting model is robust to any-precision quantization. However, for LLMs, training is not affordable to most users. Second, this work has no regard for memory bandwidth saving. The entire n-bit parameters of the parent model are loaded into memory, only then being further quantized into lower bit-width weights by bit-shifting as needed. This strategy makes sense for CNN models, which are usually compute-bound. On the other hand, on-device LLM inference is highly memory-bound due to its low arithmetic intensity. Consequently, the memory load of weight parameters is the single primary performance bottleneck (Kim et al., 2023c). Hence, when the original method is applied to LLMs as-is, operating at low bit-widths may provide little inference latency improvements over that of the parent model. A new solution is required for LLMs, one that incorporates both a low-cost any-precision quantization method and a specialized software engine wherein reduced precision inference directly translates to actual speed-ups. ",
+      "level": 1
+    },
+    {
+      "heading": "4. Any-Precision Quantization for LLM",
+      "body": "4.1. Incremental Upscaling We propose a novel approach to any-precision quantization of LLMs, termed incremental upscaling. Figure 2 illustrates the two-stage flow of the any-precision quantization, utilizing incremental upscaling. Assuming a list of candidate bit-widths ({nk}Kk=1), the initial step quantizes the model to the minimum supported bit-width (n1), which we refer to as seed model. Subsequently, we incrementally upscale the seed model one bit at a time, until we obtain the final nK-bit parent model. For every incremental upscale from an ni-bit model to an ni+1-bit model, all parameters of the ni-bit model are inherited to the ni+1-bit model, and a single additional bit is appended to the end of each parameter. 4.2. Non-uniform Quantization-based Incremental Upscaling For our incremental upscaling-based approach of any-precision quantization, a particular quantization method must be adopted as a backbone for both the seed model generation and the subsequent upscaling process. While any PTQ method can be employed for this purpose, we rule out the use of QAT method to ensure that our solution does not involve an expensive training process. Among various PTQ methods, an optimal choice would be one that 1) demonstrates state-of-the-art quantization results for the generation of a quality seed model and 2) seamlessly extends to the incremental upscaling process. To this end, we utilize the state-of-the-art clustering-based non-uniform quantization scheme, SqueezeLLM (Kim et al., 2023b), as the backbone method. It delivers state-of-the-art results and is readily compatible with incremental upscaling. Incremental upscaling with the clustering-based quantization method is straightforward. In SqueezeLLM, quantization is a process of clustering the parameters, where values within each cluster are rounded to its centroid. In this light, incremental upscaling can be achieved by further dividing each cluster into two sub-clusters. Specifically, we perform a weighted K-means clustering on the values of each cluster to generate the two sub-clusters. A sensitivity metric based on an approximated second-order derivative is used during clustering, like in the original method. Figure 3 visualizes the upscaling process on the clustering-based non-uniform quantization method, assuming the case of producing a 3-bit model from a 2-bit model. In this instance, three weight parameters (w1, w3, w4) initially assigned to cluster01 \u2014 previously rounded to its centroidc01 \u2014 are now divided into two new sub-clusters, namely 010 and 011, each with its respective centroids c010 and c011. The same process is applied to the remaining three clusters (00, 10, 11), resulting in a final total of eight sub-clusters. In contrast to clustering-based methods, state-of-the-art uniform quantization methods often involve complicated mechanisms such as weight reconstruction (Frantar et al., 2023) and per-channel scaling (Lin et al., 2023) that are not readily compatible with incremental upscaling. For example, Table 2 presents the results of applying incremental upscaling to two state-of-the-art uniform methods (AWQ, GPTQ), using a 3-bit model as the seed model. The upscaled models consistently underperform the independently quantized models, showing unacceptable degradation at low bit-widths such as 4. We provide an in-depth discussion on the challenges of applying incremental upscaling on existing uniform quantization methods, along with additional experimental results, in Appendix E. ",
+      "level": 1
+    },
+    {
+      "heading": "5. Specialized Software Engine",
+      "body": "5.1. Need for New Software Engine There are multiple GPU kernels designed for the efficient execution of weight-only-quantized LLMs (NVIDIA; Lin et al., 2023; Frantar et al., 2023; Kim et al., 2023b; turboderp; Park et al., 2024). While demonstrating promising performance, most of these existing implementations cannot support any-precision quantization because of their way of representing quantized weights. They use a bitpacking-based representation, illustrated in Figure 4-(a). Bitpacking-based representations store quantized weights sequentially in a single 1-D array. With this representation, the entire weight array has to be loaded even when running a model in a reduced bit-width. For example in Figure 4-(a), even when executing a 2-bit or 3-bit model, the full 4-bit values have to be read from memory. This is because of the coarse-grained memory access granularity of GPUs, typically 128 bytes. This results in virtually no performance improvements. On the contrary, bitplane-based representation is a suitable choice for any-precision LLM support. Bitplane-based representation decomposes quantized weights into n bit-vectors, where n is the bit-width. Each bit-vector is formed by taking each bit position of the quantized values. Figure 4-(b) illustrates the bitplane-based representation. In this representation, any runtime request of reduced bit-width directly translates into proportional speedup, as we can simply load the specified amount of bits. While relatively common in CPU GEMM implementations (Cowan et al., 2020; Umuroglu & Jahre, 2017), its adoption in GPUs has not gained much attention yet. Concurrent to our work, LUT-GEMM proposes a quantized matrix-vector multiplication kernel adopting a kind of bitplane-based weight representation (Park et al., 2024), but it lacks support for any-precision as it necessitates the generation of distinct weight layouts to accommodate different bit-widths. More importantly, LUT-GEMM strictly requires weights to adhere to a specific format called BCQ (binary-coding quantization) \u2014 BCQ cannot support the codebook-based non-uniform quantization method, which we identify as optimal for any-precision LLM. Hence, a novel software engine that fully supports both bitplane-based weight representation and non-uniform quantization is needed. 5.2. System Overview Figure 5 is an overview of our engine for any-precision LLM. This figure assumes a scenario where support for 3, 4 and 8-bit is available, and the engine is requested to run a 4-bit model. For simplicity, we show only a single linear operation. Weight matrix bitplanes of bit 0 to bit 7, along with tables containing centroid values for the supported bit-widths (3, 4, 8-bit), are stored in memory. Assuming channel-wise quantization, the centroid tables have rows equal to the number of output channels (n), with each row containing 2k values, where k refers to the bit-width. For each operation, only necessary data is loaded from memory, which in this case includes the centroid table for 4-bit and the bitplanes for bit 4, 5, 6, and 7 in this example. The rows of the centroid table are scattered across the shared memory of different thread blocks since they are frequently accessed by all the threads in the block. Meanwhile, the threads load non-overlapping regions of the weight bitplanes. Thread-Level Operations. Figure 6 depicts the five step thread-level operation, assuming a bit-width of 4. 1 First, each thread starts by loading 32 input activation values along with their corresponding weights, which are four 32-bit bit-vectors. 2 Next, the four bit-vectors are rearranged so that the bits of each weight align contiguously. This operation is equivalent to the bit-transpose of eight 4-by-4 bit matrices. 3 Subsequently, the bit-transposed bit-vectors are shifted and masked to obtain the indices for centroid lookup. 4 The dequantization process is then completed by fetching centroids from the table in the shared memory. 5 As the final step, Multiply-Accumulate (MAC) operations are conducted on the dequantized weights with the input activations. Threads iteratively execute these five steps until they collectively complete processing the channels assigned to them, alongside other threads in the warp. ",
+      "level": 1
+    },
+    {
+      "heading": "6. Evaluation",
+      "body": "Through extensive experiments, we demonstrate that our proposal is an effective way of deploying multiple, different-sized LLMs by proving the following two arguments: \u2022 A set of quantized models generated from incremental upscaling, when integrated with the non-uniform quantization method, match the state-of-the-art quantization results at their respective bit-widths. (Section 6.1) \u2022 Our specialized engine matches or even outperforms existing engines while providing memory-efficient any-precision support, a feature lacking in the existing engines. (Section 6.2 & Section 6.3) 6.1. Any-Precision Quantization Results Methodology. We evaluate 4 to 8-bit models obtained through incremental upscaling, using a 3-bit SqueezeLLM model as the seed model. The results are compared with the 4 to 8-bit SqueezeLLM models. We benchmark our method on LLaMA-2-7B (Touvron et al., 2023), Mistral-7B (Jiang et al., 2023), and three OPT models (6.7B, 2.7B, 1.3B) (Zhang et al., 2022). We evaluate the models with two metrics: perplexity on three datasets (WikiText2 (Merity et al., 2016), PTB (Marcus et al., 1994), C4 (Raffel et al., 2023)) and zero-shot accuracy on five tasks (ARC-easy/challenge (Clark et al., 2018), HellaSwag (Zellers et al., 2019), PIQA (Tata & Patel, 2003), WinoGrande (Sakaguchi et al., 2021)). Experimental details are in Appendix A. Results. Table 9 presents the results of our evaluation.",
+      "level": 1
+    }
+  ],
+  "full_text": "1. Introduction\nWith the revolutionary success of Large Language Models (LLMs) across various applications, there have been many recent efforts to reduce the costs of their deployment. Specifically, there has been a considerable focus on compressing LLMs using techniques like pruning (Frantar & Alistarh, 2023; Zhang et al., 2023; Santacroce et al., 2023; Ma et al., 2023) or quantization (Lin et al., 2023; Frantar et al., 2023; Kim et al., 2023b), as the parameter size is the primary obstacle for their efficient deployment. Meanwhile, there has been limited discussion on mitigating the costs associated with deploying multiple LLMs of varying sizes, despite its practical significance. Real-world scenarios often demand the dynamic adaptation of multiple LLMs, each with distinct model quality/inference latency trade-offs. This approach enables the effective handling of queries with varied latency constraints, enhancing the user experience. Moreover, it supports a popular generation acceleration technique: speculative decoding (Leviathan et al., 2023; Chen et al., 2023; Kim et al., 2023d). Despite these benefits, deploying multiple LLMs of varying sizes presents challenges. First, it exacerbates the already high memory costs of LLM deployment, and second, it necessitates training of multiple model versions when models of desired sizes are not readily available as open-source. Any-precision LLM, an extension of the concept of any-precision DNN (Yu et al., 2021) to LLM, is a promising solution for the low-cost deployment of multiple, different-sized LLMs. Any-precision DNN refers to an n-bit quantized model capable of generating lower bit quantized models ((n-1)-bit, (n-2)-bit, ...) simply by taking its most significant bits (MSBs). Applying this concept to LLM enables the utilization of multiple LLMs with varying sizes by storing only a single large LLM (n-bit model) in memory, while avoiding the additional overhead of training multiple LLMs. Meanwhile, two challenges need to be resolved for effective implementation of any-precision LLM. First, a practical method for any-precision quantization of LLM is needed. The existing any-precision quantization method on DNN requires training the model from scratch, limiting its applicability to LLMs. Second, a new GPU kernel for quantized matrix-vector multiplication is required, which will translate the use of reduced bit-widths in any-precision LLMs into shorter inference times. Existing kernels for quantized matrix-vector multiplication are unable to load just a portion of each quantized weight value\u2019s bit-vector. Consequently, with existing kernels, opting for a model with a lower bit-width does not reduce memory bandwidth usage. Thus, we in this paper make a strong case for any-precision LLM by addressing the two aforementioned issues. First, we build a lightweight method for any-precision quantization of LLM. Utilizing a post-training quantization (PTQ) framework, it first generates a low-bit model and then incrementally upscales it to higher bit-widths, conserving the any-precision property. Second, we develop a new software engine specialized for any-precision support, that effectively saves memory bandwidth for serving any-precision LLMs by changing the memory layout of weights. Our extensive experimental studies demonstrate that our solution is a powerful approach for the deployment of multiple, different-sized LLMs, achieving the following results: \u2022 Our solution efficiently packs LLMs quantized to varying bit-widths, such as 3, 4, ... up to n bits, into a memory footprint comparable to a single n-bit LLM. \u2022 Our solution yields a set of quantized LLMs of varying bit-widths that, while offering any-precision support, match the quality of the state-of-the-art quantization techniques at each bit-width. \u2022 Our solution, despite having to adopt a bit-interleaved (bitplane) memory layout for the support of any-precision, showcases high inference throughput, matching or even outperforming that of state-of-the-art quantized matrix-vector multiplication engines that do not support any-precision (Kim et al., 2023b). \n\n2. Background\n2.1. GPU Basics GPU Architecture Fundamentals. A GPU, the de facto standard platform for executing LLMs, comprises a large number of processing elements called Streaming Multiprocessors (SMs). GPUs often include multi-level on-chip SRAM caches. A part of the L1 cache can be configured as shared memory, providing a memory space that can be directly controlled by programmers. Execution Model. GPUs use a large number of threads to execute operations, which are known as kernels. Threads are structured into thread blocks whose execution is scheduled on SMs. All threads within a thread block share the same shared memory space. Within each thread block, threads are further organized into a set of warps, with each warp consisting of 32 consecutive threads. All threads within a warp execute the same instruction at the same time. 2.2. LLM Quantization This section discusses recent advancements in LLM quantization with a specific emphasis on weight-only, post-training quantization (PTQ). In LLMs, there is a pronounced shift towards quantizing only the weights, as the dominant bottleneck in inference throughput is the memory constraint imposed by the size of weight parameters, rather than computational requirements. Moreover, Post-Training Quantization (PTQ) has become a favored method for quantizing LLMs due to its practicality. Although Quantization-Aware Training (QAT) typically yields superior performance, its high training expense frequently renders it impractical (Liu et al., 2023; Dettmers et al., 2023; Kim et al., 2023a). GPTQ (Frantar et al., 2023), a pioneering work on weight-only PTQ for LLM, formulates quantization as a layer-wise weight reconstruction problem. GPTQ methodically quantizes each channel in iterations, simultaneously adjusting the remaining not-yet-quantized weights to correct for quantization-induced errors. AWQ (Lin et al., 2023) performs per-channel scaling to safeguard a small fraction of salient weights as a preprocessing step. Similarly, QuIP (Chee et al., 2023) preprocesses weights to be more amenable to quantization, yielding impressive results even at 2-bit precision. However, its practical utility is in question as it adds a substantial runtime overhead. While the aforementioned methods employ uniform quantization, non-uniform quantization may be a more effective alternative as it better captures the weight distributions (Gholami et al., 2021). SqueezeLLM (Kim et al., 2023b) proposes a clustering-based LLM quantization that considers the sensitivity of each weight. Somewhat orthogonal to the aforementioned studies that primarily focus on rounding schemes, there are also proposals to use mixed precision as a way of allocating more bits to sensitive weights (Kim et al., 2023b; Dettmers et al., 2024; Lee et al., 2024). \n\n3. Motivation\n3.1. Need for Deploying Multiple, Different-sized LLMs Deploying a set of different-sized LLMs provides significant practical advantages. It enhances user experience by effectively handling queries with varying latency requirements. Depending on the specific needs of users and applications, some queries require quick responses, while others can tolerate slower response times. Latency requirements become even more diverse when serving multiple different tasks concurrently, a common use case of LLMs. For instance, queries for interactive tasks like chatbots are mostly latency-sensitive, while tasks like document analysis, often handled in the background, allow for more relaxed response times. In fact, the approach of adaptively selecting different DNN models with various accuracy-latency trade-offs has been widely studied as a way to effectively meet user requirements due to its practical significance (Wan et al., 2020; Zhang et al., 2020; Han et al., 2016). Another scenario that necessitates multiple LLMs of varying sizes is speculative decoding. This popular technique boosts the throughput of a large model by additionally utilizing one or more smaller draft models (Leviathan et al., 2023; Chen et al., 2023; Kim et al., 2023d; Miao et al., 2023). 3.2. Challenges of Deploying Multiple, Different-sized LLMs In deploying multiple LLMs, we face two practical challenges: memory overhead and training costs. Challenge 1: Memory Overhead. First, a large memory capacity overhead is introduced. As LLMs are typically substantial in size, maintaining even a few additional smaller models incurs significant costs. For example, deploying three tiers of LLMs with varying sizes \u2014 a large base model, a half-sized model, and a quarter-sized model \u2014 nearly doubles on the total memory requirement. Challenge 2: Training Costs. Acquiring multiple different-sized LLMs is challenging in itself. While some open-source LLMs such as OPT (Zhang et al., 2022) offer a comprehensive range of models with varying parameter counts, this is usually not the case. Most open-source LLMs offer only one to three variants, limiting their versatility across different use scenarios. If a model in the desired size is unavailable, users must create it by themselves. However, training an LLM is very costly due to its high computational needs and large corpus requirement. One approach is to distill the available large model into smaller ones instead of training smaller models from scratch (Hinton et al., 2015; Hsieh et al., 2023; Gu et al., 2024; Zhao et al., 2022; Agarwal et al., 2024). While this approach reduces computation costs, it still entails non-trivial engineering challenges, including the need to assemble a proper set of training data and finding favorable hyperparameters for training. These two challenges become particularly prominent when individuals run LLMs on personal platforms like desktops and mobile devices. In these scenarios \u2014 unlike with datacenter-scale inference \u2014 compute, memory, and even engineering resources are severely limited. Thus, this paper focuses on addressing the challenges associated with deploying multiple, different-sized LLMs for on-device inference. 3.3. Our Solution: Any-Precision LLM Concept. Any-precision quantization, initially introduced in prior work (Yu et al., 2021), is a promising solution to mitigate the costs of deploying multiple different-sized LLMs. Figure 1 visualizes the concept of any-precision quantization. The core is to derive smaller models (7-bit, 6-bit quantized model, ...) from a large model (8-bit quantized model), referred to as the parent model, by taking only the upper bits of its parameters. Of course, a special method tailored for any-precision quantization is required to ensure that taking just the prefixes of the parent model parameters does not result in significant quality drops. The any-precision approach is highly memory-efficient as it allows the utilization of varying bit-width models by only storing in memory 1) the quantized weights of the parent model and 2) a set of quantization parameters (e.g. centroid values) associated with each supported bit-width, relatively small in size. Also, there is no need to train multiple models. Table 1 gives a quantitative analysis on the memory savings of any-precision LLM, the application of any-precision quantization to LLMs. Without any-precision quantization, adaptively using models of different bit-widths requires the deployment of separate models, each taking up its own memory space. We refer to this strategy as separate deployment. We compare the required memory space of separate deployment against any-precision LLM, for various scenarios requiring different sets of bit-widths with the Llama-2-7B model. Any-precision LLM significantly reduces memory costs across a range of scenarios, achieving a maximum saving of 3.56\u00d7 when supporting all bit-widths from 3 to 8. Challenges of Any-Precision LLM. While the concept itself is appealing, there are critical issues in directly applying the method of the original work (Yu et al., 2021), which mainly targets CNN models, to LLMs. First, it is a quantization-aware training (QAT) scheme, requiring models to be trained from scratch. During training, the forward pass quantizes parameters to varying bit-widths so that the resulting model is robust to any-precision quantization. However, for LLMs, training is not affordable to most users. Second, this work has no regard for memory bandwidth saving. The entire n-bit parameters of the parent model are loaded into memory, only then being further quantized into lower bit-width weights by bit-shifting as needed. This strategy makes sense for CNN models, which are usually compute-bound. On the other hand, on-device LLM inference is highly memory-bound due to its low arithmetic intensity. Consequently, the memory load of weight parameters is the single primary performance bottleneck (Kim et al., 2023c). Hence, when the original method is applied to LLMs as-is, operating at low bit-widths may provide little inference latency improvements over that of the parent model. A new solution is required for LLMs, one that incorporates both a low-cost any-precision quantization method and a specialized software engine wherein reduced precision inference directly translates to actual speed-ups. \n\n4. Any-Precision Quantization for LLM\n4.1. Incremental Upscaling We propose a novel approach to any-precision quantization of LLMs, termed incremental upscaling. Figure 2 illustrates the two-stage flow of the any-precision quantization, utilizing incremental upscaling. Assuming a list of candidate bit-widths ({nk}Kk=1), the initial step quantizes the model to the minimum supported bit-width (n1), which we refer to as seed model. Subsequently, we incrementally upscale the seed model one bit at a time, until we obtain the final nK-bit parent model. For every incremental upscale from an ni-bit model to an ni+1-bit model, all parameters of the ni-bit model are inherited to the ni+1-bit model, and a single additional bit is appended to the end of each parameter. 4.2. Non-uniform Quantization-based Incremental Upscaling For our incremental upscaling-based approach of any-precision quantization, a particular quantization method must be adopted as a backbone for both the seed model generation and the subsequent upscaling process. While any PTQ method can be employed for this purpose, we rule out the use of QAT method to ensure that our solution does not involve an expensive training process. Among various PTQ methods, an optimal choice would be one that 1) demonstrates state-of-the-art quantization results for the generation of a quality seed model and 2) seamlessly extends to the incremental upscaling process. To this end, we utilize the state-of-the-art clustering-based non-uniform quantization scheme, SqueezeLLM (Kim et al., 2023b), as the backbone method. It delivers state-of-the-art results and is readily compatible with incremental upscaling. Incremental upscaling with the clustering-based quantization method is straightforward. In SqueezeLLM, quantization is a process of clustering the parameters, where values within each cluster are rounded to its centroid. In this light, incremental upscaling can be achieved by further dividing each cluster into two sub-clusters. Specifically, we perform a weighted K-means clustering on the values of each cluster to generate the two sub-clusters. A sensitivity metric based on an approximated second-order derivative is used during clustering, like in the original method. Figure 3 visualizes the upscaling process on the clustering-based non-uniform quantization method, assuming the case of producing a 3-bit model from a 2-bit model. In this instance, three weight parameters (w1, w3, w4) initially assigned to cluster01 \u2014 previously rounded to its centroidc01 \u2014 are now divided into two new sub-clusters, namely 010 and 011, each with its respective centroids c010 and c011. The same process is applied to the remaining three clusters (00, 10, 11), resulting in a final total of eight sub-clusters. In contrast to clustering-based methods, state-of-the-art uniform quantization methods often involve complicated mechanisms such as weight reconstruction (Frantar et al., 2023) and per-channel scaling (Lin et al., 2023) that are not readily compatible with incremental upscaling. For example, Table 2 presents the results of applying incremental upscaling to two state-of-the-art uniform methods (AWQ, GPTQ), using a 3-bit model as the seed model. The upscaled models consistently underperform the independently quantized models, showing unacceptable degradation at low bit-widths such as 4. We provide an in-depth discussion on the challenges of applying incremental upscaling on existing uniform quantization methods, along with additional experimental results, in Appendix E. \n\n5. Specialized Software Engine\n5.1. Need for New Software Engine There are multiple GPU kernels designed for the efficient execution of weight-only-quantized LLMs (NVIDIA; Lin et al., 2023; Frantar et al., 2023; Kim et al., 2023b; turboderp; Park et al., 2024). While demonstrating promising performance, most of these existing implementations cannot support any-precision quantization because of their way of representing quantized weights. They use a bitpacking-based representation, illustrated in Figure 4-(a). Bitpacking-based representations store quantized weights sequentially in a single 1-D array. With this representation, the entire weight array has to be loaded even when running a model in a reduced bit-width. For example in Figure 4-(a), even when executing a 2-bit or 3-bit model, the full 4-bit values have to be read from memory. This is because of the coarse-grained memory access granularity of GPUs, typically 128 bytes. This results in virtually no performance improvements. On the contrary, bitplane-based representation is a suitable choice for any-precision LLM support. Bitplane-based representation decomposes quantized weights into n bit-vectors, where n is the bit-width. Each bit-vector is formed by taking each bit position of the quantized values. Figure 4-(b) illustrates the bitplane-based representation. In this representation, any runtime request of reduced bit-width directly translates into proportional speedup, as we can simply load the specified amount of bits. While relatively common in CPU GEMM implementations (Cowan et al., 2020; Umuroglu & Jahre, 2017), its adoption in GPUs has not gained much attention yet. Concurrent to our work, LUT-GEMM proposes a quantized matrix-vector multiplication kernel adopting a kind of bitplane-based weight representation (Park et al., 2024), but it lacks support for any-precision as it necessitates the generation of distinct weight layouts to accommodate different bit-widths. More importantly, LUT-GEMM strictly requires weights to adhere to a specific format called BCQ (binary-coding quantization) \u2014 BCQ cannot support the codebook-based non-uniform quantization method, which we identify as optimal for any-precision LLM. Hence, a novel software engine that fully supports both bitplane-based weight representation and non-uniform quantization is needed. 5.2. System Overview Figure 5 is an overview of our engine for any-precision LLM. This figure assumes a scenario where support for 3, 4 and 8-bit is available, and the engine is requested to run a 4-bit model. For simplicity, we show only a single linear operation. Weight matrix bitplanes of bit 0 to bit 7, along with tables containing centroid values for the supported bit-widths (3, 4, 8-bit), are stored in memory. Assuming channel-wise quantization, the centroid tables have rows equal to the number of output channels (n), with each row containing 2k values, where k refers to the bit-width. For each operation, only necessary data is loaded from memory, which in this case includes the centroid table for 4-bit and the bitplanes for bit 4, 5, 6, and 7 in this example. The rows of the centroid table are scattered across the shared memory of different thread blocks since they are frequently accessed by all the threads in the block. Meanwhile, the threads load non-overlapping regions of the weight bitplanes. Thread-Level Operations. Figure 6 depicts the five step thread-level operation, assuming a bit-width of 4. 1 First, each thread starts by loading 32 input activation values along with their corresponding weights, which are four 32-bit bit-vectors. 2 Next, the four bit-vectors are rearranged so that the bits of each weight align contiguously. This operation is equivalent to the bit-transpose of eight 4-by-4 bit matrices. 3 Subsequently, the bit-transposed bit-vectors are shifted and masked to obtain the indices for centroid lookup. 4 The dequantization process is then completed by fetching centroids from the table in the shared memory. 5 As the final step, Multiply-Accumulate (MAC) operations are conducted on the dequantized weights with the input activations. Threads iteratively execute these five steps until they collectively complete processing the channels assigned to them, alongside other threads in the warp. \n\n6. Evaluation\nThrough extensive experiments, we demonstrate that our proposal is an effective way of deploying multiple, different-sized LLMs by proving the following two arguments: \u2022 A set of quantized models generated from incremental upscaling, when integrated with the non-uniform quantization method, match the state-of-the-art quantization results at their respective bit-widths. (Section 6.1) \u2022 Our specialized engine matches or even outperforms existing engines while providing memory-efficient any-precision support, a feature lacking in the existing engines. (Section 6.2 & Section 6.3) 6.1. Any-Precision Quantization Results Methodology. We evaluate 4 to 8-bit models obtained through incremental upscaling, using a 3-bit SqueezeLLM model as the seed model. The results are compared with the 4 to 8-bit SqueezeLLM models. We benchmark our method on LLaMA-2-7B (Touvron et al., 2023), Mistral-7B (Jiang et al., 2023), and three OPT models (6.7B, 2.7B, 1.3B) (Zhang et al., 2022). We evaluate the models with two metrics: perplexity on three datasets (WikiText2 (Merity et al., 2016), PTB (Marcus et al., 1994), C4 (Raffel et al., 2023)) and zero-shot accuracy on five tasks (ARC-easy/challenge (Clark et al., 2018), HellaSwag (Zellers et al., 2019), PIQA (Tata & Patel, 2003), WinoGrande (Sakaguchi et al., 2021)). Experimental details are in Appendix A. Results. Table 9 presents the results of our evaluation.",
+  "references": [
+    {
+      "id": "b0",
+      "title": "Any-Precision DNN",
+      "authors": [
+        "Yu, X."
+      ],
+      "year": 2021,
+      "doi": null,
+      "raw": "Yu, X.. Any-Precision DNN. 2021"
+    },
+    {
+      "id": "b1",
+      "title": "GPTQ: A Pioneering Work on Weight-Only PTQ for LLM",
+      "authors": [
+        "Frantar, P.",
+        "Alistarh, D."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Frantar, P., Alistarh, D.. GPTQ: A Pioneering Work on Weight-Only PTQ for LLM. 2023"
+    },
+    {
+      "id": "b2",
+      "title": "SqueezeLLM: Clustering-Based LLM Quantization",
+      "authors": [
+        "Kim, J."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Kim, J.. SqueezeLLM: Clustering-Based LLM Quantization. 2023"
+    },
+    {
+      "id": "b3",
+      "title": "AWQ: Per-Channel Scaling for Weight Quantization",
+      "authors": [
+        "Lin, Y."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Lin, Y.. AWQ: Per-Channel Scaling for Weight Quantization. 2023"
+    },
+    {
+      "id": "b4",
+      "title": "QuIP: Preprocessing Weights for Quantization",
+      "authors": [
+        "Chee, Y."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Chee, Y.. QuIP: Preprocessing Weights for Quantization. 2023"
+    },
+    {
+      "id": "b5",
+      "title": "Non-Uniform Quantization for Weight Distributions",
+      "authors": [
+        "Gholami, A."
+      ],
+      "year": 2021,
+      "doi": null,
+      "raw": "Gholami, A.. Non-Uniform Quantization for Weight Distributions. 2021"
+    },
+    {
+      "id": "b6",
+      "title": "LLaMA-2: Open and Efficient Foundation Language Models",
+      "authors": [
+        "Touvron, H.",
+        "Lample, G.",
+        "Raffel, C."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Touvron, H., Lample, G., Raffel, C.. LLaMA-2: Open and Efficient Foundation Language Models. 2023"
+    },
+    {
+      "id": "b7",
+      "title": "Mistral: A New Approach to Language Models",
+      "authors": [
+        "Jiang, Y."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Jiang, Y.. Mistral: A New Approach to Language Models. 2023"
+    },
+    {
+      "id": "b8",
+      "title": "OPT: Open Pre-trained Transformer Models",
+      "authors": [
+        "Zhang, Y."
+      ],
+      "year": 2022,
+      "doi": null,
+      "raw": "Zhang, Y.. OPT: Open Pre-trained Transformer Models. 2022"
+    },
+    {
+      "id": "b9",
+      "title": "Hinton, G. et al. Distilling the Knowledge in a Neural Network",
+      "authors": [
+        "Hinton, G.",
+        "Vinyals, O.",
+        "Dean, J."
+      ],
+      "year": 2015,
+      "doi": null,
+      "raw": "Hinton, G., Vinyals, O., Dean, J.. Hinton, G. et al. Distilling the Knowledge in a Neural Network. 2015"
+    },
+    {
+      "id": "b10",
+      "title": "Hsieh, C. et al. Efficient Knowledge Distillation",
+      "authors": [
+        "Hsieh, C.",
+        "Zhao, Y.",
+        "Gu, Y."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Hsieh, C., Zhao, Y., Gu, Y.. Hsieh, C. et al. Efficient Knowledge Distillation. 2023"
+    },
+    {
+      "id": "b11",
+      "title": "Gu, Y. et al. Knowledge Distillation for Language Models",
+      "authors": [
+        "Gu, Y.",
+        "Zhao, Y.",
+        "Hsieh, C."
+      ],
+      "year": 2024,
+      "doi": null,
+      "raw": "Gu, Y., Zhao, Y., Hsieh, C.. Gu, Y. et al. Knowledge Distillation for Language Models. 2024"
+    },
+    {
+      "id": "b12",
+      "title": "Zhao, Y. et al. Efficient Training of Smaller Models",
+      "authors": [
+        "Zhao, Y.",
+        "Gu, Y.",
+        "Hsieh, C."
+      ],
+      "year": 2022,
+      "doi": null,
+      "raw": "Zhao, Y., Gu, Y., Hsieh, C.. Zhao, Y. et al. Efficient Training of Smaller Models. 2022"
+    },
+    {
+      "id": "b13",
+      "title": "Agarwal, A. et al. Training Smaller Models Efficiently",
+      "authors": [
+        "Agarwal, A.",
+        "Zhao, Y.",
+        "Gu, Y."
+      ],
+      "year": 2024,
+      "doi": null,
+      "raw": "Agarwal, A., Zhao, Y., Gu, Y.. Agarwal, A. et al. Training Smaller Models Efficiently. 2024"
+    },
+    {
+      "id": "b14",
+      "title": "LUT-GEMM: A Quantized Matrix-Vector Multiplication Kernel",
+      "authors": [
+        "Park, J."
+      ],
+      "year": 2024,
+      "doi": null,
+      "raw": "Park, J.. LUT-GEMM: A Quantized Matrix-Vector Multiplication Kernel. 2024"
+    },
+    {
+      "id": "b15",
+      "title": "Dettmers, T. et al. Quantization-Aware Training for LLMs",
+      "authors": [
+        "Dettmers, T.",
+        "Liu, Y."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Dettmers, T., Liu, Y.. Dettmers, T. et al. Quantization-Aware Training for LLMs. 2023"
+    },
+    {
+      "id": "b16",
+      "title": "Kim, J. et al. Efficient Quantization Techniques",
+      "authors": [
+        "Kim, J.",
+        "Frantar, P."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Kim, J., Frantar, P.. Kim, J. et al. Efficient Quantization Techniques. 2023"
+    },
+    {
+      "id": "b17",
+      "title": "Merity, S. et al. WikiText: A Large Scale Language Modeling Dataset",
+      "authors": [
+        "Merity, S.",
+        "Sutskever, I.",
+        "Kiros, R."
+      ],
+      "year": 2016,
+      "doi": null,
+      "raw": "Merity, S., Sutskever, I., Kiros, R.. Merity, S. et al. WikiText: A Large Scale Language Modeling Dataset. 2016"
+    },
+    {
+      "id": "b18",
+      "title": "Marcus, M. et al. Penn Treebank",
+      "authors": [
+        "Marcus, M.",
+        "Marcinkiewicz, M.",
+        "Stern, H."
+      ],
+      "year": 1994,
+      "doi": null,
+      "raw": "Marcus, M., Marcinkiewicz, M., Stern, H.. Marcus, M. et al. Penn Treebank. 1994"
+    },
+    {
+      "id": "b19",
+      "title": "Raffel, C. et al. Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer",
+      "authors": [
+        "Raffel, C.",
+        "Shinn, C.",
+        "Sutskever, I."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Raffel, C., Shinn, C., Sutskever, I.. Raffel, C. et al. Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer. 2023"
+    },
+    {
+      "id": "b20",
+      "title": "Clark, C. et al. Think You Can Trust Me? A Study of Trust in AI Systems",
+      "authors": [
+        "Clark, C.",
+        "Kumar, A.",
+        "Zhang, Y."
+      ],
+      "year": 2018,
+      "doi": null,
+      "raw": "Clark, C., Kumar, A., Zhang, Y.. Clark, C. et al. Think You Can Trust Me? A Study of Trust in AI Systems. 2018"
+    },
+    {
+      "id": "b21",
+      "title": "Zellers, R. et al. HellaSwag: Can a Machine Really Finish Your Sentence?",
+      "authors": [
+        "Zellers, R.",
+        "Yatskar, M.",
+        "Liu, J."
+      ],
+      "year": 2019,
+      "doi": null,
+      "raw": "Zellers, R., Yatskar, M., Liu, J.. Zellers, R. et al. HellaSwag: Can a Machine Really Finish Your Sentence?. 2019"
+    },
+    {
+      "id": "b22",
+      "title": "Tata, S. et al. PIQA: A New Dataset for Physical Interaction Questions",
+      "authors": [
+        "Tata, S.",
+        "Patel, A."
+      ],
+      "year": 2003,
+      "doi": null,
+      "raw": "Tata, S., Patel, A.. Tata, S. et al. PIQA: A New Dataset for Physical Interaction Questions. 2003"
+    },
+    {
+      "id": "b23",
+      "title": "Sakaguchi, K. et al. WinoGrande: An Adversarial Winograd Schema Challenge",
+      "authors": [
+        "Sakaguchi, K.",
+        "Kwiatkowski, T.",
+        "Choi, E."
+      ],
+      "year": 2021,
+      "doi": null,
+      "raw": "Sakaguchi, K., Kwiatkowski, T., Choi, E.. Sakaguchi, K. et al. WinoGrande: An Adversarial Winograd Schema Challenge. 2021"
+    },
+    {
+      "id": "b24",
+      "title": "Wan, L. et al. Adaptive Model Selection for Latency-Sensitive Applications",
+      "authors": [
+        "Wan, L.",
+        "Zhang, Y.",
+        "Han, S."
+      ],
+      "year": 2020,
+      "doi": null,
+      "raw": "Wan, L., Zhang, Y., Han, S.. Wan, L. et al. Adaptive Model Selection for Latency-Sensitive Applications. 2020"
+    },
+    {
+      "id": "b25",
+      "title": "Zhang, Y. et al. Efficient Model Selection for Latency-Sensitive Applications",
+      "authors": [
+        "Zhang, Y.",
+        "Wan, L.",
+        "Han, S."
+      ],
+      "year": 2020,
+      "doi": null,
+      "raw": "Zhang, Y., Wan, L., Han, S.. Zhang, Y. et al. Efficient Model Selection for Latency-Sensitive Applications. 2020"
+    },
+    {
+      "id": "b26",
+      "title": "Han, S. et al. Efficient Model Selection for Latency-Sensitive Applications",
+      "authors": [
+        "Han, S.",
+        "Zhang, Y.",
+        "Wan, L."
+      ],
+      "year": 2016,
+      "doi": null,
+      "raw": "Han, S., Zhang, Y., Wan, L.. Han, S. et al. Efficient Model Selection for Latency-Sensitive Applications. 2016"
+    },
+    {
+      "id": "b27",
+      "title": "Cowan, D. et al. Efficient Matrix Multiplication on CPUs",
+      "authors": [
+        "Cowan, D.",
+        "Umuroglu, Y.",
+        "Jahre, M."
+      ],
+      "year": 2020,
+      "doi": null,
+      "raw": "Cowan, D., Umuroglu, Y., Jahre, M.. Cowan, D. et al. Efficient Matrix Multiplication on CPUs. 2020"
+    },
+    {
+      "id": "b28",
+      "title": "Umuroglu, Y. et al. Efficient Matrix Multiplication on GPUs",
+      "authors": [
+        "Umuroglu, Y.",
+        "Jahre, M."
+      ],
+      "year": 2017,
+      "doi": null,
+      "raw": "Umuroglu, Y., Jahre, M.. Umuroglu, Y. et al. Efficient Matrix Multiplication on GPUs. 2017"
+    },
+    {
+      "id": "b29",
+      "title": "Touvron, H. et al. LLaMA: Open and Efficient Foundation Language Models",
+      "authors": [
+        "Touvron, H.",
+        "Lample, G.",
+        "Raffel, C."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Touvron, H., Lample, G., Raffel, C.. Touvron, H. et al. LLaMA: Open and Efficient Foundation Language Models. 2023"
+    },
+    {
+      "id": "b30",
+      "title": "Jiang, Y. et al. Mistral: A New Approach to Language Models",
+      "authors": [
+        "Jiang, Y.",
+        "Liu, Y.",
+        "Zhang, Y."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Jiang, Y., Liu, Y., Zhang, Y.. Jiang, Y. et al. Mistral: A New Approach to Language Models. 2023"
+    },
+    {
+      "id": "b31",
+      "title": "Zhang, Y. et al. OPT: Open Pre-trained Transformer Models",
+      "authors": [
+        "Zhang, Y.",
+        "Liu, Y.",
+        "Gu, Y."
+      ],
+      "year": 2022,
+      "doi": null,
+      "raw": "Zhang, Y., Liu, Y., Gu, Y.. Zhang, Y. et al. OPT: Open Pre-trained Transformer Models. 2022"
+    },
+    {
+      "id": "b32",
+      "title": "Hinton, G. et al. Distilling the Knowledge in a Neural Network",
+      "authors": [
+        "Hinton, G.",
+        "Vinyals, O.",
+        "Dean, J."
+      ],
+      "year": 2015,
+      "doi": null,
+      "raw": "Hinton, G., Vinyals, O., Dean, J.. Hinton, G. et al. Distilling the Knowledge in a Neural Network. 2015"
+    },
+    {
+      "id": "b33",
+      "title": "Hsieh, C. et al. Efficient Knowledge Distillation",
+      "authors": [
+        "Hsieh, C.",
+        "Zhao, Y.",
+        "Gu, Y."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Hsieh, C., Zhao, Y., Gu, Y.. Hsieh, C. et al. Efficient Knowledge Distillation. 2023"
+    },
+    {
+      "id": "b34",
+      "title": "Gu, Y. et al. Knowledge Distillation for Language Models",
+      "authors": [
+        "Gu, Y.",
+        "Zhao, Y.",
+        "Hsieh, C."
+      ],
+      "year": 2024,
+      "doi": null,
+      "raw": "Gu, Y., Zhao, Y., Hsieh, C.. Gu, Y. et al. Knowledge Distillation for Language Models. 2024"
+    },
+    {
+      "id": "b35",
+      "title": "Zhao, Y. et al. Efficient Training of Smaller Models",
+      "authors": [
+        "Zhao, Y.",
+        "Gu, Y.",
+        "Hsieh, C."
+      ],
+      "year": 2022,
+      "doi": null,
+      "raw": "Zhao, Y., Gu, Y., Hsieh, C.. Zhao, Y. et al. Efficient Training of Smaller Models. 2022"
+    },
+    {
+      "id": "b36",
+      "title": "Agarwal, A. et al. Training Smaller Models Efficiently",
+      "authors": [
+        "Agarwal, A.",
+        "Zhao, Y.",
+        "Gu, Y."
+      ],
+      "year": 2024,
+      "doi": null,
+      "raw": "Agarwal, A., Zhao, Y., Gu, Y.. Agarwal, A. et al. Training Smaller Models Efficiently. 2024"
+    },
+    {
+      "id": "b37",
+      "title": "Park, J. et al. LUT-GEMM: A Quantized Matrix-Vector Multiplication Kernel",
+      "authors": [
+        "Park, J.",
+        "Kim, J.",
+        "Frantar, P."
+      ],
+      "year": 2024,
+      "doi": null,
+      "raw": "Park, J., Kim, J., Frantar, P.. Park, J. et al. LUT-GEMM: A Quantized Matrix-Vector Multiplication Kernel. 2024"
+    },
+    {
+      "id": "b38",
+      "title": "Dettmers, T. et al. Quantization-Aware Training for LLMs",
+      "authors": [
+        "Dettmers, T.",
+        "Liu, Y."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Dettmers, T., Liu, Y.. Dettmers, T. et al. Quantization-Aware Training for LLMs. 2023"
+    },
+    {
+      "id": "b39",
+      "title": "Kim, J. et al. Efficient Quantization Techniques",
+      "authors": [
+        "Kim, J.",
+        "Frantar, P."
+      ],
+      "year": 2023,
+      "doi": null,
+      "raw": "Kim, J., Frantar, P.. Kim, J. et al. Efficient Quantization Techniques. 2023"
+    }
+  ],
+  "inline_citations": [
+    "b0",
+    "b1",
+    "b2",
+    "b3",
+    "b4",
+    "b5",
+    "b6",
+    "b7",
+    "b8",
+    "b9",
+    "b10",
+    "b11",
+    "b12",
+    "b13",
+    "b14",
+    "b15",
+    "b16",
+    "b17",
+    "b18",
+    "b19",
+    "b20",
+    "b21",
+    "b22",
+    "b23",
+    "b24",
+    "b25",
+    "b26",
+    "b27",
+    "b28",
+    "b29",
+    "b30",
+    "b31",
+    "b32",
+    "b33",
+    "b34",
+    "b35",
+    "b36",
+    "b37",
+    "b38",
+    "b39"
+  ],
+  "word_count": 3316
+}

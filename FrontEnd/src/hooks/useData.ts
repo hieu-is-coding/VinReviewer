@@ -1,6 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+/** Returns the authenticated user's UUID, or throws if not signed in. */
+async function getUserId(): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+  return user.id;
+}
+
 // ---- Classes ----
 export function useClasses() {
   return useQuery({
@@ -17,7 +24,8 @@ export function useCreateClass() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: { name: string; description?: string }) => {
-      const { data, error } = await supabase.from("classes").insert(values).select().single();
+      const user_id = await getUserId();
+      const { data, error } = await supabase.from("classes").insert({ ...values, user_id }).select().single();
       if (error) throw error;
       return data;
     },
@@ -64,7 +72,8 @@ export function useCreateStudent() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: { name: string; email?: string }) => {
-      const { data, error } = await supabase.from("students").insert(values).select().single();
+      const user_id = await getUserId();
+      const { data, error } = await supabase.from("students").insert({ ...values, user_id }).select().single();
       if (error) throw error;
       return data;
     },
@@ -99,7 +108,8 @@ export function useCreateRubric() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: { name: string; description?: string; class_id?: string | null }) => {
-      const { data, error } = await supabase.from("rubrics").insert(values).select().single();
+      const user_id = await getUserId();
+      const { data, error } = await supabase.from("rubrics").insert({ ...values, user_id }).select().single();
       if (error) throw error;
       return data;
     },
@@ -129,7 +139,8 @@ export function useCreateCriterion() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: { rubric_id: string; name: string; description?: string; weight?: number; max_score?: number; sort_order?: number }) => {
-      const { data, error } = await supabase.from("criteria").insert(values).select().single();
+      const user_id = await getUserId();
+      const { data, error } = await supabase.from("criteria").insert({ ...values, user_id }).select().single();
       if (error) throw error;
       return data;
     },
@@ -171,7 +182,8 @@ export function useAddStudentToClass() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: { class_id: string; student_id: string }) => {
-      const { data, error } = await supabase.from("class_students").insert(values).select().single();
+      const user_id = await getUserId();
+      const { data, error } = await supabase.from("class_students").insert({ ...values, user_id }).select().single();
       if (error) throw error;
       return data;
     },
@@ -205,7 +217,8 @@ export function useCreateSubmission() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (values: { student_id: string; class_id: string; rubric_id?: string | null; title?: string; content: string }) => {
-      const { data, error } = await supabase.from("submissions").insert(values).select().single();
+      const user_id = await getUserId();
+      const { data, error } = await supabase.from("submissions").insert({ ...values, user_id }).select().single();
       if (error) throw error;
       return data;
     },
@@ -237,7 +250,7 @@ export function useEvaluateSubmission() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${import.meta.env.VITE_BACKEND_API_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({ submission_id }),
       });

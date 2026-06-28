@@ -1,0 +1,19 @@
+{
+  "claims": [
+    {
+      "claim_text": "We propose a novel approach to neural machine translation that incorporates multi-head cross-attention layers into transformer architectures.",
+      "max_similarity": 0.3792573298546043,
+      "closest_paper_id": "152e4152e8e6a4b94f98e6fdcd2c3959e391cfc3",
+      "closest_paper_title": "Improving English Text Machine Translation Quality with Cutting-Edge Neural Network Systems",
+      "classification": "NOVEL"
+    },
+    {
+      "claim_text": "We demonstrate significant improvements in BLEU scores on WMT14 English-German benchmarks compared to previous methods.",
+      "max_similarity": 0.2762141645395299,
+      "closest_paper_id": "aaba9ba4b3fc4613a8d9e033bb2d6c6b4f38bd9d",
+      "closest_paper_title": "Comparative Analysis of Neural Machine Translation Techniques for Sanskrit-to-English Using Deep Learning and Transformer Models",
+      "classification": "NOVEL"
+    }
+  ],
+  "overall_novelty_score": 1.0
+}

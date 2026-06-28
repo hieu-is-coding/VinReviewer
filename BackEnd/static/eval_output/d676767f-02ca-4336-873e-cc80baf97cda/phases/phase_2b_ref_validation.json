@@ -1,0 +1,20 @@
+{
+  "results": [
+    {
+      "ref_id": "b0",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.2307/40201892",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b1",
+      "status": "verified",
+      "source": "openalex",
+      "matched_doi": "10.2307/2009958",
+      "confidence": 1.0
+    }
+  ],
+  "verified_ratio": 1.0,
+  "fabricated_refs": []
+}

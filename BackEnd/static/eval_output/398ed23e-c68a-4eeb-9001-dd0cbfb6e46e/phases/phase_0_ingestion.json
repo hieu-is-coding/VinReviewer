@@ -1,0 +1,56 @@
+{
+  "source_path": "E:\\VinReviewer\\BackEnd\\src\\routes\\..\\..\\static\\pdfs\\398ed23e-c68a-4eeb-9001-dd0cbfb6e46e.pdf",
+  "language": "en",
+  "title": "A Novel Approach to Neural Machine Translation Using Attention-Based Transformer Architectures",
+  "abstract": "This paper presents a novel approach to neural machine translation using attention-based transformer architectures. We demonstrate significant improvements in BLEU scores on WMT14 English-German benchmarks compared to previous methods.",
+  "sections": [
+    {
+      "heading": "1. Introduction",
+      "body": "Neural machine translation has revolutionized language processing tasks. Our method builds upon the foundational work of Vaswani et al. (2017) and extends it with multi-head cross-attention layers.",
+      "level": 1
+    },
+    {
+      "heading": "2. Methodology",
+      "body": "We train our model on 4.5M sentence pairs using the Adam optimizer with a learning rate of 0.0001 and batch size of 32. The model architecture consists of 6 encoder and 6 decoder layers with 8 attention heads.",
+      "level": 1
+    },
+    {
+      "heading": "3. Results",
+      "body": "Our model achieves a BLEU score of 28.4 on WMT14 En-De, surpassing the baseline by 2.1 points. Ablation studies confirm the importance of each component.",
+      "level": 1
+    },
+    {
+      "heading": "4. Conclusion",
+      "body": "We have demonstrated a new state-of-the-art result for neural machine translation. Future work will explore larger datasets and multilingual transfer learning.",
+      "level": 1
+    }
+  ],
+  "full_text": "1. Introduction\nNeural machine translation has revolutionized language processing tasks. Our method builds upon the foundational work of Vaswani et al. (2017) and extends it with multi-head cross-attention layers.\n\n2. Methodology\nWe train our model on 4.5M sentence pairs using the Adam optimizer with a learning rate of 0.0001 and batch size of 32. The model architecture consists of 6 encoder and 6 decoder layers with 8 attention heads.\n\n3. Results\nOur model achieves a BLEU score of 28.4 on WMT14 En-De, surpassing the baseline by 2.1 points. Ablation studies confirm the importance of each component.\n\n4. Conclusion\nWe have demonstrated a new state-of-the-art result for neural machine translation. Future work will explore larger datasets and multilingual transfer learning.",
+  "references": [
+    {
+      "id": "b1",
+      "title": "Attention is all you need",
+      "authors": [
+        "Vaswani, A."
+      ],
+      "year": 2017,
+      "doi": null,
+      "raw": "Vaswani, A.. Attention is all you need. 2017"
+    },
+    {
+      "id": "b2",
+      "title": "Neural machine translation by jointly learning to align and translate",
+      "authors": [
+        "Bahdanau, D."
+      ],
+      "year": 2015,
+      "doi": null,
+      "raw": "Bahdanau, D.. Neural machine translation by jointly learning to align and translate. 2015"
+    }
+  ],
+  "inline_citations": [
+    "b1",
+    "b2"
+  ],
+  "word_count": 119
+}

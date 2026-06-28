@@ -1,0 +1,181 @@
+{
+  "results": [
+    {
+      "ref_id": "b0",
+      "status": "verified",
+      "source": "openalex",
+      "matched_doi": "10.48550/arxiv.1603.04467",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b1",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b2",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.1145/3315508.3329973",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b3",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.1145/1555754.1555775",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b4",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.1145/1815961.1815998",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b5",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.1145/3669940.3707265",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b6",
+      "status": "verified",
+      "source": "openalex",
+      "matched_doi": "10.1145/3613424.3614277",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b7",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b8",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b9",
+      "status": "verified",
+      "source": "openalex",
+      "matched_doi": "10.1109/ispass64960.2025.00023",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b10",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b11",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b12",
+      "status": "likely_valid",
+      "source": "crossref",
+      "matched_doi": "10.1007/978-981-97-9314-3_66",
+      "confidence": 0.7619047619047619
+    },
+    {
+      "ref_id": "b13",
+      "status": "suspicious",
+      "source": "crossref",
+      "matched_doi": "10.1145/2939672.2939785",
+      "confidence": 0.2978723404255319
+    },
+    {
+      "ref_id": "b14",
+      "status": "verified",
+      "source": "openalex",
+      "matched_doi": "10.48550/arxiv.1607.06450",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b15",
+      "status": "verified",
+      "source": "openalex",
+      "matched_doi": "10.48550/arxiv.1502.03167",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b16",
+      "status": "verified",
+      "source": "openalex",
+      "matched_doi": "10.65215/2q58a426",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b17",
+      "status": "verified",
+      "source": "openalex",
+      "matched_doi": "10.48550/arxiv.2006.06762",
+      "confidence": 0.9457364341085271
+    },
+    {
+      "ref_id": "b18",
+      "status": "likely_valid",
+      "source": "crossref",
+      "matched_doi": "10.2172/1407078",
+      "confidence": 0.8444444444444444
+    },
+    {
+      "ref_id": "b19",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.1145/3431731",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b20",
+      "status": "verified",
+      "source": "openalex",
+      "matched_doi": "10.1145/3126557",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b21",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.1109/access.2019.2951218",
+      "confidence": 1.0
+    },
+    {
+      "ref_id": "b22",
+      "status": "verified",
+      "source": "openalex",
+      "matched_doi": "10.5555/3291168.3291211",
+      "confidence": 0.9606299212598425
+    },
+    {
+      "ref_id": "b23",
+      "status": "suspicious",
+      "source": "unverified",
+      "matched_doi": null,
+      "confidence": 0.0
+    },
+    {
+      "ref_id": "b24",
+      "status": "verified",
+      "source": "crossref",
+      "matched_doi": "10.1145/3706628.3708833",
+      "confidence": 1.0
+    }
+  ],
+  "verified_ratio": 0.72,
+  "fabricated_refs": []
+}

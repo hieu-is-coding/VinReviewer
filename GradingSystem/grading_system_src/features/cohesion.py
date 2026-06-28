@@ -50,17 +50,10 @@ def extract_cohesion_features(manuscript: Manuscript) -> dict[str, FeatureValue]
 
 
 def _split_sentences(text: str) -> list[str]:
-    """Sentence segmentation using spaCy's rule-based sentencizer."""
-    import spacy
-    try:
-        nlp = spacy.blank("en")
-        nlp.add_pipe("sentencizer")
-        doc = nlp(text[:500_000])
-        return [sent.text.strip() for sent in doc.sents if len(sent.text.strip()) > 10]
-    except Exception:
-        import re
-        raw = re.split(r"(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ])", text)
-        return [s.strip() for s in raw if len(s.strip()) > 10]
+    """Sentence segmentation using rule-based/regex splitting."""
+    import re
+    raw = re.split(r"(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ])", text[:500_000])
+    return [s.strip() for s in raw if len(s.strip()) > 10]
 
 
 def _adjacent_cosine(embeddings: np.ndarray) -> np.ndarray:

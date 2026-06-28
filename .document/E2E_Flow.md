@@ -1,6 +1,6 @@
 # End-to-End Submission & AI Evaluation Flow
 
-This document details the end-to-end technical flow of the VinReviewer application, starting from a user submitting an assignment in the front-end interface, processing it through the Python backend and LangGraph multi-agent grading engine, and ending with database persistence and manual review approval.
+This document details the end-to-end technical flow of the GradioAI application, starting from a user submitting an assignment in the front-end interface, processing it through the Python backend and LangGraph multi-agent grading engine, and ending with database persistence and manual review approval.
 
 ---
 

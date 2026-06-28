@@ -1,0 +1,40 @@
+{
+  "calibration": {
+    "slope": 0.9999999999999986,
+    "intercept": -0.1999999999999989,
+    "lower_bound": 0.4499999999999997,
+    "upper_bound": 0.45000000000000023
+  },
+  "raw_score": 0.6267,
+  "calibrated_score": 0.5267000000000003,
+  "comparative": {
+    "overall_percentile": 32.8,
+    "dimension_percentiles": {
+      "thesis_clarity": 67.2,
+      "scope_appropriateness": 89.9,
+      "research_question": 34.9,
+      "source_quality": 84.1,
+      "evidence_integration": 34.9,
+      "citation_accuracy": 6.7,
+      "organization": 67.2,
+      "paragraph_cohesion": 56.6,
+      "transitions": 25.2,
+      "grammar_spelling": 99.6,
+      "sentence_variety": 56.6,
+      "academic_register": 89.9,
+      "argument_depth": 76.5,
+      "counterargument": 25.2,
+      "synthesis": 25.2,
+      "formatting": 96.7,
+      "citation_style": 34.9,
+      "word_count": 98.3
+    },
+    "venue_tier": "general",
+    "comparative_statements": [
+      "This paper scores in the 33th percentile relative to submissions at general venues.",
+      "Strongest aspect: 'grammar_spelling' (100th percentile).",
+      "Weakest aspect: 'citation_accuracy' (7th percentile) \u2014 below average for general submissions.",
+      "This paper is below the typical acceptance threshold for this venue tier."
+    ]
+  }
+}

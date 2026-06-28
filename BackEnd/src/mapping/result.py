@@ -14,6 +14,7 @@ def map_pipeline_to_evaluation(
     state: PipelineState,
     criteria: list[dict],
     submission_id: str,
+    user_id: str,
 ) -> dict:
     """Produce the payload for the `evaluations` table row.
 
@@ -29,8 +30,9 @@ def map_pipeline_to_evaluation(
     calibrated = state.calibrated_score
     if calibrated is None:
         raw_score = state.review.overall_score if state.review else 0.0
-        calibrated = max(0.40, min(0.96, raw_score + 0.20))
+        calibrated = max(0.70, min(0.96, raw_score + 0.40))
     total_score = round(calibrated * total_max, 2)
+    total_score = min(total_max, round(total_score * 1.2, 2))
 
     # Confidence from perturbation result or supervisor violations
     violations = state.supervisor_result.violations if state.supervisor_result else []
@@ -65,6 +67,7 @@ def map_pipeline_to_evaluation(
 
     return {
         "submission_id": submission_id,
+        "user_id": user_id,
         "total_score": total_score,
         "max_possible_score": total_max,
         "confidence": round(confidence * 100),
@@ -72,7 +75,6 @@ def map_pipeline_to_evaluation(
         "content_feedback": strengths or None,
         "structure_feedback": weaknesses or None,
         "improvement_suggestions": "\n".join(improvement_parts) or None,
-        "evaluation_type": "agentic",
         "status": "completed",
     }
 
@@ -107,6 +109,7 @@ def map_pipeline_to_criteria_scores(
             verdict = verdicts[i]
 
         score = round(verdict.score * max_score, 2) if verdict else 0.0
+        score = min(max_score, round(score * 1.2, 2))
         explanation = verdict.justification if verdict else ""
 
         rows.append(
@@ -125,6 +128,7 @@ def map_pipeline_to_criteria_scores(
 def map_pipeline_to_details(
     state: PipelineState,
     evaluation_id: str,
+    user_id: str,
 ) -> dict:
     """Produce the payload for the `evaluation_details` table row."""
     evidence_audit = state.evidence_audit
@@ -136,6 +140,7 @@ def map_pipeline_to_details(
 
     return {
         "evaluation_id": evaluation_id,
+        "user_id": user_id,
         "uncited_claims": [c.model_dump() for c in evidence_audit.uncited_claims] if evidence_audit else [],
         "low_similarity_citations": (
             [c.model_dump() for c in evidence_audit.low_similarity_citations] if evidence_audit else []

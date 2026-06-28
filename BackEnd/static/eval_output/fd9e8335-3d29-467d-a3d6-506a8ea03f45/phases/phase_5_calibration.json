@@ -1,0 +1,40 @@
+{
+  "calibration": {
+    "slope": 0.9999999999999986,
+    "intercept": -0.1999999999999989,
+    "lower_bound": 0.4499999999999997,
+    "upper_bound": 0.45000000000000023
+  },
+  "raw_score": 0.7067,
+  "calibrated_score": 0.6067000000000001,
+  "comparative": {
+    "overall_percentile": 58.8,
+    "dimension_percentiles": {
+      "thesis_clarity": 89.9,
+      "scope_appropriateness": 94.0,
+      "research_question": 92.2,
+      "source_quality": 98.8,
+      "evidence_integration": 84.1,
+      "citation_accuracy": 96.7,
+      "organization": 80.5,
+      "paragraph_cohesion": 56.6,
+      "transitions": 29.9,
+      "grammar_spelling": 99.6,
+      "sentence_variety": 72.0,
+      "academic_register": 97.6,
+      "argument_depth": 89.9,
+      "counterargument": 45.6,
+      "synthesis": 72.0,
+      "formatting": 98.3,
+      "citation_style": 97.6,
+      "word_count": 96.7
+    },
+    "venue_tier": "general",
+    "comparative_statements": [
+      "This paper scores in the 59th percentile relative to submissions at general venues.",
+      "Strongest aspect: 'grammar_spelling' (100th percentile).",
+      "Weakest aspect: 'transitions' (30th percentile) \u2014 below average for general submissions.",
+      "This paper is in the borderline range; revision is recommended."
+    ]
+  }
+}

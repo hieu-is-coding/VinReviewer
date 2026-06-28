@@ -1,0 +1,43 @@
+{
+  "dimensions": [
+    {
+      "id": "clarity_novelty",
+      "label": "Clarity & Novelty",
+      "weight": 0.5,
+      "children": [
+        {
+          "id": "clarity",
+          "label": "Clarity of presentation",
+          "weight": 0.6,
+          "children": []
+        },
+        {
+          "id": "novelty",
+          "label": "Novelty of contributions",
+          "weight": 0.4,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "methodology",
+      "label": "Methodology",
+      "weight": 0.5,
+      "children": [
+        {
+          "id": "methodological_rigor",
+          "label": "Methodological rigor and appropriateness",
+          "weight": 0.7,
+          "children": []
+        },
+        {
+          "id": "data_analysis",
+          "label": "Data analysis techniques",
+          "weight": 0.3,
+          "children": []
+        }
+      ]
+    }
+  ],
+  "depth": 2
+}

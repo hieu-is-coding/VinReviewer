@@ -1,4 +1,4 @@
-# VinReviewer
+# GradioAI
 
 An AI-powered academic submission review platform. Instructors upload student papers; the system evaluates them against a custom rubric using either a fast Gemini-based evaluator or a full multi-agent pipeline with evidence auditing, novelty detection, multi-persona deliberation, and calibrated scoring.
 
@@ -6,14 +6,14 @@ An AI-powered academic submission review platform. Instructors upload student pa
 
 ## Architecture
 
-![VinReviewer Platform Architecture](imgs/vinreviewer_architecture.png)
+![GradioAI Platform Architecture](imgs/GradioAI_architecture.png)
 
 <details>
 <summary>Show text-based architecture diagram</summary>
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                        VinReviewer Platform                       │
+│                        GradioAI Platform                       │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌─────────────┐          ┌──────────────┐                      │
@@ -48,7 +48,7 @@ An AI-powered academic submission review platform. Instructors upload student pa
 ### Folder layout
 
 ```
-VinReviewer/
+GradioAI/
 ├── FrontEnd/          React 18 + Supabase + Tailwind UI
 ├── BackEnd/           FastAPI orchestration service  (NEW)
 ├── GradingSystem/     Python multi-agent review pipeline
@@ -253,8 +253,8 @@ The Edge Function auto-proxies to BackEnd when `BACKEND_URL` and `BACKEND_API_KE
 ### 1. Clone and configure
 
 ```bash
-git clone https://github.com/your-org/VinReviewer.git
-cd VinReviewer
+git clone https://github.com/your-org/GradioAI.git
+cd GradioAI
 
 # BackEnd environment
 cp BackEnd/.env.example BackEnd/.env
@@ -282,8 +282,8 @@ npx supabase db push
 
 ```bash
 # Create environment with Python and Node.js
-conda create -n vinreviewer python=3.11 nodejs=18 -y
-conda activate vinreviewer
+conda create -n GradioAI python=3.11 nodejs=18 -y
+conda activate GradioAI
 
 # GradingSystem
 cd GradingSystem
@@ -360,7 +360,7 @@ npx supabase functions serve
 ### 7. Run with Docker Compose (alternative to step 6)
 
 ```bash
-# From the VinReviewer/ root
+# From the GradioAI/ root
 docker compose up --build
 # BackEnd → http://localhost:8000
 # GROBID  → http://localhost:8070

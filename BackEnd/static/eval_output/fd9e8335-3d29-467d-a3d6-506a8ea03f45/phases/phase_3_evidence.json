@@ -1,0 +1,3087 @@
+{
+  "claims": [
+    {
+      "text": "1 Introduction\nDeep learning (DL) workloads have demonstrated great success in various problem domains, such as computer vision [1\u20133] and natural language processing [4\u20136].",
+      "section_id": "",
+      "start_char": 0,
+      "end_char": 172,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26819793191348124,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, they typically involve massive general matrix multiplication (GEMM)-based operators, such as CONV2D, Linear, and BMM (batched matrix multiplication), complex non-GEMM operators, such as memory operations (e.g., reshape, view, and transpose), normalization, and logit computation functions (e.g., Softmax), and/or sophisticated compound kernels such as FlashAttention [7, 8] and Mixture-of-Experts (MoE) [9, 10].",
+      "section_id": "",
+      "start_char": 173,
+      "end_char": 593,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2363620541137271,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The critical operations, such as attention, can also span into multiple implementations for prefill and decode phases [11].",
+      "section_id": "",
+      "start_char": 594,
+      "end_char": 717,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23876397202796878,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To effectively support these diverse operations, modern hardware systems [12\u201316] have involved scaling up the number of computing units, cache size, memory capacity, and bandwidth.",
+      "section_id": "",
+      "start_char": 718,
+      "end_char": 898,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13097692698543614,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This motivates a strong demand to develop and optimize GPU kernels and DL frameworks, such as Tensorflow [17], Pytorch [18, 19], vLLM [20], and SGLang [21].",
+      "section_id": "",
+      "start_char": 899,
+      "end_char": 1055,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22254237619470485,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To facilitate kernel development, various domain-specific languages (DSL) and their corresponding platforms have recently been introduced, including TVM [22, 23], Halide [24], and Triton [25].",
+      "section_id": "",
+      "start_char": 1056,
+      "end_char": 1248,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20631485332447616,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, Triton [25] has emerged as a programming language and compiler that enables developers to write high-performance GPU kernels with reduced programming complexity.",
+      "section_id": "",
+      "start_char": 1249,
+      "end_char": 1424,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29058412817163154,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, a numerical evaluation of Triton that demonstrates its ability to generate matrix multiplication implementations on par with cuBLAS and up to 3\u00d7 faster than other domain-specific languages for DNNs on recurrent and transformer neural networks [25].",
+      "section_id": "",
+      "start_char": 1425,
+      "end_char": 1686,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2616000875897374,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As a result, Triton has been integrated into various DL platforms, including TorchInductor [19], vLLM [20], and SGLang [21], attracting significant attention from the developer community.",
+      "section_id": "",
+      "start_char": 1687,
+      "end_char": 1874,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17779738322793256,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A critical issue with a Triton kernel is that it typically requires tuning hyperparameters to achieve good performance [26].",
+      "section_id": "",
+      "start_char": 1875,
+      "end_char": 1999,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13614833465076054,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, Figure 1 shows a normalized latency of a matrix multiplication kernel in Triton on four common GPUs (e.g., V100 [12], A100 [14], H100, and MI250 [15]).",
+      "section_id": "",
+      "start_char": 2000,
+      "end_char": 2164,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23162944898245913,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These kernel implementations are associated with different configurations, including tiling configurations and thread block dimensions.",
+      "section_id": "",
+      "start_char": 2165,
+      "end_char": 2300,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2286538053977541,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "It is observed that latencies vary widely across configurations, for example, ranging from 1 to 16\u00d7 with an input shape of (1024, 1024, 1024) (See Section 4 for detailed settings).",
+      "section_id": "",
+      "start_char": 2301,
+      "end_char": 2481,
+      "cited_ref_ids": [
+        "(1024, 1024, 1024)"
+      ],
+      "evidence_similarity": 0.3159980103455479,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Unfortunately, it becomes too costly to fully examine all tuning configurations (e.g., with a few thousand candidates) to identify the best-performing one.",
+      "section_id": "",
+      "start_char": 2482,
+      "end_char": 2637,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12535739264249157,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "According to a recent report [26], among 57 Triton kernels in vLLM [20], only seven have a performance-tuning mode by default.",
+      "section_id": "",
+      "start_char": 2638,
+      "end_char": 2764,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1270593970046074,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To address these shortcomings, this work presents TTX, a tuning scheme for Triton kernels with an XGBoost performance predictor, with the following main contributions: \u2022 Autotuner.",
+      "section_id": "",
+      "start_char": 2765,
+      "end_char": 2945,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24290181653084392,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We present TTX, an extension of the Triton-JIT compiler that transparently and efficiently supports performance autotuning for existing applications.",
+      "section_id": "",
+      "start_char": 2946,
+      "end_char": 3095,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3475063826202992,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Leveraging an efficient latency predictor, TTX rapidly explores the tuning configuration space and thereby accurately identifies a few potential configuration candidates (e.g., the top-50 via a performance model) for benchmarking.",
+      "section_id": "",
+      "start_char": 3096,
+      "end_char": 3326,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25937376045618904,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "\u2022 Performance Model.",
+      "section_id": "",
+      "start_char": 3327,
+      "end_char": 3347,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.49403903619641243,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The proposed predictor is built on a rich set of features specified for Triton kernels.",
+      "section_id": "",
+      "start_char": 3348,
+      "end_char": 3435,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22779753957702525,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Leveraging a well-known regressor, XGBoost [27], our predictor rapidly and accurately estimates the latency of a Triton kernel for a given tuning configuration.",
+      "section_id": "",
+      "start_char": 3436,
+      "end_char": 3596,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22908456782245937,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We evaluate TTX on a comprehensive set of Triton operations, including emerging operations such as FlashAttention, quantized GEMM, and fused MoE.",
+      "section_id": "",
+      "start_char": 3611,
+      "end_char": 3756,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2905058336736788,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Experiments are also conducted on four popular GPUs (e.g., Nvidia V100, A100, and H100, and AMD MI250).",
+      "section_id": "",
+      "start_char": 3757,
+      "end_char": 3860,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26096182190941825,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "\u2022 Cross-Kernel Generalization Analysis.",
+      "section_id": "",
+      "start_char": 3861,
+      "end_char": 3900,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1420567244412176,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We empirically study leave-one-kernel-out (LOKO) generalization with a unified cross-kernel predictor that combines a contrastive-pretrained PTX encoder with a single shared XGBoost.",
+      "section_id": "",
+      "start_char": 3901,
+      "end_char": 4083,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.10640451357465838,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The analysis reveals that pointwise and normalization kernels transfer cleanly across the kernel boundary, while compute-bound kernels (MM, BMM) do not.",
+      "section_id": "",
+      "start_char": 4084,
+      "end_char": 4236,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1761880772773386,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This asymmetry directly motivates the per-kernel design of TTX and clarifies the boundary along which a unified model can and cannot substitute for per-kernel ones.",
+      "section_id": "",
+      "start_char": 4237,
+      "end_char": 4401,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25150637854619284,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "2 Background\n2.1 GPU Kernel Development and Generation Modern DL workloads typically consist of various complex operations, including MM, BMM, normalization [28, 29], attention [30], and MoE [9].",
+      "section_id": "",
+      "start_char": 4402,
+      "end_char": 4597,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2637121159025971,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "One popular approach to specializing kernels for various hardware architectures is to use template libraries.",
+      "section_id": "",
+      "start_char": 4598,
+      "end_char": 4707,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20524800736253607,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, flash_attn libraries [7, 8] present optimized kernels for widely-used attention operations [30].",
+      "section_id": "",
+      "start_char": 4708,
+      "end_char": 4817,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16186384936044598,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These template libraries select which handwritten code fragments (written in a low-level language such as CUDA) to use based on the usage scenario (e.g., depending on the tensor shape, data type, or batch size).",
+      "section_id": "",
+      "start_char": 4818,
+      "end_char": 5029,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15325080328444962,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Unfortunately, flash_attn has nearly 70000 LoC, making it a significant effort to optimize the kernel or modify it to target a new hardware device.",
+      "section_id": "",
+      "start_char": 5030,
+      "end_char": 5177,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11319878445127543,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The DSL Triton [25] has recently become a promising alternative to writing custom CUDA kernels.",
+      "section_id": "",
+      "start_char": 5178,
+      "end_char": 5273,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13914216250860936,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Triton enables developers to write and debug Python-based code that can be executed on various GPUs, including Nvidia V100 [12], A100 [14], H100, and AMD MI250 [15].",
+      "section_id": "",
+      "start_char": 5274,
+      "end_char": 5439,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18794007239475574,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, Figure 2 presents an example of Triton matrix multiplication (triton_mm) in Lines 25-38.",
+      "section_id": "",
+      "start_char": 5440,
+      "end_char": 5541,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25979459702575164,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Written in Python, the code takes as input a set of parameters, including input shapes, tile sizes, and parallelism factors.",
+      "section_id": "",
+      "start_char": 5542,
+      "end_char": 5666,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18600037459098137,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Thanks to a user-friendly interface, Triton has been integrated into popular DL platforms, such as Torch Inductor [19, 31] and vLLM [20], to generate efficient GPU kernels.",
+      "section_id": "",
+      "start_char": 5667,
+      "end_char": 5839,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19980465570352227,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For instance, given a PyTorch layer normalization implementation, Torch Inductor can generate a Triton code template, enabling the rapid development of an efficient kernel.",
+      "section_id": "",
+      "start_char": 5840,
+      "end_char": 6012,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24032353443444696,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "2.2 Compilation and Autotuning To avoid writing hand-optimized code, one may rely on either ahead-of-time compilation to generate generic binaries or use a Just-in-Time (JIT) compiler to generate executables on the fly [26].",
+      "section_id": "",
+      "start_char": 6013,
+      "end_char": 6237,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2127846953871623,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Compiler-based approaches depend on predefined heuristics to generate general-purpose code, which may not maximize performance for all parameter combinations.",
+      "section_id": "",
+      "start_char": 6238,
+      "end_char": 6396,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2459789795962467,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In contrast, autotuned kernels augment compilation with empirical performance tuning, generating and benchmarking a wide range of kernel variants to select the best-performing configuration for the target hardware and scenario [26].",
+      "section_id": "",
+      "start_char": 6397,
+      "end_char": 6629,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2335172863402931,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, Triton leverages a JIT compiler and explores the tuning configuration design space using hierarchical tiles to automate memory coalescing, shared memory allocation, and thread synchronization [25].",
+      "section_id": "",
+      "start_char": 6630,
+      "end_char": 6841,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24854608001371392,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For instance, the autotune function triton.autotune (Lines 15-23 in Figure 2) calls a function (e.g., matmul_get_configs) to obtain tuning configurations (e.g., BLOCK_M, BLOCK_N, and BLOCK_K).",
+      "section_id": "",
+      "start_char": 6842,
+      "end_char": 7034,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22237450722400948,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This infrastructure is notably adopted by the torch.compile API, which leverages the TorchInductor backend to generate Triton kernels [19].",
+      "section_id": "",
+      "start_char": 7035,
+      "end_char": 7174,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.09942730231621802,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To optimize these kernels, TorchInductor offers a max-autotune mode.",
+      "section_id": "",
+      "start_char": 7175,
+      "end_char": 7243,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.08746242656196414,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This mode leverages Triton or template-based matrix multiplications on supported devices and Triton-based convolutions on GPUs, instantiating a benchmarking harness that compiles and executes multiple candidate kernels, varying parameters such as tile sizes and thread parallelism (e.g., num_warps) to empirically select the fastest implementation from a static, engineer-defined subset of configurations.",
+      "section_id": "",
+      "start_char": 7244,
+      "end_char": 7649,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18301250830721696,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While this strategy balances compilation time with runtime performance, finding a \u201cgood enough\u201d kernel, it remains fundamentally constrained by its search space.",
+      "section_id": "",
+      "start_char": 7650,
+      "end_char": 7811,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12432883848545954,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "By iterating only over predefined candidates, the compiler may fail to discover optimal configurations that lie outside these heuristics, particularly for irregular input shapes or novel hardware architectures where manual presets are insufficient.",
+      "section_id": "",
+      "start_char": 7812,
+      "end_char": 8060,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20989887402458174,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "2.3 GPU Kernel Performance Modeling To evaluate an implementation candidate, one may rely on direct measurements on a device or on a cost model.",
+      "section_id": "",
+      "start_char": 8061,
+      "end_char": 8205,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2979167481549655,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Measuring performance with all scenarios is generally expensive.",
+      "section_id": "",
+      "start_char": 8206,
+      "end_char": 8270,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24136498726790634,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As a result, GPU kernel modeling has been well studied in the literature.",
+      "section_id": "",
+      "start_char": 8271,
+      "end_char": 8344,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1741539697698996,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A common approach relies on analytical models based on handcrafted rules and architectural knowledge [32\u201335].",
+      "section_id": "",
+      "start_char": 8345,
+      "end_char": 8454,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1928994224582613,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "They typically rely on runtime profiling and hardware-specific counters such as cache hit rates and memory utilization.",
+      "section_id": "",
+      "start_char": 8455,
+      "end_char": 8574,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19172554932289765,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Recently, data-driven approaches have emerged as a modern solution, achieving higher accuracy in performance prediction, as demonstrated by systems such as Neusight [36] and by Li et al.",
+      "section_id": "",
+      "start_char": 8575,
+      "end_char": 8761,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16926329900354659,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Neusight and Li et al.",
+      "section_id": "",
+      "start_char": 8768,
+      "end_char": 8790,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22515305952441814,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "develop data-driven approaches for cuDNN, demonstrating that predicting kernel latency in this context is relatively straightforward.",
+      "section_id": "",
+      "start_char": 8791,
+      "end_char": 8924,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12384762876034706,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "3 Proposed TTX\n3.1 Motivation Although tuning Triton kernels is essential to achieve good performance, it poses the following two challenges.",
+      "section_id": "",
+      "start_char": 8925,
+      "end_char": 9066,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13070876861457129,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Performance Heterogeneity of Triton Kernels.",
+      "section_id": "",
+      "start_char": 9067,
+      "end_char": 9111,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2541187940092148,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The latency diversity of Triton kernels is shown in Figure 1.",
+      "section_id": "",
+      "start_char": 9112,
+      "end_char": 9173,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1796891224708632,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Furthermore, we observe that simply copying the best configuration from one input shape to another can significantly degrade performance.",
+      "section_id": "",
+      "start_char": 9174,
+      "end_char": 9311,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13036019075572045,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 3 presents a confusion matrix of normalized latency when transferring tuning configurations of Triton-based matrix multiplication among four input shapes.",
+      "section_id": "",
+      "start_char": 9312,
+      "end_char": 9473,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11655906126613033,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, on H100, when using the best configuration with the input shape (128, 128, 128), the implementations of the shapes (512, 512, 512), (1024, 1024, 1024), and (2048, 2048, 2048) only achieve 43%, 22%, and 17%, respectively, compared to their corresponding best-performing implementations.",
+      "section_id": "",
+      "start_char": 9474,
+      "end_char": 9772,
+      "cited_ref_ids": [
+        "(1024, 1024, 1024)",
+        "(2048, 2048, 2048)"
+      ],
+      "evidence_similarity": 0.20748951711250097,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Additionally, transferring the best-performing configuration from one GPU to another (e.g., from A100 to MI250) may also degrade performance significantly [26].",
+      "section_id": "",
+      "start_char": 9773,
+      "end_char": 9933,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19077162916092083,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Large Design Space of Configurations.",
+      "section_id": "",
+      "start_char": 9934,
+      "end_char": 9971,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15080019865128536,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Another challenge in tuning a Triton kernel is the high cost of evaluating the large number of tuning configurations.",
+      "section_id": "",
+      "start_char": 9972,
+      "end_char": 10089,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20376022761198317,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, Figure 4 presents an example of a configuration search space for various operations (e.g., matrix multiplication (MM), convolution (CONV), and flash attention (flash_attn)) on V100, A100/H100, and MI250 (See Section 4 for detailed settings).",
+      "section_id": "",
+      "start_char": 10090,
+      "end_char": 10344,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29598311831646845,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On Nvidia A100 and H100 GPUs, the widely-used MM may have 7680 configurations, representing all combinations of tile sizes, the number of wraps, and the number of compilation stages.",
+      "section_id": "",
+      "start_char": 10345,
+      "end_char": 10527,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2471983473594755,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The number of options can be significantly increased on an AMD MI250 GPU (e.g., 38400 configurations).",
+      "section_id": "",
+      "start_char": 10528,
+      "end_char": 10630,
+      "cited_ref_ids": [
+        "(e.g., 38400 configurations)"
+      ],
+      "evidence_similarity": 0.377010639720239,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Note that the number of configurations is defined for a single input shape, e.g., M = 128, N = 128, K = 128.",
+      "section_id": "",
+      "start_char": 10631,
+      "end_char": 10739,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1420567244412176,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As explained in the previous example, it may not directly transfer the optimized configuration from one input shape to another.",
+      "section_id": "",
+      "start_char": 10740,
+      "end_char": 10867,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12119435804328761,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As it becomes extremely costly or infeasible to examine all configurations for all input shapes.",
+      "section_id": "",
+      "start_char": 10868,
+      "end_char": 10964,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19204478773664954,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Some kernels, such as FlashAttention, may use a small set of default tuning configurations [7, 8].",
+      "section_id": "",
+      "start_char": 10965,
+      "end_char": 11063,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2386590569892905,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "3.2 System Overview To address the aforementioned challenges, we introduce TTX, a tuning scheme for Triton kernels with an XGBoost performance predictor.",
+      "section_id": "",
+      "start_char": 11064,
+      "end_char": 11217,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3360023385952429,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The three building blocks of TTX are explained as follows.",
+      "section_id": "",
+      "start_char": 11218,
+      "end_char": 11276,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17968912247086316,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "3.2.1 An Extension of Triton-JIT Compiler.",
+      "section_id": "",
+      "start_char": 11277,
+      "end_char": 11319,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.34513839974902993,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We present our framework as an extension of the Triton-JIT compiler, enabling transparent and efficient performance autotuning for existing applications.",
+      "section_id": "",
+      "start_char": 11320,
+      "end_char": 11473,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3393332738786517,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Triton exposes a rich set of performance-tuning parameters, as they are primarily defined by programmers rather than limited to predefined optimization strategies.",
+      "section_id": "",
+      "start_char": 11474,
+      "end_char": 11637,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1200807688661224,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As explained in Figure 5, our framework extends the Triton language: developers need only specify the parameters to tune, along with optional tuning ranges.",
+      "section_id": "",
+      "start_char": 11638,
+      "end_char": 11794,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1486165265755247,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The extension comprises a kernel performance model that predicts the execution time of any Triton kernel, coupled with a simple algorithm that selects the best parameters based on the estimated performance.",
+      "section_id": "",
+      "start_char": 11795,
+      "end_char": 12001,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29700729517765173,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "3.2.2 Kernel Performance Prediction.",
+      "section_id": "",
+      "start_char": 12002,
+      "end_char": 12038,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20169059194959987,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We build a performance predictor to estimate the execution time of a Triton kernel.",
+      "section_id": "",
+      "start_char": 12039,
+      "end_char": 12122,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2460494642890004,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The predictor is constructed if a new kernel is encountered (i.e., when it is not already present in our database).",
+      "section_id": "",
+      "start_char": 12123,
+      "end_char": 12238,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15661828498323271,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We first define the search space of tuning configurations and input shapes.",
+      "section_id": "",
+      "start_char": 12239,
+      "end_char": 12314,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1946822193270661,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Each set of tuning parameters and input shapes is associated with the corresponding execution time of the kernel, forming a supervised learning problem.",
+      "section_id": "",
+      "start_char": 12315,
+      "end_char": 12467,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2775944951760242,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, the kernel performance predictor takes the tuning parameters and the input shape features as input and produces an estimated execution time.",
+      "section_id": "",
+      "start_char": 12468,
+      "end_char": 12622,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25550906167194826,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "During deployment, the predictor generalizes to unseen input shapes and tuning configurations.",
+      "section_id": "",
+      "start_char": 12623,
+      "end_char": 12717,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17108320031571747,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To further enhance prediction quality, we also employ intermediate representation (IR) features, which have been shown to be effective [38, 39].",
+      "section_id": "",
+      "start_char": 12718,
+      "end_char": 12862,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16105033244814848,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For NVIDIA GPUs, we use PTX, and for AMD GPUs, we use LLVM IR.",
+      "section_id": "",
+      "start_char": 12863,
+      "end_char": 12925,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19826366318290756,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As illustrated in Fig.",
+      "section_id": "",
+      "start_char": 12926,
+      "end_char": 12948,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.120105148127447,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "6, each sampled configuration is compiled by the Triton compiler.",
+      "section_id": "",
+      "start_char": 12949,
+      "end_char": 13014,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18786954889463311,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "From the IR, we extract instruction-level features (e.g., instruction counts), as described in Table 1.",
+      "section_id": "",
+      "start_char": 13015,
+      "end_char": 13118,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.09818535458698188,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The extracted code features, together with the corresponding input shapes and tuning parameters, are stored in a database.",
+      "section_id": "",
+      "start_char": 13119,
+      "end_char": 13241,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1988943053002022,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Finally, we use NVIDIA Nsight Systems and ROCProfiler to measure the runtime latency of each compiled kernel and record these latency measurements alongside the associated input shapes and tuning parameters.",
+      "section_id": "",
+      "start_char": 13242,
+      "end_char": 13449,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18081159224438312,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "3.2.3 Model-Guided Tuning.",
+      "section_id": "",
+      "start_char": 13450,
+      "end_char": 13476,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20169059194959987,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "As illustrated in Figure 5, our system takes input shapes and candidate tuning parameters, such as tiling sizes, extracts IR-level code features, and uses a trained XGBoost model to predict the kernel execution time.",
+      "section_id": "",
+      "start_char": 13477,
+      "end_char": 13693,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20844338807660254,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Based on these predictions, our framework selects the top-50 configurations with the lowest estimated latencies.",
+      "section_id": "",
+      "start_char": 13694,
+      "end_char": 13806,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18073605717434282,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The selected configurations are then executed to measure actual execution times, enabling fine-grained discrimination.",
+      "section_id": "",
+      "start_char": 13807,
+      "end_char": 13925,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.0793340181431237,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The configuration with the fastest execution time is marked.",
+      "section_id": "",
+      "start_char": 13926,
+      "end_char": 13986,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1642240311581627,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Finally, the kernel is executed with the marked configuration.",
+      "section_id": "",
+      "start_char": 13987,
+      "end_char": 14049,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1460065839372805,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "3.3 Implementation Details 3.3.1 Triton Kernel Collection.",
+      "section_id": "",
+      "start_char": 14050,
+      "end_char": 14108,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1937267665229383,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "We select a set of representative Triton kernels to evaluate the effectiveness of our framework.",
+      "section_id": "",
+      "start_char": 14109,
+      "end_char": 14205,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23984355839260577,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The Triton kernels for widely used ML operations are collected from two primary sources: the official Triton repository and kernels generated by TorchInductor.",
+      "section_id": "",
+      "start_char": 14206,
+      "end_char": 14365,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2039518126963995,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The detailed sources are listed in Table 2.",
+      "section_id": "",
+      "start_char": 14366,
+      "end_char": 14409,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12901501250279432,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "For instance, matrix multiplication, layer normalization, and softmax operations commonly used in large language models (LLMs) are obtained from the Triton repository.",
+      "section_id": "",
+      "start_char": 14410,
+      "end_char": 14577,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.33831123513259553,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "TorchInductor, which serves as the default backend for PyTorch\u2019s torch.compile [40], produces Triton kernels specialized for particular problem sizes.",
+      "section_id": "",
+      "start_char": 14578,
+      "end_char": 14728,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.182195073955107,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "To enable autotuning and model training, these kernels are restructured to accept parameterized tile sizes and warps, making them tunable across different configurations.",
+      "section_id": "",
+      "start_char": 14729,
+      "end_char": 14899,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22237450722400945,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The correctness of GPU kernels is validated by comparing their outputs against those of the corresponding PyTorch operators.",
+      "section_id": "",
+      "start_char": 14900,
+      "end_char": 15024,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22807691845954584,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "In addition, kernels for FlashAttention and GEMM quantization are taken from the repositories by the authors, as specified in Table 2.",
+      "section_id": "",
+      "start_char": 15025,
+      "end_char": 15159,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2221347703073552,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "3.3.2 Performance Features.",
+      "section_id": "",
+      "start_char": 15160,
+      "end_char": 15187,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24701951809820621,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The feature set employed in our predictive model is categorized into three primary domains: (1) kernel input shapes, (2) tuning parameters, and (3) IR-level code features derived from the generated PTX or LLVM IR code.",
+      "section_id": "",
+      "start_char": 15188,
+      "end_char": 15406,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15547310142111936,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "These features are described in Table 1.",
+      "section_id": "",
+      "start_char": 15407,
+      "end_char": 15447,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.09806544279787856,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Specifically, for the third category, we parse the compiled kernel to extract instruction counts across seven distinct groups: (i) total instructions; (ii) arithmetic operations (e.g., add, sub, cmp); (iii) bitwise logic operations; (iv) special mathematical functions (e.g., sqrt, sin); (v) synchronization primitives; (vi) global memory instructions; and (vii) shared memory instructions.",
+      "section_id": "",
+      "start_char": 15448,
+      "end_char": 15838,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1663244461157964,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "These IR-level code features play an important role in capturing how high-level codes are transformed into lower-level GPU-dependent codes.",
+      "section_id": "",
+      "start_char": 15839,
+      "end_char": 15978,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3086378394686272,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The IR information helps the model quantitatively identify the portion of each instruction type so that the effect of each tuning parameter is taken into account.",
+      "section_id": "",
+      "start_char": 15979,
+      "end_char": 16141,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24185828161132628,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Furthermore, to capture hardware utilization and algorithmic characteristics, we incorporate derived high-level features.",
+      "section_id": "",
+      "start_char": 16142,
+      "end_char": 16263,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16820170793627698,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "These include Arithmetic Intensity, defined as the ratio of total computational operations to the memory footprint of input and output tensors, and Grid Size, representing the total number of thread blocks spawned for the kernel execution.",
+      "section_id": "",
+      "start_char": 16264,
+      "end_char": 16503,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.265872607686273,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Our empirical observations suggest that, to ensure efficient hardware memory alignment, the Triton compiler may apply different code generation strategies based on whether tensor dimensions are divisible by 16.",
+      "section_id": "",
+      "start_char": 16504,
+      "end_char": 16714,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17691376492470395,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "To expose this latent behavior to the predictor, we introduce binary alignment indicators (0 or 1) for each dimension.",
+      "section_id": "",
+      "start_char": 16715,
+      "end_char": 16833,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1620794051156934,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "These features aim to assist the model in distinguishing performance patterns between aligned and unaligned input shapes, particularly when fixed tuning configurations are used.",
+      "section_id": "",
+      "start_char": 16834,
+      "end_char": 17011,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21392517790363647,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Although tuning parameters and input shapes are both kernel inputs, they are different in nature.",
+      "section_id": "",
+      "start_char": 17012,
+      "end_char": 17109,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15602697645873229,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Tuning parameters are typically declared with tl.constexpr to enable compile-time specialization that reduces computation and improve the compiler\u2019s optimization opportunities.",
+      "section_id": "",
+      "start_char": 17110,
+      "end_char": 17286,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17745171399440063,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As a result, different values of tuning parameters generally produce distinct IR code features.",
+      "section_id": "",
+      "start_char": 17287,
+      "end_char": 17382,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1740780488780338,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In contrast, for all possible combinations of input shapes, the divisibility-by-16 condition described earlier bounds number of possible uniquely generated IR programs to 2^N, where N denotes the number of input tensors.",
+      "section_id": "",
+      "start_char": 17383,
+      "end_char": 17603,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17204504100280696,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This property leads to two important implications.",
+      "section_id": "",
+      "start_char": 17604,
+      "end_char": 17654,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1544274337440993,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "First, the number of distinct IR programs generated by a kernel is at most the number of possible tuning configurations, and is independent of the number of input shape combinations, which can be prohibitive large.",
+      "section_id": "",
+      "start_char": 17655,
+      "end_char": 17869,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19944810892955028,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Second, IR code features can be efficiently generated during the model construction phase by exhaustively iterating through the tuning-parameter space and subsequently reused during the deployment phase.",
+      "section_id": "",
+      "start_char": 17870,
+      "end_char": 18073,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1455530298278908,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "3.3.3 Prediction Model.",
+      "section_id": "",
+      "start_char": 18074,
+      "end_char": 18097,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.32551584898969155,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As the features are in a tabular structure mixing tile sizes, problem sizes, and the PTX-based counts, our framework adopts XGBoost [27] as a prediction model.",
+      "section_id": "",
+      "start_char": 18098,
+      "end_char": 18257,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15482344484252877,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "XGBoost is chosen for its robustness in regression problems and its ability to efficiently handle nonlinear relationships.",
+      "section_id": "",
+      "start_char": 18258,
+      "end_char": 18380,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23511055176774293,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Also, in order to be useful in solving real-world compiler problems (e.g., auto-tuning), one of the main concerns when designing our predictor is that the model needs to be light-weight in both training and inference cost.",
+      "section_id": "",
+      "start_char": 18381,
+      "end_char": 18603,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19226075510934307,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Compared to neural-network-based approaches [36, 37], XGBoost requires a smaller dataset and takes less training time, and thereby aligns well with our design goals.",
+      "section_id": "",
+      "start_char": 18604,
+      "end_char": 18769,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20001340920968635,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "4 Evaluation\n4.1 Methodology Triton Kernels and GPUs.",
+      "section_id": "",
+      "start_char": 18770,
+      "end_char": 18823,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23162944898245916,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To demonstrate the effectiveness of the proposed TTX, we conduct the experiments with diverse widely-used DL operations, including matrix multiplication (MM), batched matrix multiplication (BMM), convolution (CONV), activations (e.g., SilU, ReLU, and GeLU), Dropout, Softmax, Batch Normalization (BN), Layer Normalization (LN), quantized GEMM, Flash Attention, and Fused MoE.",
+      "section_id": "",
+      "start_char": 18824,
+      "end_char": 19199,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18993714197217415,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The detailed sources are specified in Table 2.",
+      "section_id": "",
+      "start_char": 19200,
+      "end_char": 19246,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.10738478998168366,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The experiments are conducted on four popular data center GPUs, including three NVIDIA models (Tesla V100S-PCIE-32GB, Ampere A100-PCIe-40GB, and H100-HBM3-80GB) and one AMD model (Instinct MI250).",
+      "section_id": "",
+      "start_char": 19247,
+      "end_char": 19443,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18452787390294578,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "All measurements are conducted using Pytorch 2.0.1 compiled with CUDA Library 12.1 for the Nvidia GPUs and Pytorch 2.3.1 compiled with ROCm 6.1 for the AMD GPU.",
+      "section_id": "",
+      "start_char": 19444,
+      "end_char": 19604,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2561226756242158,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "By default, fused MoE and FlashAttention kernels are executed in half-precision (FP16), while the others are executed in FP32.",
+      "section_id": "",
+      "start_char": 19605,
+      "end_char": 19731,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15786891223521055,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Quantized GEMM kernels are executed using both FP32 and FP16 formats.",
+      "section_id": "",
+      "start_char": 19732,
+      "end_char": 19801,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18189788899754153,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Latency is measured by running each operator five times and averaging the results from the four later measurements.",
+      "section_id": "",
+      "start_char": 19802,
+      "end_char": 19917,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1706939481357418,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For training, we collect \u223c20k data points for each kernel by randomly sampling input shapes and configurations within fixed bounds.",
+      "section_id": "",
+      "start_char": 19918,
+      "end_char": 20049,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2860154255202519,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, for input shapes, we uniformly sample: (i) MM/GEMM-Quant: M, N, K \u2208 [1, 2048]; (ii) Conv: batch \u2208 [1, 100], channels \u2208 [3, 512], spatial size \u2208 [5, 1024] with a fixed 3\u00d73 kernel, stride 1, padding 1; (iii) BMM: batch \u2208 [1, 128] and M, N, K \u2208 [1, 2048]; (iv) FlashAttention: batch \u2208 [1, 128], L_q, L_k \u2208 [1, 512], heads \u2208 [1, 128], head dimension \u2208 [1, 128]; (v) MoE: experts E \u2208 [4, 128], top-k k \u2208 [1, \u230aE/4\u230b], tokens \u2208 [128, 2048], out_dim \u2208 [1025, 3000], and in_dim \u2208 [1024, out_dim].",
+      "section_id": "",
+      "start_char": 20050,
+      "end_char": 20550,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16224774716296664,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For all other kernels, any remaining dimensions are sampled from [1, 2048].",
+      "section_id": "",
+      "start_char": 20551,
+      "end_char": 20626,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16785264222310364,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Tuning Configurations.",
+      "section_id": "",
+      "start_char": 20627,
+      "end_char": 20649,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.0,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Tuning hyperparameters for Triton kernels on GPUs are reported in Tables 3, 4, and 5.",
+      "section_id": "",
+      "start_char": 20650,
+      "end_char": 20735,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26353608728680356,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On the V100 GPU, the total number of configurations (Total_Configs) is determined by all combinations of tiling settings (e.g., BLOCK_M, BLOCK_N, BLOCK_K, GROUP_M) and the number of wraps (num_wraps).",
+      "section_id": "",
+      "start_char": 20736,
+      "end_char": 20936,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.275087570693887,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On the A100 and H100 GPUs, the number of compilation (optimization) stages for software-pipelining loops is included, resulting in a large number of configurations.",
+      "section_id": "",
+      "start_char": 20937,
+      "end_char": 21101,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24677631912186954,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On the MI250 GPU, the configuration space also includes waves_per_eu, a hyperparameter that controls the use of vector general-purpose registers to achieve the desired occupancy levels.",
+      "section_id": "",
+      "start_char": 21102,
+      "end_char": 21287,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23461869239097197,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Consequently, the space is much larger than others.",
+      "section_id": "",
+      "start_char": 21288,
+      "end_char": 21339,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17241714316026188,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For instance, for attention kernels, the numbers of configurations on V100, A100, and MI250 are 96, 480, and 3200, respectively.",
+      "section_id": "",
+      "start_char": 21340,
+      "end_char": 21468,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.31986283362938517,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To train and evaluate the performance predictor, the collected dataset is randomly divided into 80% for training and 20% for testing.",
+      "section_id": "",
+      "start_char": 21479,
+      "end_char": 21612,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3712585379334664,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Each operator has its own predictor based on XGBoost [27].",
+      "section_id": "",
+      "start_char": 21613,
+      "end_char": 21671,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20722495104566224,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A base model is initialized with 500 estimators.",
+      "section_id": "",
+      "start_char": 21672,
+      "end_char": 21720,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19300258974670065,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Empirically, the depth is set to 10, and the learning rate is 0.02.",
+      "section_id": "",
+      "start_char": 21721,
+      "end_char": 21788,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2081795221775856,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The XGBoost objective function is set to reg:gamma to ensure that all predicted values, e.g., latency, remain positive.",
+      "section_id": "",
+      "start_char": 21789,
+      "end_char": 21908,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15866873115624971,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Following prior work [36], we evaluate prediction accuracy using the mean absolute percentage error (MAPE).",
+      "section_id": "",
+      "start_char": 21909,
+      "end_char": 22016,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11964138126902013,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "MAPE = 1/n \u2211_{i=1}^{n} |y_i\u2212 \u02c6{y_i}|/y_i where y_i denotes the ground truth value and \u02c6{y_i} represents the predicted value.",
+      "section_id": "",
+      "start_char": 22017,
+      "end_char": 22141,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1384309359359168,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To evaluate autotuning performance, we use the set of input shapes from previous work [42] and collect data for all configurations of each shape to form the ground truth.",
+      "section_id": "",
+      "start_char": 22142,
+      "end_char": 22312,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2447882543521084,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Meanwhile, TTX generates a small set of tuning configurations (e.g., Top-k) based on its performance model.",
+      "section_id": "",
+      "start_char": 22313,
+      "end_char": 22420,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22779753957702525,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Given an input shape, the best-performing candidate among the top-k is normalized to match the best one obtained from the ground truth.",
+      "section_id": "",
+      "start_char": 22421,
+      "end_char": 22556,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13219369634211287,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Our latency predictor is compared against recent GPU kernel performance models, including Neusight [36] and the Roofline model [43].",
+      "section_id": "",
+      "start_char": 22568,
+      "end_char": 22700,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.320574858183417,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The comparison is conducted using our Triton kernel dataset, with aligned model settings and, where applicable, feature representations.",
+      "section_id": "",
+      "start_char": 22701,
+      "end_char": 22837,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21329418130817038,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "When training and evaluating the Neusight MLP model on our Triton kernel dataset, we exclude hardware-level features (e.g., L2 cache size and the number of SMs) to ensure a fair and consistent comparison.",
+      "section_id": "",
+      "start_char": 22838,
+      "end_char": 23042,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21450693318545677,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Meanwhile, Roofline relies on analytical performance bounds derived from peak hardware characteristics, including peak memory bandwidth and peak FLOPs.",
+      "section_id": "",
+      "start_char": 23043,
+      "end_char": 23194,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19878071569159236,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Kernel performance is estimated based on arithmetic intensity, defined as the ratio of total floating-point operations to the volume of memory transactions.",
+      "section_id": "",
+      "start_char": 23195,
+      "end_char": 23351,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2996756506520456,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Cross-Kernel Setting.",
+      "section_id": "",
+      "start_char": 23352,
+      "end_char": 23373,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14010746552279263,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In addition to the per-kernel evaluation above, we study how well a single unified predictor generalizes across kernels.",
+      "section_id": "",
+      "start_char": 23374,
+      "end_char": 23494,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1483399630985694,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The unified variant trains one XGBoost across all kernels using the same hyperparameters as TTX, augmented with a fixed-length PTX-IR embedding produced by a small Transformer encoder pretrained with a contrastive (NT-Xent) objective on the same kernel corpus (d_model = 128, two layers, four heads, output dimension 128, temperature 0.1, 50 epochs).",
+      "section_id": "",
+      "start_char": 23495,
+      "end_char": 23845,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1957790321229046,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The encoder is frozen and applied per (kernel, configuration) prior to XGBoost training.",
+      "section_id": "",
+      "start_char": 23846,
+      "end_char": 23934,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17043681122881532,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We evaluate this variant under leave-one-kernel-out (LOKO): for each held-out kernel, the unified model is trained on the remaining kernels and tested on the held-out one.",
+      "section_id": "",
+      "start_char": 23935,
+      "end_char": 24106,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2503145839253493,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We report MAPE per kernel and the geometric mean across folds.",
+      "section_id": "",
+      "start_char": 24107,
+      "end_char": 24169,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15396280470015908,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This study uses V100 across nine kernels (MM, BMM, LN, Softmax, BN, GeLU, SiLU, ReLU, Dropout); preliminary multi-seed and multi-GPU validation are ongoing.",
+      "section_id": "",
+      "start_char": 24170,
+      "end_char": 24326,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2871238676631755,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "4.2 Experimental Results 4.2.1 Results for Performance model.",
+      "section_id": "",
+      "start_char": 24327,
+      "end_char": 24388,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.36121485346818916,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 7 presents the prediction accuracy of the operations on Nvidia V100, A100, and H100, and AMD MI250.",
+      "section_id": "",
+      "start_char": 24389,
+      "end_char": 24495,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.3068311399603927,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, complex operators such as GEMM, BMM, Convolution, FlashAttention, Quantized GEMM, and MoE exhibit MAPEs ranging from 9% to 22%.",
+      "section_id": "",
+      "start_char": 24496,
+      "end_char": 24637,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16626236914341813,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In contrast, the remaining seven lighter kernels achieve significantly lower error rates, ranging from 0.5% to 5%.",
+      "section_id": "",
+      "start_char": 24638,
+      "end_char": 24752,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1054940206992849,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This disparity can be attributed to the complex runtime behaviors of the compute-intensive operators, whereas the lighter kernels are influenced by less tuning parameters and exhibit more predictable performance patterns.",
+      "section_id": "",
+      "start_char": 24753,
+      "end_char": 24974,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2208916507541744,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This behavior is consistent across all the hardwares in our experiments.",
+      "section_id": "",
+      "start_char": 24975,
+      "end_char": 25047,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24638095118924142,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Although NeuSight performed well on cuDNN workloads, it consistently ranks second in our evaluation on the Triton dataset.",
+      "section_id": "",
+      "start_char": 25048,
+      "end_char": 25170,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2367273811500008,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We observed a distinct error pattern where NeuSight struggles with compute-intensive operators, exhibiting high MAPEs ranging from 19% to 219%.",
+      "section_id": "",
+      "start_char": 25171,
+      "end_char": 25314,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15436080388221446,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In contrast, for lightweight operators, the error rates are significantly lower (1.86% to 14%).",
+      "section_id": "",
+      "start_char": 25315,
+      "end_char": 25410,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14025190046174849,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These results suggest that while NeuSight performs well in its native cuDNN environment, it fails to generalize effectively to the Triton compiler context.",
+      "section_id": "",
+      "start_char": 25411,
+      "end_char": 25566,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20816087381363269,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The Roofline model consistently exhibits poor predictive accuracy, often yielding a MAPE of approximately 100%.",
+      "section_id": "",
+      "start_char": 25567,
+      "end_char": 25678,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20935909778621362,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This limitation stems from its oversimplified assumptions, which fail to capture the complex, non-linear runtime behaviors inherent in GPU kernels.",
+      "section_id": "",
+      "start_char": 25679,
+      "end_char": 25826,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17618219005322538,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Consequently, the Roofline model consistently ranks third in our evaluation.",
+      "section_id": "",
+      "start_char": 25827,
+      "end_char": 25903,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19432786369535607,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "4.2.2 Cross-Kernel Generalization Analysis.",
+      "section_id": "",
+      "start_char": 25904,
+      "end_char": 25947,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1420567244412176,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A natural question is whether a single cross-kernel model could replace the per-kernel ensemble in TTX.",
+      "section_id": "",
+      "start_char": 25948,
+      "end_char": 26051,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12332158583120761,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We investigated this empirically using the unified variant described in Section 3.2.",
+      "section_id": "",
+      "start_char": 26052,
+      "end_char": 26136,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12986853169148557,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Under leave-one-kernel-out (LOKO) evaluation, we report MAPE per kernel and the geometric mean across folds.",
+      "section_id": "",
+      "start_char": 26137,
+      "end_char": 26245,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11707355741455527,
+      "claim_type": "UNSUPPORTED"
+    }
+  ],
+  "uncited_claims": [
+    {
+      "text": "1 Introduction\nDeep learning (DL) workloads have demonstrated great success in various problem domains, such as computer vision [1\u20133] and natural language processing [4\u20136].",
+      "section_id": "",
+      "start_char": 0,
+      "end_char": 172,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26819793191348124,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "However, they typically involve massive general matrix multiplication (GEMM)-based operators, such as CONV2D, Linear, and BMM (batched matrix multiplication), complex non-GEMM operators, such as memory operations (e.g., reshape, view, and transpose), normalization, and logit computation functions (e.g., Softmax), and/or sophisticated compound kernels such as FlashAttention [7, 8] and Mixture-of-Experts (MoE) [9, 10].",
+      "section_id": "",
+      "start_char": 173,
+      "end_char": 593,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2363620541137271,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The critical operations, such as attention, can also span into multiple implementations for prefill and decode phases [11].",
+      "section_id": "",
+      "start_char": 594,
+      "end_char": 717,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23876397202796878,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To effectively support these diverse operations, modern hardware systems [12\u201316] have involved scaling up the number of computing units, cache size, memory capacity, and bandwidth.",
+      "section_id": "",
+      "start_char": 718,
+      "end_char": 898,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13097692698543614,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This motivates a strong demand to develop and optimize GPU kernels and DL frameworks, such as Tensorflow [17], Pytorch [18, 19], vLLM [20], and SGLang [21].",
+      "section_id": "",
+      "start_char": 899,
+      "end_char": 1055,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22254237619470485,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To facilitate kernel development, various domain-specific languages (DSL) and their corresponding platforms have recently been introduced, including TVM [22, 23], Halide [24], and Triton [25].",
+      "section_id": "",
+      "start_char": 1056,
+      "end_char": 1248,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20631485332447616,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, Triton [25] has emerged as a programming language and compiler that enables developers to write high-performance GPU kernels with reduced programming complexity.",
+      "section_id": "",
+      "start_char": 1249,
+      "end_char": 1424,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29058412817163154,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, a numerical evaluation of Triton that demonstrates its ability to generate matrix multiplication implementations on par with cuBLAS and up to 3\u00d7 faster than other domain-specific languages for DNNs on recurrent and transformer neural networks [25].",
+      "section_id": "",
+      "start_char": 1425,
+      "end_char": 1686,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2616000875897374,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As a result, Triton has been integrated into various DL platforms, including TorchInductor [19], vLLM [20], and SGLang [21], attracting significant attention from the developer community.",
+      "section_id": "",
+      "start_char": 1687,
+      "end_char": 1874,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17779738322793256,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A critical issue with a Triton kernel is that it typically requires tuning hyperparameters to achieve good performance [26].",
+      "section_id": "",
+      "start_char": 1875,
+      "end_char": 1999,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13614833465076054,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, Figure 1 shows a normalized latency of a matrix multiplication kernel in Triton on four common GPUs (e.g., V100 [12], A100 [14], H100, and MI250 [15]).",
+      "section_id": "",
+      "start_char": 2000,
+      "end_char": 2164,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23162944898245913,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These kernel implementations are associated with different configurations, including tiling configurations and thread block dimensions.",
+      "section_id": "",
+      "start_char": 2165,
+      "end_char": 2300,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2286538053977541,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Unfortunately, it becomes too costly to fully examine all tuning configurations (e.g., with a few thousand candidates) to identify the best-performing one.",
+      "section_id": "",
+      "start_char": 2482,
+      "end_char": 2637,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12535739264249157,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "According to a recent report [26], among 57 Triton kernels in vLLM [20], only seven have a performance-tuning mode by default.",
+      "section_id": "",
+      "start_char": 2638,
+      "end_char": 2764,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1270593970046074,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To address these shortcomings, this work presents TTX, a tuning scheme for Triton kernels with an XGBoost performance predictor, with the following main contributions: \u2022 Autotuner.",
+      "section_id": "",
+      "start_char": 2765,
+      "end_char": 2945,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24290181653084392,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Leveraging an efficient latency predictor, TTX rapidly explores the tuning configuration space and thereby accurately identifies a few potential configuration candidates (e.g., the top-50 via a performance model) for benchmarking.",
+      "section_id": "",
+      "start_char": 3096,
+      "end_char": 3326,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25937376045618904,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The proposed predictor is built on a rich set of features specified for Triton kernels.",
+      "section_id": "",
+      "start_char": 3348,
+      "end_char": 3435,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22779753957702525,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Leveraging a well-known regressor, XGBoost [27], our predictor rapidly and accurately estimates the latency of a Triton kernel for a given tuning configuration.",
+      "section_id": "",
+      "start_char": 3436,
+      "end_char": 3596,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22908456782245937,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We evaluate TTX on a comprehensive set of Triton operations, including emerging operations such as FlashAttention, quantized GEMM, and fused MoE.",
+      "section_id": "",
+      "start_char": 3611,
+      "end_char": 3756,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2905058336736788,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Experiments are also conducted on four popular GPUs (e.g., Nvidia V100, A100, and H100, and AMD MI250).",
+      "section_id": "",
+      "start_char": 3757,
+      "end_char": 3860,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26096182190941825,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We empirically study leave-one-kernel-out (LOKO) generalization with a unified cross-kernel predictor that combines a contrastive-pretrained PTX encoder with a single shared XGBoost.",
+      "section_id": "",
+      "start_char": 3901,
+      "end_char": 4083,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.10640451357465838,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The analysis reveals that pointwise and normalization kernels transfer cleanly across the kernel boundary, while compute-bound kernels (MM, BMM) do not.",
+      "section_id": "",
+      "start_char": 4084,
+      "end_char": 4236,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1761880772773386,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This asymmetry directly motivates the per-kernel design of TTX and clarifies the boundary along which a unified model can and cannot substitute for per-kernel ones.",
+      "section_id": "",
+      "start_char": 4237,
+      "end_char": 4401,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25150637854619284,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "2 Background\n2.1 GPU Kernel Development and Generation Modern DL workloads typically consist of various complex operations, including MM, BMM, normalization [28, 29], attention [30], and MoE [9].",
+      "section_id": "",
+      "start_char": 4402,
+      "end_char": 4597,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2637121159025971,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "One popular approach to specializing kernels for various hardware architectures is to use template libraries.",
+      "section_id": "",
+      "start_char": 4598,
+      "end_char": 4707,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20524800736253607,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, flash_attn libraries [7, 8] present optimized kernels for widely-used attention operations [30].",
+      "section_id": "",
+      "start_char": 4708,
+      "end_char": 4817,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16186384936044598,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These template libraries select which handwritten code fragments (written in a low-level language such as CUDA) to use based on the usage scenario (e.g., depending on the tensor shape, data type, or batch size).",
+      "section_id": "",
+      "start_char": 4818,
+      "end_char": 5029,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15325080328444962,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Unfortunately, flash_attn has nearly 70000 LoC, making it a significant effort to optimize the kernel or modify it to target a new hardware device.",
+      "section_id": "",
+      "start_char": 5030,
+      "end_char": 5177,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11319878445127543,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The DSL Triton [25] has recently become a promising alternative to writing custom CUDA kernels.",
+      "section_id": "",
+      "start_char": 5178,
+      "end_char": 5273,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13914216250860936,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Triton enables developers to write and debug Python-based code that can be executed on various GPUs, including Nvidia V100 [12], A100 [14], H100, and AMD MI250 [15].",
+      "section_id": "",
+      "start_char": 5274,
+      "end_char": 5439,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18794007239475574,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, Figure 2 presents an example of Triton matrix multiplication (triton_mm) in Lines 25-38.",
+      "section_id": "",
+      "start_char": 5440,
+      "end_char": 5541,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25979459702575164,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Written in Python, the code takes as input a set of parameters, including input shapes, tile sizes, and parallelism factors.",
+      "section_id": "",
+      "start_char": 5542,
+      "end_char": 5666,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18600037459098137,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Thanks to a user-friendly interface, Triton has been integrated into popular DL platforms, such as Torch Inductor [19, 31] and vLLM [20], to generate efficient GPU kernels.",
+      "section_id": "",
+      "start_char": 5667,
+      "end_char": 5839,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19980465570352227,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For instance, given a PyTorch layer normalization implementation, Torch Inductor can generate a Triton code template, enabling the rapid development of an efficient kernel.",
+      "section_id": "",
+      "start_char": 5840,
+      "end_char": 6012,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24032353443444696,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "2.2 Compilation and Autotuning To avoid writing hand-optimized code, one may rely on either ahead-of-time compilation to generate generic binaries or use a Just-in-Time (JIT) compiler to generate executables on the fly [26].",
+      "section_id": "",
+      "start_char": 6013,
+      "end_char": 6237,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2127846953871623,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Compiler-based approaches depend on predefined heuristics to generate general-purpose code, which may not maximize performance for all parameter combinations.",
+      "section_id": "",
+      "start_char": 6238,
+      "end_char": 6396,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2459789795962467,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In contrast, autotuned kernels augment compilation with empirical performance tuning, generating and benchmarking a wide range of kernel variants to select the best-performing configuration for the target hardware and scenario [26].",
+      "section_id": "",
+      "start_char": 6397,
+      "end_char": 6629,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2335172863402931,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, Triton leverages a JIT compiler and explores the tuning configuration design space using hierarchical tiles to automate memory coalescing, shared memory allocation, and thread synchronization [25].",
+      "section_id": "",
+      "start_char": 6630,
+      "end_char": 6841,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24854608001371392,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For instance, the autotune function triton.autotune (Lines 15-23 in Figure 2) calls a function (e.g., matmul_get_configs) to obtain tuning configurations (e.g., BLOCK_M, BLOCK_N, and BLOCK_K).",
+      "section_id": "",
+      "start_char": 6842,
+      "end_char": 7034,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22237450722400948,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This infrastructure is notably adopted by the torch.compile API, which leverages the TorchInductor backend to generate Triton kernels [19].",
+      "section_id": "",
+      "start_char": 7035,
+      "end_char": 7174,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.09942730231621802,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To optimize these kernels, TorchInductor offers a max-autotune mode.",
+      "section_id": "",
+      "start_char": 7175,
+      "end_char": 7243,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.08746242656196414,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This mode leverages Triton or template-based matrix multiplications on supported devices and Triton-based convolutions on GPUs, instantiating a benchmarking harness that compiles and executes multiple candidate kernels, varying parameters such as tile sizes and thread parallelism (e.g., num_warps) to empirically select the fastest implementation from a static, engineer-defined subset of configurations.",
+      "section_id": "",
+      "start_char": 7244,
+      "end_char": 7649,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18301250830721696,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "While this strategy balances compilation time with runtime performance, finding a \u201cgood enough\u201d kernel, it remains fundamentally constrained by its search space.",
+      "section_id": "",
+      "start_char": 7650,
+      "end_char": 7811,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12432883848545954,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "By iterating only over predefined candidates, the compiler may fail to discover optimal configurations that lie outside these heuristics, particularly for irregular input shapes or novel hardware architectures where manual presets are insufficient.",
+      "section_id": "",
+      "start_char": 7812,
+      "end_char": 8060,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20989887402458174,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "2.3 GPU Kernel Performance Modeling To evaluate an implementation candidate, one may rely on direct measurements on a device or on a cost model.",
+      "section_id": "",
+      "start_char": 8061,
+      "end_char": 8205,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2979167481549655,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As a result, GPU kernel modeling has been well studied in the literature.",
+      "section_id": "",
+      "start_char": 8271,
+      "end_char": 8344,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1741539697698996,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A common approach relies on analytical models based on handcrafted rules and architectural knowledge [32\u201335].",
+      "section_id": "",
+      "start_char": 8345,
+      "end_char": 8454,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1928994224582613,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "They typically rely on runtime profiling and hardware-specific counters such as cache hit rates and memory utilization.",
+      "section_id": "",
+      "start_char": 8455,
+      "end_char": 8574,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19172554932289765,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Recently, data-driven approaches have emerged as a modern solution, achieving higher accuracy in performance prediction, as demonstrated by systems such as Neusight [36] and by Li et al.",
+      "section_id": "",
+      "start_char": 8575,
+      "end_char": 8761,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16926329900354659,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "develop data-driven approaches for cuDNN, demonstrating that predicting kernel latency in this context is relatively straightforward.",
+      "section_id": "",
+      "start_char": 8791,
+      "end_char": 8924,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12384762876034706,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "3 Proposed TTX\n3.1 Motivation Although tuning Triton kernels is essential to achieve good performance, it poses the following two challenges.",
+      "section_id": "",
+      "start_char": 8925,
+      "end_char": 9066,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13070876861457129,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The latency diversity of Triton kernels is shown in Figure 1.",
+      "section_id": "",
+      "start_char": 9112,
+      "end_char": 9173,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1796891224708632,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Furthermore, we observe that simply copying the best configuration from one input shape to another can significantly degrade performance.",
+      "section_id": "",
+      "start_char": 9174,
+      "end_char": 9311,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13036019075572045,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Figure 3 presents a confusion matrix of normalized latency when transferring tuning configurations of Triton-based matrix multiplication among four input shapes.",
+      "section_id": "",
+      "start_char": 9312,
+      "end_char": 9473,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11655906126613033,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Additionally, transferring the best-performing configuration from one GPU to another (e.g., from A100 to MI250) may also degrade performance significantly [26].",
+      "section_id": "",
+      "start_char": 9773,
+      "end_char": 9933,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19077162916092083,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Another challenge in tuning a Triton kernel is the high cost of evaluating the large number of tuning configurations.",
+      "section_id": "",
+      "start_char": 9972,
+      "end_char": 10089,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20376022761198317,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For example, Figure 4 presents an example of a configuration search space for various operations (e.g., matrix multiplication (MM), convolution (CONV), and flash attention (flash_attn)) on V100, A100/H100, and MI250 (See Section 4 for detailed settings).",
+      "section_id": "",
+      "start_char": 10090,
+      "end_char": 10344,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29598311831646845,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On Nvidia A100 and H100 GPUs, the widely-used MM may have 7680 configurations, representing all combinations of tile sizes, the number of wraps, and the number of compilation stages.",
+      "section_id": "",
+      "start_char": 10345,
+      "end_char": 10527,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2471983473594755,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Note that the number of configurations is defined for a single input shape, e.g., M = 128, N = 128, K = 128.",
+      "section_id": "",
+      "start_char": 10631,
+      "end_char": 10739,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1420567244412176,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As explained in the previous example, it may not directly transfer the optimized configuration from one input shape to another.",
+      "section_id": "",
+      "start_char": 10740,
+      "end_char": 10867,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12119435804328761,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As it becomes extremely costly or infeasible to examine all configurations for all input shapes.",
+      "section_id": "",
+      "start_char": 10868,
+      "end_char": 10964,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19204478773664954,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Some kernels, such as FlashAttention, may use a small set of default tuning configurations [7, 8].",
+      "section_id": "",
+      "start_char": 10965,
+      "end_char": 11063,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2386590569892905,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The three building blocks of TTX are explained as follows.",
+      "section_id": "",
+      "start_char": 11218,
+      "end_char": 11276,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17968912247086316,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Triton exposes a rich set of performance-tuning parameters, as they are primarily defined by programmers rather than limited to predefined optimization strategies.",
+      "section_id": "",
+      "start_char": 11474,
+      "end_char": 11637,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1200807688661224,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As explained in Figure 5, our framework extends the Triton language: developers need only specify the parameters to tune, along with optional tuning ranges.",
+      "section_id": "",
+      "start_char": 11638,
+      "end_char": 11794,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1486165265755247,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The extension comprises a kernel performance model that predicts the execution time of any Triton kernel, coupled with a simple algorithm that selects the best parameters based on the estimated performance.",
+      "section_id": "",
+      "start_char": 11795,
+      "end_char": 12001,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.29700729517765173,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "We build a performance predictor to estimate the execution time of a Triton kernel.",
+      "section_id": "",
+      "start_char": 12039,
+      "end_char": 12122,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2460494642890004,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The predictor is constructed if a new kernel is encountered (i.e., when it is not already present in our database).",
+      "section_id": "",
+      "start_char": 12123,
+      "end_char": 12238,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15661828498323271,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We first define the search space of tuning configurations and input shapes.",
+      "section_id": "",
+      "start_char": 12239,
+      "end_char": 12314,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1946822193270661,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Each set of tuning parameters and input shapes is associated with the corresponding execution time of the kernel, forming a supervised learning problem.",
+      "section_id": "",
+      "start_char": 12315,
+      "end_char": 12467,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2775944951760242,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, the kernel performance predictor takes the tuning parameters and the input shape features as input and produces an estimated execution time.",
+      "section_id": "",
+      "start_char": 12468,
+      "end_char": 12622,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.25550906167194826,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "During deployment, the predictor generalizes to unseen input shapes and tuning configurations.",
+      "section_id": "",
+      "start_char": 12623,
+      "end_char": 12717,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17108320031571747,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To further enhance prediction quality, we also employ intermediate representation (IR) features, which have been shown to be effective [38, 39].",
+      "section_id": "",
+      "start_char": 12718,
+      "end_char": 12862,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16105033244814848,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For NVIDIA GPUs, we use PTX, and for AMD GPUs, we use LLVM IR.",
+      "section_id": "",
+      "start_char": 12863,
+      "end_char": 12925,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19826366318290756,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "6, each sampled configuration is compiled by the Triton compiler.",
+      "section_id": "",
+      "start_char": 12949,
+      "end_char": 13014,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18786954889463311,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "From the IR, we extract instruction-level features (e.g., instruction counts), as described in Table 1.",
+      "section_id": "",
+      "start_char": 13015,
+      "end_char": 13118,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.09818535458698188,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The extracted code features, together with the corresponding input shapes and tuning parameters, are stored in a database.",
+      "section_id": "",
+      "start_char": 13119,
+      "end_char": 13241,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1988943053002022,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Finally, we use NVIDIA Nsight Systems and ROCProfiler to measure the runtime latency of each compiled kernel and record these latency measurements alongside the associated input shapes and tuning parameters.",
+      "section_id": "",
+      "start_char": 13242,
+      "end_char": 13449,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18081159224438312,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "As illustrated in Figure 5, our system takes input shapes and candidate tuning parameters, such as tiling sizes, extracts IR-level code features, and uses a trained XGBoost model to predict the kernel execution time.",
+      "section_id": "",
+      "start_char": 13477,
+      "end_char": 13693,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20844338807660254,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Based on these predictions, our framework selects the top-50 configurations with the lowest estimated latencies.",
+      "section_id": "",
+      "start_char": 13694,
+      "end_char": 13806,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18073605717434282,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The selected configurations are then executed to measure actual execution times, enabling fine-grained discrimination.",
+      "section_id": "",
+      "start_char": 13807,
+      "end_char": 13925,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.0793340181431237,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The configuration with the fastest execution time is marked.",
+      "section_id": "",
+      "start_char": 13926,
+      "end_char": 13986,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1642240311581627,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Finally, the kernel is executed with the marked configuration.",
+      "section_id": "",
+      "start_char": 13987,
+      "end_char": 14049,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1460065839372805,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "We select a set of representative Triton kernels to evaluate the effectiveness of our framework.",
+      "section_id": "",
+      "start_char": 14109,
+      "end_char": 14205,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23984355839260577,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The Triton kernels for widely used ML operations are collected from two primary sources: the official Triton repository and kernels generated by TorchInductor.",
+      "section_id": "",
+      "start_char": 14206,
+      "end_char": 14365,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2039518126963995,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "TorchInductor, which serves as the default backend for PyTorch\u2019s torch.compile [40], produces Triton kernels specialized for particular problem sizes.",
+      "section_id": "",
+      "start_char": 14578,
+      "end_char": 14728,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.182195073955107,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "To enable autotuning and model training, these kernels are restructured to accept parameterized tile sizes and warps, making them tunable across different configurations.",
+      "section_id": "",
+      "start_char": 14729,
+      "end_char": 14899,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22237450722400945,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "The correctness of GPU kernels is validated by comparing their outputs against those of the corresponding PyTorch operators.",
+      "section_id": "",
+      "start_char": 14900,
+      "end_char": 15024,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22807691845954584,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "In addition, kernels for FlashAttention and GEMM quantization are taken from the repositories by the authors, as specified in Table 2.",
+      "section_id": "",
+      "start_char": 15025,
+      "end_char": 15159,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2221347703073552,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The feature set employed in our predictive model is categorized into three primary domains: (1) kernel input shapes, (2) tuning parameters, and (3) IR-level code features derived from the generated PTX or LLVM IR code.",
+      "section_id": "",
+      "start_char": 15188,
+      "end_char": 15406,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15547310142111936,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Specifically, for the third category, we parse the compiled kernel to extract instruction counts across seven distinct groups: (i) total instructions; (ii) arithmetic operations (e.g., add, sub, cmp); (iii) bitwise logic operations; (iv) special mathematical functions (e.g., sqrt, sin); (v) synchronization primitives; (vi) global memory instructions; and (vii) shared memory instructions.",
+      "section_id": "",
+      "start_char": 15448,
+      "end_char": 15838,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1663244461157964,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "The IR information helps the model quantitatively identify the portion of each instruction type so that the effect of each tuning parameter is taken into account.",
+      "section_id": "",
+      "start_char": 15979,
+      "end_char": 16141,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24185828161132628,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Furthermore, to capture hardware utilization and algorithmic characteristics, we incorporate derived high-level features.",
+      "section_id": "",
+      "start_char": 16142,
+      "end_char": 16263,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16820170793627698,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "These include Arithmetic Intensity, defined as the ratio of total computational operations to the memory footprint of input and output tensors, and Grid Size, representing the total number of thread blocks spawned for the kernel execution.",
+      "section_id": "",
+      "start_char": 16264,
+      "end_char": 16503,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.265872607686273,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Our empirical observations suggest that, to ensure efficient hardware memory alignment, the Triton compiler may apply different code generation strategies based on whether tensor dimensions are divisible by 16.",
+      "section_id": "",
+      "start_char": 16504,
+      "end_char": 16714,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17691376492470395,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "To expose this latent behavior to the predictor, we introduce binary alignment indicators (0 or 1) for each dimension.",
+      "section_id": "",
+      "start_char": 16715,
+      "end_char": 16833,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1620794051156934,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "These features aim to assist the model in distinguishing performance patterns between aligned and unaligned input shapes, particularly when fixed tuning configurations are used.",
+      "section_id": "",
+      "start_char": 16834,
+      "end_char": 17011,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21392517790363647,
+      "claim_type": "SYNTHESIS"
+    },
+    {
+      "text": "Although tuning parameters and input shapes are both kernel inputs, they are different in nature.",
+      "section_id": "",
+      "start_char": 17012,
+      "end_char": 17109,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15602697645873229,
+      "claim_type": "SUMMARY"
+    },
+    {
+      "text": "Tuning parameters are typically declared with tl.constexpr to enable compile-time specialization that reduces computation and improve the compiler\u2019s optimization opportunities.",
+      "section_id": "",
+      "start_char": 17110,
+      "end_char": 17286,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17745171399440063,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As a result, different values of tuning parameters generally produce distinct IR code features.",
+      "section_id": "",
+      "start_char": 17287,
+      "end_char": 17382,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1740780488780338,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In contrast, for all possible combinations of input shapes, the divisibility-by-16 condition described earlier bounds number of possible uniquely generated IR programs to 2^N, where N denotes the number of input tensors.",
+      "section_id": "",
+      "start_char": 17383,
+      "end_char": 17603,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17204504100280696,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "First, the number of distinct IR programs generated by a kernel is at most the number of possible tuning configurations, and is independent of the number of input shape combinations, which can be prohibitive large.",
+      "section_id": "",
+      "start_char": 17655,
+      "end_char": 17869,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19944810892955028,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Second, IR code features can be efficiently generated during the model construction phase by exhaustively iterating through the tuning-parameter space and subsequently reused during the deployment phase.",
+      "section_id": "",
+      "start_char": 17870,
+      "end_char": 18073,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1455530298278908,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "As the features are in a tabular structure mixing tile sizes, problem sizes, and the PTX-based counts, our framework adopts XGBoost [27] as a prediction model.",
+      "section_id": "",
+      "start_char": 18098,
+      "end_char": 18257,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15482344484252877,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "XGBoost is chosen for its robustness in regression problems and its ability to efficiently handle nonlinear relationships.",
+      "section_id": "",
+      "start_char": 18258,
+      "end_char": 18380,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23511055176774293,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Also, in order to be useful in solving real-world compiler problems (e.g., auto-tuning), one of the main concerns when designing our predictor is that the model needs to be light-weight in both training and inference cost.",
+      "section_id": "",
+      "start_char": 18381,
+      "end_char": 18603,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19226075510934307,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Compared to neural-network-based approaches [36, 37], XGBoost requires a smaller dataset and takes less training time, and thereby aligns well with our design goals.",
+      "section_id": "",
+      "start_char": 18604,
+      "end_char": 18769,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20001340920968635,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To demonstrate the effectiveness of the proposed TTX, we conduct the experiments with diverse widely-used DL operations, including matrix multiplication (MM), batched matrix multiplication (BMM), convolution (CONV), activations (e.g., SilU, ReLU, and GeLU), Dropout, Softmax, Batch Normalization (BN), Layer Normalization (LN), quantized GEMM, Flash Attention, and Fused MoE.",
+      "section_id": "",
+      "start_char": 18824,
+      "end_char": 19199,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18993714197217415,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The experiments are conducted on four popular data center GPUs, including three NVIDIA models (Tesla V100S-PCIE-32GB, Ampere A100-PCIe-40GB, and H100-HBM3-80GB) and one AMD model (Instinct MI250).",
+      "section_id": "",
+      "start_char": 19247,
+      "end_char": 19443,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18452787390294578,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "All measurements are conducted using Pytorch 2.0.1 compiled with CUDA Library 12.1 for the Nvidia GPUs and Pytorch 2.3.1 compiled with ROCm 6.1 for the AMD GPU.",
+      "section_id": "",
+      "start_char": 19444,
+      "end_char": 19604,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2561226756242158,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "By default, fused MoE and FlashAttention kernels are executed in half-precision (FP16), while the others are executed in FP32.",
+      "section_id": "",
+      "start_char": 19605,
+      "end_char": 19731,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15786891223521055,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Quantized GEMM kernels are executed using both FP32 and FP16 formats.",
+      "section_id": "",
+      "start_char": 19732,
+      "end_char": 19801,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.18189788899754153,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Latency is measured by running each operator five times and averaging the results from the four later measurements.",
+      "section_id": "",
+      "start_char": 19802,
+      "end_char": 19917,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1706939481357418,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For training, we collect \u223c20k data points for each kernel by randomly sampling input shapes and configurations within fixed bounds.",
+      "section_id": "",
+      "start_char": 19918,
+      "end_char": 20049,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2860154255202519,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, for input shapes, we uniformly sample: (i) MM/GEMM-Quant: M, N, K \u2208 [1, 2048]; (ii) Conv: batch \u2208 [1, 100], channels \u2208 [3, 512], spatial size \u2208 [5, 1024] with a fixed 3\u00d73 kernel, stride 1, padding 1; (iii) BMM: batch \u2208 [1, 128] and M, N, K \u2208 [1, 2048]; (iv) FlashAttention: batch \u2208 [1, 128], L_q, L_k \u2208 [1, 512], heads \u2208 [1, 128], head dimension \u2208 [1, 128]; (v) MoE: experts E \u2208 [4, 128], top-k k \u2208 [1, \u230aE/4\u230b], tokens \u2208 [128, 2048], out_dim \u2208 [1025, 3000], and in_dim \u2208 [1024, out_dim].",
+      "section_id": "",
+      "start_char": 20050,
+      "end_char": 20550,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16224774716296664,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "For all other kernels, any remaining dimensions are sampled from [1, 2048].",
+      "section_id": "",
+      "start_char": 20551,
+      "end_char": 20626,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16785264222310364,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Tuning hyperparameters for Triton kernels on GPUs are reported in Tables 3, 4, and 5.",
+      "section_id": "",
+      "start_char": 20650,
+      "end_char": 20735,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.26353608728680356,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On the V100 GPU, the total number of configurations (Total_Configs) is determined by all combinations of tiling settings (e.g., BLOCK_M, BLOCK_N, BLOCK_K, GROUP_M) and the number of wraps (num_wraps).",
+      "section_id": "",
+      "start_char": 20736,
+      "end_char": 20936,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.275087570693887,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On the A100 and H100 GPUs, the number of compilation (optimization) stages for software-pipelining loops is included, resulting in a large number of configurations.",
+      "section_id": "",
+      "start_char": 20937,
+      "end_char": 21101,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24677631912186954,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "On the MI250 GPU, the configuration space also includes waves_per_eu, a hyperparameter that controls the use of vector general-purpose registers to achieve the desired occupancy levels.",
+      "section_id": "",
+      "start_char": 21102,
+      "end_char": 21287,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.23461869239097197,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Each operator has its own predictor based on XGBoost [27].",
+      "section_id": "",
+      "start_char": 21613,
+      "end_char": 21671,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20722495104566224,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Empirically, the depth is set to 10, and the learning rate is 0.02.",
+      "section_id": "",
+      "start_char": 21721,
+      "end_char": 21788,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2081795221775856,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The XGBoost objective function is set to reg:gamma to ensure that all predicted values, e.g., latency, remain positive.",
+      "section_id": "",
+      "start_char": 21789,
+      "end_char": 21908,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15866873115624971,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Following prior work [36], we evaluate prediction accuracy using the mean absolute percentage error (MAPE).",
+      "section_id": "",
+      "start_char": 21909,
+      "end_char": 22016,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11964138126902013,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "MAPE = 1/n \u2211_{i=1}^{n} |y_i\u2212 \u02c6{y_i}|/y_i where y_i denotes the ground truth value and \u02c6{y_i} represents the predicted value.",
+      "section_id": "",
+      "start_char": 22017,
+      "end_char": 22141,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1384309359359168,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "To evaluate autotuning performance, we use the set of input shapes from previous work [42] and collect data for all configurations of each shape to form the ground truth.",
+      "section_id": "",
+      "start_char": 22142,
+      "end_char": 22312,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2447882543521084,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Meanwhile, TTX generates a small set of tuning configurations (e.g., Top-k) based on its performance model.",
+      "section_id": "",
+      "start_char": 22313,
+      "end_char": 22420,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.22779753957702525,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Given an input shape, the best-performing candidate among the top-k is normalized to match the best one obtained from the ground truth.",
+      "section_id": "",
+      "start_char": 22421,
+      "end_char": 22556,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.13219369634211287,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The comparison is conducted using our Triton kernel dataset, with aligned model settings and, where applicable, feature representations.",
+      "section_id": "",
+      "start_char": 22701,
+      "end_char": 22837,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21329418130817038,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "When training and evaluating the Neusight MLP model on our Triton kernel dataset, we exclude hardware-level features (e.g., L2 cache size and the number of SMs) to ensure a fair and consistent comparison.",
+      "section_id": "",
+      "start_char": 22838,
+      "end_char": 23042,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.21450693318545677,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Meanwhile, Roofline relies on analytical performance bounds derived from peak hardware characteristics, including peak memory bandwidth and peak FLOPs.",
+      "section_id": "",
+      "start_char": 23043,
+      "end_char": 23194,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19878071569159236,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Kernel performance is estimated based on arithmetic intensity, defined as the ratio of total floating-point operations to the volume of memory transactions.",
+      "section_id": "",
+      "start_char": 23195,
+      "end_char": 23351,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2996756506520456,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In addition to the per-kernel evaluation above, we study how well a single unified predictor generalizes across kernels.",
+      "section_id": "",
+      "start_char": 23374,
+      "end_char": 23494,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1483399630985694,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The unified variant trains one XGBoost across all kernels using the same hyperparameters as TTX, augmented with a fixed-length PTX-IR embedding produced by a small Transformer encoder pretrained with a contrastive (NT-Xent) objective on the same kernel corpus (d_model = 128, two layers, four heads, output dimension 128, temperature 0.1, 50 epochs).",
+      "section_id": "",
+      "start_char": 23495,
+      "end_char": 23845,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1957790321229046,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The encoder is frozen and applied per (kernel, configuration) prior to XGBoost training.",
+      "section_id": "",
+      "start_char": 23846,
+      "end_char": 23934,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17043681122881532,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We evaluate this variant under leave-one-kernel-out (LOKO): for each held-out kernel, the unified model is trained on the remaining kernels and tested on the held-out one.",
+      "section_id": "",
+      "start_char": 23935,
+      "end_char": 24106,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2503145839253493,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We report MAPE per kernel and the geometric mean across folds.",
+      "section_id": "",
+      "start_char": 24107,
+      "end_char": 24169,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15396280470015908,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This study uses V100 across nine kernels (MM, BMM, LN, Softmax, BN, GeLU, SiLU, ReLU, Dropout); preliminary multi-seed and multi-GPU validation are ongoing.",
+      "section_id": "",
+      "start_char": 24170,
+      "end_char": 24326,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2871238676631755,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Specifically, complex operators such as GEMM, BMM, Convolution, FlashAttention, Quantized GEMM, and MoE exhibit MAPEs ranging from 9% to 22%.",
+      "section_id": "",
+      "start_char": 24496,
+      "end_char": 24637,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.16626236914341813,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In contrast, the remaining seven lighter kernels achieve significantly lower error rates, ranging from 0.5% to 5%.",
+      "section_id": "",
+      "start_char": 24638,
+      "end_char": 24752,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.1054940206992849,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This disparity can be attributed to the complex runtime behaviors of the compute-intensive operators, whereas the lighter kernels are influenced by less tuning parameters and exhibit more predictable performance patterns.",
+      "section_id": "",
+      "start_char": 24753,
+      "end_char": 24974,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2208916507541744,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This behavior is consistent across all the hardwares in our experiments.",
+      "section_id": "",
+      "start_char": 24975,
+      "end_char": 25047,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.24638095118924142,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Although NeuSight performed well on cuDNN workloads, it consistently ranks second in our evaluation on the Triton dataset.",
+      "section_id": "",
+      "start_char": 25048,
+      "end_char": 25170,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.2367273811500008,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We observed a distinct error pattern where NeuSight struggles with compute-intensive operators, exhibiting high MAPEs ranging from 19% to 219%.",
+      "section_id": "",
+      "start_char": 25171,
+      "end_char": 25314,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.15436080388221446,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "In contrast, for lightweight operators, the error rates are significantly lower (1.86% to 14%).",
+      "section_id": "",
+      "start_char": 25315,
+      "end_char": 25410,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.14025190046174849,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "These results suggest that while NeuSight performs well in its native cuDNN environment, it fails to generalize effectively to the Triton compiler context.",
+      "section_id": "",
+      "start_char": 25411,
+      "end_char": 25566,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20816087381363269,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "The Roofline model consistently exhibits poor predictive accuracy, often yielding a MAPE of approximately 100%.",
+      "section_id": "",
+      "start_char": 25567,
+      "end_char": 25678,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.20935909778621362,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "This limitation stems from its oversimplified assumptions, which fail to capture the complex, non-linear runtime behaviors inherent in GPU kernels.",
+      "section_id": "",
+      "start_char": 25679,
+      "end_char": 25826,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.17618219005322538,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Consequently, the Roofline model consistently ranks third in our evaluation.",
+      "section_id": "",
+      "start_char": 25827,
+      "end_char": 25903,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.19432786369535607,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "A natural question is whether a single cross-kernel model could replace the per-kernel ensemble in TTX.",
+      "section_id": "",
+      "start_char": 25948,
+      "end_char": 26051,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12332158583120761,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "We investigated this empirically using the unified variant described in Section 3.2.",
+      "section_id": "",
+      "start_char": 26052,
+      "end_char": 26136,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.12986853169148557,
+      "claim_type": "UNSUPPORTED"
+    },
+    {
+      "text": "Under leave-one-kernel-out (LOKO) evaluation, we report MAPE per kernel and the geometric mean across folds.",
+      "section_id": "",
+      "start_char": 26137,
+      "end_char": 26245,
+      "cited_ref_ids": [],
+      "evidence_similarity": 0.11707355741455527,
+      "claim_type": "UNSUPPORTED"
+    }
+  ],
+  "low_similarity_citations": [
+    {
+      "text": "For example, on H100, when using the best configuration with the input shape (128, 128, 128), the implementations of the shapes (512, 512, 512), (1024, 1024, 1024), and (2048, 2048, 2048) only achieve 43%, 22%, and 17%, respectively, compared to their corresponding best-performing implementations.",
+      "section_id": "",
+      "start_char": 9474,
+      "end_char": 9772,
+      "cited_ref_ids": [
+        "(1024, 1024, 1024)",
+        "(2048, 2048, 2048)"
+      ],
+      "evidence_similarity": 0.20748951711250097,
+      "claim_type": "SUMMARY"
+    }
+  ]
+}

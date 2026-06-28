@@ -181,7 +181,7 @@ const AssignmentDetailPage = () => {
       formData.append("file", file);
       const response = await fetch(`${getBackendUrl()}/parse-pdf`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        headers: { Authorization: `Bearer ${import.meta.env.VITE_BACKEND_API_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
         body: formData,
       });
       if (!response.ok) {
@@ -246,7 +246,7 @@ const AssignmentDetailPage = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${import.meta.env.VITE_BACKEND_API_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({ submission_id: submission.id }),
         }).then(async (response) => {
@@ -313,7 +313,7 @@ const AssignmentDetailPage = () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              Authorization: `Bearer ${import.meta.env.VITE_BACKEND_API_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
             },
             body: JSON.stringify({ submission_id: submission.id }),
           }).then((res) => {
@@ -495,7 +495,7 @@ const AssignmentDetailPage = () => {
                           method: "POST",
                           headers: {
                             "Content-Type": "application/json",
-                            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                            Authorization: `Bearer ${import.meta.env.VITE_BACKEND_API_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
                           },
                           body: JSON.stringify({ submission_id: s.id }),
                         });
@@ -784,7 +784,7 @@ const AssignmentDetailPage = () => {
           classStudents={classStudents || []}
           onSubmitAll={handleBulkSubmitAll}
           parsePdfUrl={`${getBackendUrl()}/parse-pdf`}
-          anonKey={import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}
+          anonKey={import.meta.env.VITE_BACKEND_API_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}
         />
       </div>
     </DashboardLayout>

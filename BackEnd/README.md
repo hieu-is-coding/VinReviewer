@@ -1,4 +1,4 @@
-# VinReviewer BackEnd
+# GradioAI BackEnd
 
 FastAPI orchestration service that bridges the FrontEnd (Supabase) and GradingSystem pipeline.
 
@@ -157,7 +157,7 @@ Tests cover:
 
 | Platform | Notes |
 |----------|-------|
-| **Docker Compose** | Use `docker compose up --build` from the VinReviewer root |
+| **Docker Compose** | Use `docker compose up --build` from the GradioAI root |
 | **Railway / Render** | Push `BackEnd/` service; add env vars in dashboard |
 | **AWS ECS / GCP Cloud Run** | Use the `BackEnd/Dockerfile`; mount or install GradingSystem at build time |
 

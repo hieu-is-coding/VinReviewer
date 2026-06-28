@@ -1,5 +1,8 @@
 project_id = "vahshwccsjxarjkzcuzq"
 
+[auth.email]
+enable_confirmations = false
+
 [functions.evaluate]
 verify_jwt = false
 

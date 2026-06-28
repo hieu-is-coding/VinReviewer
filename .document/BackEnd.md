@@ -1,12 +1,12 @@
-# VinReviewer BackEnd & Database Specifications
+# GradioAI BackEnd & Database Specifications
 
-This document provides a detailed specification of the VinReviewer BackEnd service, including its API architecture, database connection, database schema entities, data mapping structures, reliability mechanisms, and testing strategies.
+This document provides a detailed specification of the GradioAI BackEnd service, including its API architecture, database connection, database schema entities, data mapping structures, reliability mechanisms, and testing strategies.
 
 ---
 
 ## 1. Overview & Technology Stack
 
-The VinReviewer BackEnd acts as the orchestration and processing engine that connects the React FrontEnd (via Supabase PostgreSQL) to the advanced AI pipeline (`GradingSystem`). It handles tasks such as concurrent job queueing, database schema mapping, partial-write rollback operations, and structured logging.
+The GradioAI BackEnd acts as the orchestration and processing engine that connects the React FrontEnd (via Supabase PostgreSQL) to the advanced AI pipeline (`GradingSystem`). It handles tasks such as concurrent job queueing, database schema mapping, partial-write rollback operations, and structured logging.
 
 ### Technology Stack Selection
 
@@ -25,12 +25,12 @@ The backend is built using the following modern Python technology stack:
 The database is powered by **Supabase (PostgreSQL)**. The connection is initialized and managed asynchronously to avoid blocking the API worker threads.
 
 ### 2.1 Supabase Client Wrapper
-The database client is implemented as a singleton client wrapper in [supabase_client.py](file:///e:/VinReviewer/BackEnd/src/services/supabase_client.py):
+The database client is implemented as a singleton client wrapper in [supabase_client.py](file:///e:/GradioAI/BackEnd/src/services/supabase_client.py):
 *   **Initialization:** Calls `acreate_client()` using `settings.supabase_url` and `settings.supabase_service_key` (service role secret).
 *   **Service Account Authorization:** Since database transactions are triggered server-side by the backend, it uses the high-privilege `service_key` to bypass Row-Level Security (RLS) policies for write/cleanup tasks while client-side reads are restricted via standard RLS policies.
 
 ### 2.2 Environment Configurations
-Defined in [config.py](file:///e:/VinReviewer/BackEnd/src/config.py) and mapped via `.env`:
+Defined in [config.py](file:///e:/GradioAI/BackEnd/src/config.py) and mapped via `.env`:
 *   `SUPABASE_URL`: The project endpoint URL.
 *   `SUPABASE_SERVICE_KEY`: Service role secret token for API validation.
 *   `API_KEY`: A shared secret compared via a timing-safe `compare_digest` in the `X-API-Key` HTTP header.
@@ -310,21 +310,21 @@ Plagiarism and generative AI likelihood indices for a submission.
 ```
 
 1.  **DB Webhook Request:** When a submission is created via the frontend, Supabase broadcasts an HTTP POST database webhook to the backend `/webhook/submission-created` endpoint.
-2.  **API Handler validation:** [evaluate.py](file:///e:/VinReviewer/BackEnd/src/routes/evaluate.py) parses the request into a `WebhookPayload` object, checks if the status is `'pending'`, and ensures there is no existing active job processing the `submission_id`.
+2.  **API Handler validation:** [evaluate.py](file:///e:/GradioAI/BackEnd/src/routes/evaluate.py) parses the request into a `WebhookPayload` object, checks if the status is `'pending'`, and ensures there is no existing active job processing the `submission_id`.
 3.  **Job Initialization:** Calls `job_manager.create_job()`, registers the status as `"queued"`, and spawns an asynchronous background worker task (`run_text_pipeline` or `run_pdf_pipeline`).
-4.  **Worker Core:** [pipeline_worker.py](file:///e:/VinReviewer/BackEnd/src/workers/pipeline_worker.py) acquires the asyncio concurrency Semaphore and triggers the core evaluator functions.
+4.  **Worker Core:** [pipeline_worker.py](file:///e:/GradioAI/BackEnd/src/workers/pipeline_worker.py) acquires the asyncio concurrency Semaphore and triggers the core evaluator functions.
 
 ---
 
 ### 4.2 Data Mapping Layer
 
 The mapping layer bridges the database entities and Python models inside the AI pipeline:
-*   **Rubric Mapper ([rubric.py](file:///e:/VinReviewer/BackEnd/src/mapping/rubric.py)):**
+*   **Rubric Mapper ([rubric.py](file:///e:/GradioAI/BackEnd/src/mapping/rubric.py)):**
     Fetches raw `criteria` rows from the database and maps them to a `RubricTree` representation:
     *   Sorts criteria based on `sort_order`.
     *   Normalizes the absolute weights to sum up to `1.0` to preserve mathematical convergence during mathematical Z-Score alignment:
         $$\text{Normalized Weight} = \frac{\text{Criterion Weight}}{\sum \text{Weights}}$$
-*   **Result Mapper ([result.py](file:///e:/VinReviewer/BackEnd/src/mapping/result.py)):**
+*   **Result Mapper ([result.py](file:///e:/GradioAI/BackEnd/src/mapping/result.py)):**
     Maps the final `PipelineState` object from the AI block to three table payloads:
     *   `evaluations`: Calculates total calibrated score against rubric max thresholds, formats overall strengths and weaknesses text blocks, and writes the baseline metadata.
     *   `criteria_scores`: Correlates the voting persona leaf node scores back to their matching database `criterion_id` keys by positional index.
@@ -335,7 +335,7 @@ The mapping layer bridges the database entities and Python models inside the AI 
 ### 4.3 Transaction Reliability & Fallback Controls
 
 #### 4.3.1 Concurrency Controls
-The [job_manager.py](file:///e:/VinReviewer/BackEnd/src/services/job_manager.py) manages concurrent jobs:
+The [job_manager.py](file:///e:/GradioAI/BackEnd/src/services/job_manager.py) manages concurrent jobs:
 *   Uses `asyncio.Semaphore(MAX_CONCURRENT_JOBS)` to queue incoming jobs once the limit is reached.
 *   Implements `find_active_job(submission_id)` to check for duplicate requests, avoiding redundant model processing.
 
@@ -352,7 +352,7 @@ On timeout (default 10 minutes), the job status is set to `'failed'`, and the su
 #### 4.3.3 Partial-Write Rollbacks
 Writing evaluation outputs requires inserting records across multiple database tables (`evaluations`, `criteria_scores`, `evaluation_details`). If criteria score or detail insertions fail after the parent evaluation row is created:
 1.  Catches the database exception.
-2.  Triggers `delete_evaluation(eval_id)` in [supabase_client.py](file:///e:/VinReviewer/BackEnd/src/services/supabase_client.py), which deletes the criteria scores, evaluation details, and the evaluation row.
+2.  Triggers `delete_evaluation(eval_id)` in [supabase_client.py](file:///e:/GradioAI/BackEnd/src/services/supabase_client.py), which deletes the criteria scores, evaluation details, and the evaluation row.
 3.  Resets the submission status to `'needs_review'` to prevent database corruption.
 
 ---
@@ -372,13 +372,13 @@ The backend is secured using the following measures:
 
 The backend uses **pytest** with **pytest-asyncio** to test route validation, ORM mapping, and evaluator operations:
 
-*   **Route Verification ([test_routes.py](file:///e:/VinReviewer/BackEnd/tests/test_routes.py)):**
+*   **Route Verification ([test_routes.py](file:///e:/GradioAI/BackEnd/tests/test_routes.py)):**
     Tests API key authentication, route errors, and verify JSON structures conform to Pydantic responses.
-*   **Schema Mapping ([test_mapping.py](file:///e:/VinReviewer/BackEnd/tests/test_mapping.py)):**
+*   **Schema Mapping ([test_mapping.py](file:///e:/GradioAI/BackEnd/tests/test_mapping.py)):**
     Tests rubric weight normalization, sorting index offsets, and pipeline state mappings.
-*   **Evaluator Integrity ([test_evaluator.py](file:///e:/VinReviewer/BackEnd/tests/test_evaluator.py)):**
+*   **Evaluator Integrity ([test_evaluator.py](file:///e:/GradioAI/BackEnd/tests/test_evaluator.py)):**
     Tests error handling paths (e.g. missing rubrics, empty criteria list, pipeline exceptions) and validates the partial-write rollback mechanism.
-*   **Mocks Framework ([conftest.py](file:///e:/VinReviewer/BackEnd/tests/conftest.py)):**
+*   **Mocks Framework ([conftest.py](file:///e:/GradioAI/BackEnd/tests/conftest.py)):**
     Provides a mock Supabase client and job manager instance to test backend workflows without executing database updates or spawning external LLM calls.
 
 *   *Run tests with:*

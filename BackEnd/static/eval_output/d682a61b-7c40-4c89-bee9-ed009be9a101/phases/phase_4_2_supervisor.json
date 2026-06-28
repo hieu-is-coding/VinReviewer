@@ -1,0 +1,12 @@
+{
+  "passed": false,
+  "violations": [
+    {
+      "rule_id": "deliberation_disagreement_resolved",
+      "severity": "soft",
+      "detail": "High persona disagreement on 1 leaf(s): novelty"
+    }
+  ],
+  "regen_count": 2,
+  "human_flag": true
+}

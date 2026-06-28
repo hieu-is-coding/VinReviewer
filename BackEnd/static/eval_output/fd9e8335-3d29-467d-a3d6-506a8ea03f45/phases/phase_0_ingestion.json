@@ -1,0 +1,408 @@
+{
+  "source_path": "E:\\VinReviewer\\BackEnd\\src\\services\\..\\..\\static\\pdfs\\fd9e8335-3d29-467d-a3d6-506a8ea03f45.pdf",
+  "language": "en",
+  "title": "TPE: TTX: Practical Triton Autotuning via Learned Latency Prediction",
+  "abstract": "GPU kernel optimization is essential for high-performance machine learning systems, but it remains labor-intensive. Triton simplifies GPU kernel development with a Python-based interface, yet auto-tuning still requires searching a large configuration space, which is costly. We present TTX, a Triton tuning framework with an XGBoost-based performance predictor. By using input shapes, tuning parameters, and IR-level features, TTX accurately estimates kernel latency and quickly selects promising candidates for further search. Experiments show that TTX achieves around 10% MAPE on operators such as matrix multiplication, batched matrix multiplication, and convolution across multiple GPUs. It reaches about 80% of the best performance with the top-1 candidate and over 95% with the top-50 candidates. We further analyze cross-kernel generalization and identify a fundamental asymmetry \u2014 pointwise and normalization kernels transfer cleanly across the kernel boundary while compute-bound kernels do not \u2014 empirically motivating the per-kernel design.",
+  "sections": [
+    {
+      "heading": "1 Introduction",
+      "body": "Deep learning (DL) workloads have demonstrated great success in various problem domains, such as computer vision [1\u20133] and natural language processing [4\u20136]. However, they typically involve massive general matrix multiplication (GEMM)-based operators, such as CONV2D, Linear, and BMM (batched matrix multiplication), complex non-GEMM operators, such as memory operations (e.g., reshape, view, and transpose), normalization, and logit computation functions (e.g., Softmax), and/or sophisticated compound kernels such as FlashAttention [7, 8] and Mixture-of-Experts (MoE) [9, 10]. The critical operations, such as attention, can also span into multiple implementations for prefill and decode phases [11]. To effectively support these diverse operations, modern hardware systems [12\u201316] have involved scaling up the number of computing units, cache size, memory capacity, and bandwidth. This motivates a strong demand to develop and optimize GPU kernels and DL frameworks, such as Tensorflow [17], Pytorch [18, 19], vLLM [20], and SGLang [21]. To facilitate kernel development, various domain-specific languages (DSL) and their corresponding platforms have recently been introduced, including TVM [22, 23], Halide [24], and Triton [25]. Specifically, Triton [25] has emerged as a programming language and compiler that enables developers to write high-performance GPU kernels with reduced programming complexity. For example, a numerical evaluation of Triton that demonstrates its ability to generate matrix multiplication implementations on par with cuBLAS and up to 3\u00d7 faster than other domain-specific languages for DNNs on recurrent and transformer neural networks [25]. As a result, Triton has been integrated into various DL platforms, including TorchInductor [19], vLLM [20], and SGLang [21], attracting significant attention from the developer community. A critical issue with a Triton kernel is that it typically requires tuning hyperparameters to achieve good performance [26]. For example, Figure 1 shows a normalized latency of a matrix multiplication kernel in Triton on four common GPUs (e.g., V100 [12], A100 [14], H100, and MI250 [15]). These kernel implementations are associated with different configurations, including tiling configurations and thread block dimensions. It is observed that latencies vary widely across configurations, for example, ranging from 1 to 16\u00d7 with an input shape of (1024, 1024, 1024) (See Section 4 for detailed settings). Unfortunately, it becomes too costly to fully examine all tuning configurations (e.g., with a few thousand candidates) to identify the best-performing one. According to a recent report [26], among 57 Triton kernels in vLLM [20], only seven have a performance-tuning mode by default. To address these shortcomings, this work presents TTX, a tuning scheme for Triton kernels with an XGBoost performance predictor, with the following main contributions: \u2022 Autotuner. We present TTX, an extension of the Triton-JIT compiler that transparently and efficiently supports performance autotuning for existing applications. Leveraging an efficient latency predictor, TTX rapidly explores the tuning configuration space and thereby accurately identifies a few potential configuration candidates (e.g., the top-50 via a performance model) for benchmarking. \u2022 Performance Model. The proposed predictor is built on a rich set of features specified for Triton kernels. Leveraging a well-known regressor, XGBoost [27], our predictor rapidly and accurately estimates the latency of a Triton kernel for a given tuning configuration. \u2022 Evaluation. We evaluate TTX on a comprehensive set of Triton operations, including emerging operations such as FlashAttention, quantized GEMM, and fused MoE. Experiments are also conducted on four popular GPUs (e.g., Nvidia V100, A100, and H100, and AMD MI250). \u2022 Cross-Kernel Generalization Analysis. We empirically study leave-one-kernel-out (LOKO) generalization with a unified cross-kernel predictor that combines a contrastive-pretrained PTX encoder with a single shared XGBoost. The analysis reveals that pointwise and normalization kernels transfer cleanly across the kernel boundary, while compute-bound kernels (MM, BMM) do not. This asymmetry directly motivates the per-kernel design of TTX and clarifies the boundary along which a unified model can and cannot substitute for per-kernel ones.",
+      "level": 1
+    },
+    {
+      "heading": "2 Background",
+      "body": "2.1 GPU Kernel Development and Generation Modern DL workloads typically consist of various complex operations, including MM, BMM, normalization [28, 29], attention [30], and MoE [9]. One popular approach to specializing kernels for various hardware architectures is to use template libraries. For example, flash_attn libraries [7, 8] present optimized kernels for widely-used attention operations [30]. These template libraries select which handwritten code fragments (written in a low-level language such as CUDA) to use based on the usage scenario (e.g., depending on the tensor shape, data type, or batch size). Unfortunately, flash_attn has nearly 70000 LoC, making it a significant effort to optimize the kernel or modify it to target a new hardware device. The DSL Triton [25] has recently become a promising alternative to writing custom CUDA kernels. Triton enables developers to write and debug Python-based code that can be executed on various GPUs, including Nvidia V100 [12], A100 [14], H100, and AMD MI250 [15]. For example, Figure 2 presents an example of Triton matrix multiplication (triton_mm) in Lines 25-38. Written in Python, the code takes as input a set of parameters, including input shapes, tile sizes, and parallelism factors. Thanks to a user-friendly interface, Triton has been integrated into popular DL platforms, such as Torch Inductor [19, 31] and vLLM [20], to generate efficient GPU kernels. For instance, given a PyTorch layer normalization implementation, Torch Inductor can generate a Triton code template, enabling the rapid development of an efficient kernel. 2.2 Compilation and Autotuning To avoid writing hand-optimized code, one may rely on either ahead-of-time compilation to generate generic binaries or use a Just-in-Time (JIT) compiler to generate executables on the fly [26]. Compiler-based approaches depend on predefined heuristics to generate general-purpose code, which may not maximize performance for all parameter combinations. In contrast, autotuned kernels augment compilation with empirical performance tuning, generating and benchmarking a wide range of kernel variants to select the best-performing configuration for the target hardware and scenario [26]. Specifically, Triton leverages a JIT compiler and explores the tuning configuration design space using hierarchical tiles to automate memory coalescing, shared memory allocation, and thread synchronization [25]. For instance, the autotune function triton.autotune (Lines 15-23 in Figure 2) calls a function (e.g., matmul_get_configs) to obtain tuning configurations (e.g., BLOCK_M, BLOCK_N, and BLOCK_K). This infrastructure is notably adopted by the torch.compile API, which leverages the TorchInductor backend to generate Triton kernels [19]. To optimize these kernels, TorchInductor offers a max-autotune mode. This mode leverages Triton or template-based matrix multiplications on supported devices and Triton-based convolutions on GPUs, instantiating a benchmarking harness that compiles and executes multiple candidate kernels, varying parameters such as tile sizes and thread parallelism (e.g., num_warps) to empirically select the fastest implementation from a static, engineer-defined subset of configurations. While this strategy balances compilation time with runtime performance, finding a \u201cgood enough\u201d kernel, it remains fundamentally constrained by its search space. By iterating only over predefined candidates, the compiler may fail to discover optimal configurations that lie outside these heuristics, particularly for irregular input shapes or novel hardware architectures where manual presets are insufficient. 2.3 GPU Kernel Performance Modeling To evaluate an implementation candidate, one may rely on direct measurements on a device or on a cost model. Measuring performance with all scenarios is generally expensive. As a result, GPU kernel modeling has been well studied in the literature. A common approach relies on analytical models based on handcrafted rules and architectural knowledge [32\u201335]. They typically rely on runtime profiling and hardware-specific counters such as cache hit rates and memory utilization. Recently, data-driven approaches have emerged as a modern solution, achieving higher accuracy in performance prediction, as demonstrated by systems such as Neusight [36] and by Li et al. [37]. Neusight and Li et al. develop data-driven approaches for cuDNN, demonstrating that predicting kernel latency in this context is relatively straightforward.",
+      "level": 1
+    },
+    {
+      "heading": "3 Proposed TTX",
+      "body": "3.1 Motivation Although tuning Triton kernels is essential to achieve good performance, it poses the following two challenges. Performance Heterogeneity of Triton Kernels. The latency diversity of Triton kernels is shown in Figure 1. Furthermore, we observe that simply copying the best configuration from one input shape to another can significantly degrade performance. Figure 3 presents a confusion matrix of normalized latency when transferring tuning configurations of Triton-based matrix multiplication among four input shapes. For example, on H100, when using the best configuration with the input shape (128, 128, 128), the implementations of the shapes (512, 512, 512), (1024, 1024, 1024), and (2048, 2048, 2048) only achieve 43%, 22%, and 17%, respectively, compared to their corresponding best-performing implementations. Additionally, transferring the best-performing configuration from one GPU to another (e.g., from A100 to MI250) may also degrade performance significantly [26]. Large Design Space of Configurations. Another challenge in tuning a Triton kernel is the high cost of evaluating the large number of tuning configurations. For example, Figure 4 presents an example of a configuration search space for various operations (e.g., matrix multiplication (MM), convolution (CONV), and flash attention (flash_attn)) on V100, A100/H100, and MI250 (See Section 4 for detailed settings). On Nvidia A100 and H100 GPUs, the widely-used MM may have 7680 configurations, representing all combinations of tile sizes, the number of wraps, and the number of compilation stages. The number of options can be significantly increased on an AMD MI250 GPU (e.g., 38400 configurations). Note that the number of configurations is defined for a single input shape, e.g., M = 128, N = 128, K = 128. As explained in the previous example, it may not directly transfer the optimized configuration from one input shape to another. As it becomes extremely costly or infeasible to examine all configurations for all input shapes. Some kernels, such as FlashAttention, may use a small set of default tuning configurations [7, 8]. 3.2 System Overview To address the aforementioned challenges, we introduce TTX, a tuning scheme for Triton kernels with an XGBoost performance predictor. The three building blocks of TTX are explained as follows. 3.2.1 An Extension of Triton-JIT Compiler. We present our framework as an extension of the Triton-JIT compiler, enabling transparent and efficient performance autotuning for existing applications. Triton exposes a rich set of performance-tuning parameters, as they are primarily defined by programmers rather than limited to predefined optimization strategies. As explained in Figure 5, our framework extends the Triton language: developers need only specify the parameters to tune, along with optional tuning ranges. The extension comprises a kernel performance model that predicts the execution time of any Triton kernel, coupled with a simple algorithm that selects the best parameters based on the estimated performance. 3.2.2 Kernel Performance Prediction. We build a performance predictor to estimate the execution time of a Triton kernel. The predictor is constructed if a new kernel is encountered (i.e., when it is not already present in our database). We first define the search space of tuning configurations and input shapes. Each set of tuning parameters and input shapes is associated with the corresponding execution time of the kernel, forming a supervised learning problem. Specifically, the kernel performance predictor takes the tuning parameters and the input shape features as input and produces an estimated execution time. During deployment, the predictor generalizes to unseen input shapes and tuning configurations. To further enhance prediction quality, we also employ intermediate representation (IR) features, which have been shown to be effective [38, 39]. For NVIDIA GPUs, we use PTX, and for AMD GPUs, we use LLVM IR. As illustrated in Fig. 6, each sampled configuration is compiled by the Triton compiler. From the IR, we extract instruction-level features (e.g., instruction counts), as described in Table 1. The extracted code features, together with the corresponding input shapes and tuning parameters, are stored in a database. Finally, we use NVIDIA Nsight Systems and ROCProfiler to measure the runtime latency of each compiled kernel and record these latency measurements alongside the associated input shapes and tuning parameters. 3.2.3 Model-Guided Tuning. As illustrated in Figure 5, our system takes input shapes and candidate tuning parameters, such as tiling sizes, extracts IR-level code features, and uses a trained XGBoost model to predict the kernel execution time. Based on these predictions, our framework selects the top-50 configurations with the lowest estimated latencies. The selected configurations are then executed to measure actual execution times, enabling fine-grained discrimination. The configuration with the fastest execution time is marked. Finally, the kernel is executed with the marked configuration. 3.3 Implementation Details 3.3.1 Triton Kernel Collection. We select a set of representative Triton kernels to evaluate the effectiveness of our framework. The Triton kernels for widely used ML operations are collected from two primary sources: the official Triton repository and kernels generated by TorchInductor. The detailed sources are listed in Table 2. For instance, matrix multiplication, layer normalization, and softmax operations commonly used in large language models (LLMs) are obtained from the Triton repository. TorchInductor, which serves as the default backend for PyTorch\u2019s torch.compile [40], produces Triton kernels specialized for particular problem sizes. To enable autotuning and model training, these kernels are restructured to accept parameterized tile sizes and warps, making them tunable across different configurations. The correctness of GPU kernels is validated by comparing their outputs against those of the corresponding PyTorch operators. In addition, kernels for FlashAttention and GEMM quantization are taken from the repositories by the authors, as specified in Table 2. 3.3.2 Performance Features. The feature set employed in our predictive model is categorized into three primary domains: (1) kernel input shapes, (2) tuning parameters, and (3) IR-level code features derived from the generated PTX or LLVM IR code. These features are described in Table 1. Specifically, for the third category, we parse the compiled kernel to extract instruction counts across seven distinct groups: (i) total instructions; (ii) arithmetic operations (e.g., add, sub, cmp); (iii) bitwise logic operations; (iv) special mathematical functions (e.g., sqrt, sin); (v) synchronization primitives; (vi) global memory instructions; and (vii) shared memory instructions. These IR-level code features play an important role in capturing how high-level codes are transformed into lower-level GPU-dependent codes. The IR information helps the model quantitatively identify the portion of each instruction type so that the effect of each tuning parameter is taken into account. Furthermore, to capture hardware utilization and algorithmic characteristics, we incorporate derived high-level features. These include Arithmetic Intensity, defined as the ratio of total computational operations to the memory footprint of input and output tensors, and Grid Size, representing the total number of thread blocks spawned for the kernel execution. Our empirical observations suggest that, to ensure efficient hardware memory alignment, the Triton compiler may apply different code generation strategies based on whether tensor dimensions are divisible by 16. To expose this latent behavior to the predictor, we introduce binary alignment indicators (0 or 1) for each dimension. These features aim to assist the model in distinguishing performance patterns between aligned and unaligned input shapes, particularly when fixed tuning configurations are used. Although tuning parameters and input shapes are both kernel inputs, they are different in nature. Tuning parameters are typically declared with tl.constexpr to enable compile-time specialization that reduces computation and improve the compiler\u2019s optimization opportunities. As a result, different values of tuning parameters generally produce distinct IR code features. In contrast, for all possible combinations of input shapes, the divisibility-by-16 condition described earlier bounds number of possible uniquely generated IR programs to 2^N, where N denotes the number of input tensors. This property leads to two important implications. First, the number of distinct IR programs generated by a kernel is at most the number of possible tuning configurations, and is independent of the number of input shape combinations, which can be prohibitive large. Second, IR code features can be efficiently generated during the model construction phase by exhaustively iterating through the tuning-parameter space and subsequently reused during the deployment phase. 3.3.3 Prediction Model. As the features are in a tabular structure mixing tile sizes, problem sizes, and the PTX-based counts, our framework adopts XGBoost [27] as a prediction model. XGBoost is chosen for its robustness in regression problems and its ability to efficiently handle nonlinear relationships. Also, in order to be useful in solving real-world compiler problems (e.g., auto-tuning), one of the main concerns when designing our predictor is that the model needs to be light-weight in both training and inference cost. Compared to neural-network-based approaches [36, 37], XGBoost requires a smaller dataset and takes less training time, and thereby aligns well with our design goals.",
+      "level": 1
+    },
+    {
+      "heading": "4 Evaluation",
+      "body": "4.1 Methodology Triton Kernels and GPUs. To demonstrate the effectiveness of the proposed TTX, we conduct the experiments with diverse widely-used DL operations, including matrix multiplication (MM), batched matrix multiplication (BMM), convolution (CONV), activations (e.g., SilU, ReLU, and GeLU), Dropout, Softmax, Batch Normalization (BN), Layer Normalization (LN), quantized GEMM, Flash Attention, and Fused MoE. The detailed sources are specified in Table 2. The experiments are conducted on four popular data center GPUs, including three NVIDIA models (Tesla V100S-PCIE-32GB, Ampere A100-PCIe-40GB, and H100-HBM3-80GB) and one AMD model (Instinct MI250). All measurements are conducted using Pytorch 2.0.1 compiled with CUDA Library 12.1 for the Nvidia GPUs and Pytorch 2.3.1 compiled with ROCm 6.1 for the AMD GPU. By default, fused MoE and FlashAttention kernels are executed in half-precision (FP16), while the others are executed in FP32. Quantized GEMM kernels are executed using both FP32 and FP16 formats. Latency is measured by running each operator five times and averaging the results from the four later measurements. For training, we collect \u223c20k data points for each kernel by randomly sampling input shapes and configurations within fixed bounds. Specifically, for input shapes, we uniformly sample: (i) MM/GEMM-Quant: M, N, K \u2208 [1, 2048]; (ii) Conv: batch \u2208 [1, 100], channels \u2208 [3, 512], spatial size \u2208 [5, 1024] with a fixed 3\u00d73 kernel, stride 1, padding 1; (iii) BMM: batch \u2208 [1, 128] and M, N, K \u2208 [1, 2048]; (iv) FlashAttention: batch \u2208 [1, 128], L_q, L_k \u2208 [1, 512], heads \u2208 [1, 128], head dimension \u2208 [1, 128]; (v) MoE: experts E \u2208 [4, 128], top-k k \u2208 [1, \u230aE/4\u230b], tokens \u2208 [128, 2048], out_dim \u2208 [1025, 3000], and in_dim \u2208 [1024, out_dim]. For all other kernels, any remaining dimensions are sampled from [1, 2048]. Tuning Configurations. Tuning hyperparameters for Triton kernels on GPUs are reported in Tables 3, 4, and 5. On the V100 GPU, the total number of configurations (Total_Configs) is determined by all combinations of tiling settings (e.g., BLOCK_M, BLOCK_N, BLOCK_K, GROUP_M) and the number of wraps (num_wraps). On the A100 and H100 GPUs, the number of compilation (optimization) stages for software-pipelining loops is included, resulting in a large number of configurations. On the MI250 GPU, the configuration space also includes waves_per_eu, a hyperparameter that controls the use of vector general-purpose registers to achieve the desired occupancy levels. Consequently, the space is much larger than others. For instance, for attention kernels, the numbers of configurations on V100, A100, and MI250 are 96, 480, and 3200, respectively. Settings. To train and evaluate the performance predictor, the collected dataset is randomly divided into 80% for training and 20% for testing. Each operator has its own predictor based on XGBoost [27]. A base model is initialized with 500 estimators. Empirically, the depth is set to 10, and the learning rate is 0.02. The XGBoost objective function is set to reg:gamma to ensure that all predicted values, e.g., latency, remain positive. Following prior work [36], we evaluate prediction accuracy using the mean absolute percentage error (MAPE). MAPE = 1/n \u2211_{i=1}^{n} |y_i\u2212 \u02c6{y_i}|/y_i where y_i denotes the ground truth value and \u02c6{y_i} represents the predicted value. To evaluate autotuning performance, we use the set of input shapes from previous work [42] and collect data for all configurations of each shape to form the ground truth. Meanwhile, TTX generates a small set of tuning configurations (e.g., Top-k) based on its performance model. Given an input shape, the best-performing candidate among the top-k is normalized to match the best one obtained from the ground truth. Baselines. Our latency predictor is compared against recent GPU kernel performance models, including Neusight [36] and the Roofline model [43]. The comparison is conducted using our Triton kernel dataset, with aligned model settings and, where applicable, feature representations. When training and evaluating the Neusight MLP model on our Triton kernel dataset, we exclude hardware-level features (e.g., L2 cache size and the number of SMs) to ensure a fair and consistent comparison. Meanwhile, Roofline relies on analytical performance bounds derived from peak hardware characteristics, including peak memory bandwidth and peak FLOPs. Kernel performance is estimated based on arithmetic intensity, defined as the ratio of total floating-point operations to the volume of memory transactions. Cross-Kernel Setting. In addition to the per-kernel evaluation above, we study how well a single unified predictor generalizes across kernels. The unified variant trains one XGBoost across all kernels using the same hyperparameters as TTX, augmented with a fixed-length PTX-IR embedding produced by a small Transformer encoder pretrained with a contrastive (NT-Xent) objective on the same kernel corpus (d_model = 128, two layers, four heads, output dimension 128, temperature 0.1, 50 epochs). The encoder is frozen and applied per (kernel, configuration) prior to XGBoost training. We evaluate this variant under leave-one-kernel-out (LOKO): for each held-out kernel, the unified model is trained on the remaining kernels and tested on the held-out one. We report MAPE per kernel and the geometric mean across folds. This study uses V100 across nine kernels (MM, BMM, LN, Softmax, BN, GeLU, SiLU, ReLU, Dropout); preliminary multi-seed and multi-GPU validation are ongoing. 4.2 Experimental Results 4.2.1 Results for Performance model. Figure 7 presents the prediction accuracy of the operations on Nvidia V100, A100, and H100, and AMD MI250. Specifically, complex operators such as GEMM, BMM, Convolution, FlashAttention, Quantized GEMM, and MoE exhibit MAPEs ranging from 9% to 22%. In contrast, the remaining seven lighter kernels achieve significantly lower error rates, ranging from 0.5% to 5%. This disparity can be attributed to the complex runtime behaviors of the compute-intensive operators, whereas the lighter kernels are influenced by less tuning parameters and exhibit more predictable performance patterns. This behavior is consistent across all the hardwares in our experiments. Although NeuSight performed well on cuDNN workloads, it consistently ranks second in our evaluation on the Triton dataset. We observed a distinct error pattern where NeuSight struggles with compute-intensive operators, exhibiting high MAPEs ranging from 19% to 219%. In contrast, for lightweight operators, the error rates are significantly lower (1.86% to 14%). These results suggest that while NeuSight performs well in its native cuDNN environment, it fails to generalize effectively to the Triton compiler context. The Roofline model consistently exhibits poor predictive accuracy, often yielding a MAPE of approximately 100%. This limitation stems from its oversimplified assumptions, which fail to capture the complex, non-linear runtime behaviors inherent in GPU kernels. Consequently, the Roofline model consistently ranks third in our evaluation. 4.2.2 Cross-Kernel Generalization Analysis. A natural question is whether a single cross-kernel model could replace the per-kernel ensemble in TTX. We investigated this empirically using the unified variant described in Section 3.2. Under leave-one-kernel-out (LOKO) evaluation, we report MAPE per kernel and the geometric mean across folds.",
+      "level": 1
+    }
+  ],
+  "full_text": "1 Introduction\nDeep learning (DL) workloads have demonstrated great success in various problem domains, such as computer vision [1\u20133] and natural language processing [4\u20136]. However, they typically involve massive general matrix multiplication (GEMM)-based operators, such as CONV2D, Linear, and BMM (batched matrix multiplication), complex non-GEMM operators, such as memory operations (e.g., reshape, view, and transpose), normalization, and logit computation functions (e.g., Softmax), and/or sophisticated compound kernels such as FlashAttention [7, 8] and Mixture-of-Experts (MoE) [9, 10]. The critical operations, such as attention, can also span into multiple implementations for prefill and decode phases [11]. To effectively support these diverse operations, modern hardware systems [12\u201316] have involved scaling up the number of computing units, cache size, memory capacity, and bandwidth. This motivates a strong demand to develop and optimize GPU kernels and DL frameworks, such as Tensorflow [17], Pytorch [18, 19], vLLM [20], and SGLang [21]. To facilitate kernel development, various domain-specific languages (DSL) and their corresponding platforms have recently been introduced, including TVM [22, 23], Halide [24], and Triton [25]. Specifically, Triton [25] has emerged as a programming language and compiler that enables developers to write high-performance GPU kernels with reduced programming complexity. For example, a numerical evaluation of Triton that demonstrates its ability to generate matrix multiplication implementations on par with cuBLAS and up to 3\u00d7 faster than other domain-specific languages for DNNs on recurrent and transformer neural networks [25]. As a result, Triton has been integrated into various DL platforms, including TorchInductor [19], vLLM [20], and SGLang [21], attracting significant attention from the developer community. A critical issue with a Triton kernel is that it typically requires tuning hyperparameters to achieve good performance [26]. For example, Figure 1 shows a normalized latency of a matrix multiplication kernel in Triton on four common GPUs (e.g., V100 [12], A100 [14], H100, and MI250 [15]). These kernel implementations are associated with different configurations, including tiling configurations and thread block dimensions. It is observed that latencies vary widely across configurations, for example, ranging from 1 to 16\u00d7 with an input shape of (1024, 1024, 1024) (See Section 4 for detailed settings). Unfortunately, it becomes too costly to fully examine all tuning configurations (e.g., with a few thousand candidates) to identify the best-performing one. According to a recent report [26], among 57 Triton kernels in vLLM [20], only seven have a performance-tuning mode by default. To address these shortcomings, this work presents TTX, a tuning scheme for Triton kernels with an XGBoost performance predictor, with the following main contributions: \u2022 Autotuner. We present TTX, an extension of the Triton-JIT compiler that transparently and efficiently supports performance autotuning for existing applications. Leveraging an efficient latency predictor, TTX rapidly explores the tuning configuration space and thereby accurately identifies a few potential configuration candidates (e.g., the top-50 via a performance model) for benchmarking. \u2022 Performance Model. The proposed predictor is built on a rich set of features specified for Triton kernels. Leveraging a well-known regressor, XGBoost [27], our predictor rapidly and accurately estimates the latency of a Triton kernel for a given tuning configuration. \u2022 Evaluation. We evaluate TTX on a comprehensive set of Triton operations, including emerging operations such as FlashAttention, quantized GEMM, and fused MoE. Experiments are also conducted on four popular GPUs (e.g., Nvidia V100, A100, and H100, and AMD MI250). \u2022 Cross-Kernel Generalization Analysis. We empirically study leave-one-kernel-out (LOKO) generalization with a unified cross-kernel predictor that combines a contrastive-pretrained PTX encoder with a single shared XGBoost. The analysis reveals that pointwise and normalization kernels transfer cleanly across the kernel boundary, while compute-bound kernels (MM, BMM) do not. This asymmetry directly motivates the per-kernel design of TTX and clarifies the boundary along which a unified model can and cannot substitute for per-kernel ones.\n\n2 Background\n2.1 GPU Kernel Development and Generation Modern DL workloads typically consist of various complex operations, including MM, BMM, normalization [28, 29], attention [30], and MoE [9]. One popular approach to specializing kernels for various hardware architectures is to use template libraries. For example, flash_attn libraries [7, 8] present optimized kernels for widely-used attention operations [30]. These template libraries select which handwritten code fragments (written in a low-level language such as CUDA) to use based on the usage scenario (e.g., depending on the tensor shape, data type, or batch size). Unfortunately, flash_attn has nearly 70000 LoC, making it a significant effort to optimize the kernel or modify it to target a new hardware device. The DSL Triton [25] has recently become a promising alternative to writing custom CUDA kernels. Triton enables developers to write and debug Python-based code that can be executed on various GPUs, including Nvidia V100 [12], A100 [14], H100, and AMD MI250 [15]. For example, Figure 2 presents an example of Triton matrix multiplication (triton_mm) in Lines 25-38. Written in Python, the code takes as input a set of parameters, including input shapes, tile sizes, and parallelism factors. Thanks to a user-friendly interface, Triton has been integrated into popular DL platforms, such as Torch Inductor [19, 31] and vLLM [20], to generate efficient GPU kernels. For instance, given a PyTorch layer normalization implementation, Torch Inductor can generate a Triton code template, enabling the rapid development of an efficient kernel. 2.2 Compilation and Autotuning To avoid writing hand-optimized code, one may rely on either ahead-of-time compilation to generate generic binaries or use a Just-in-Time (JIT) compiler to generate executables on the fly [26]. Compiler-based approaches depend on predefined heuristics to generate general-purpose code, which may not maximize performance for all parameter combinations. In contrast, autotuned kernels augment compilation with empirical performance tuning, generating and benchmarking a wide range of kernel variants to select the best-performing configuration for the target hardware and scenario [26]. Specifically, Triton leverages a JIT compiler and explores the tuning configuration design space using hierarchical tiles to automate memory coalescing, shared memory allocation, and thread synchronization [25]. For instance, the autotune function triton.autotune (Lines 15-23 in Figure 2) calls a function (e.g., matmul_get_configs) to obtain tuning configurations (e.g., BLOCK_M, BLOCK_N, and BLOCK_K). This infrastructure is notably adopted by the torch.compile API, which leverages the TorchInductor backend to generate Triton kernels [19]. To optimize these kernels, TorchInductor offers a max-autotune mode. This mode leverages Triton or template-based matrix multiplications on supported devices and Triton-based convolutions on GPUs, instantiating a benchmarking harness that compiles and executes multiple candidate kernels, varying parameters such as tile sizes and thread parallelism (e.g., num_warps) to empirically select the fastest implementation from a static, engineer-defined subset of configurations. While this strategy balances compilation time with runtime performance, finding a \u201cgood enough\u201d kernel, it remains fundamentally constrained by its search space. By iterating only over predefined candidates, the compiler may fail to discover optimal configurations that lie outside these heuristics, particularly for irregular input shapes or novel hardware architectures where manual presets are insufficient. 2.3 GPU Kernel Performance Modeling To evaluate an implementation candidate, one may rely on direct measurements on a device or on a cost model. Measuring performance with all scenarios is generally expensive. As a result, GPU kernel modeling has been well studied in the literature. A common approach relies on analytical models based on handcrafted rules and architectural knowledge [32\u201335]. They typically rely on runtime profiling and hardware-specific counters such as cache hit rates and memory utilization. Recently, data-driven approaches have emerged as a modern solution, achieving higher accuracy in performance prediction, as demonstrated by systems such as Neusight [36] and by Li et al. [37]. Neusight and Li et al. develop data-driven approaches for cuDNN, demonstrating that predicting kernel latency in this context is relatively straightforward.\n\n3 Proposed TTX\n3.1 Motivation Although tuning Triton kernels is essential to achieve good performance, it poses the following two challenges. Performance Heterogeneity of Triton Kernels. The latency diversity of Triton kernels is shown in Figure 1. Furthermore, we observe that simply copying the best configuration from one input shape to another can significantly degrade performance. Figure 3 presents a confusion matrix of normalized latency when transferring tuning configurations of Triton-based matrix multiplication among four input shapes. For example, on H100, when using the best configuration with the input shape (128, 128, 128), the implementations of the shapes (512, 512, 512), (1024, 1024, 1024), and (2048, 2048, 2048) only achieve 43%, 22%, and 17%, respectively, compared to their corresponding best-performing implementations. Additionally, transferring the best-performing configuration from one GPU to another (e.g., from A100 to MI250) may also degrade performance significantly [26]. Large Design Space of Configurations. Another challenge in tuning a Triton kernel is the high cost of evaluating the large number of tuning configurations. For example, Figure 4 presents an example of a configuration search space for various operations (e.g., matrix multiplication (MM), convolution (CONV), and flash attention (flash_attn)) on V100, A100/H100, and MI250 (See Section 4 for detailed settings). On Nvidia A100 and H100 GPUs, the widely-used MM may have 7680 configurations, representing all combinations of tile sizes, the number of wraps, and the number of compilation stages. The number of options can be significantly increased on an AMD MI250 GPU (e.g., 38400 configurations). Note that the number of configurations is defined for a single input shape, e.g., M = 128, N = 128, K = 128. As explained in the previous example, it may not directly transfer the optimized configuration from one input shape to another. As it becomes extremely costly or infeasible to examine all configurations for all input shapes. Some kernels, such as FlashAttention, may use a small set of default tuning configurations [7, 8]. 3.2 System Overview To address the aforementioned challenges, we introduce TTX, a tuning scheme for Triton kernels with an XGBoost performance predictor. The three building blocks of TTX are explained as follows. 3.2.1 An Extension of Triton-JIT Compiler. We present our framework as an extension of the Triton-JIT compiler, enabling transparent and efficient performance autotuning for existing applications. Triton exposes a rich set of performance-tuning parameters, as they are primarily defined by programmers rather than limited to predefined optimization strategies. As explained in Figure 5, our framework extends the Triton language: developers need only specify the parameters to tune, along with optional tuning ranges. The extension comprises a kernel performance model that predicts the execution time of any Triton kernel, coupled with a simple algorithm that selects the best parameters based on the estimated performance. 3.2.2 Kernel Performance Prediction. We build a performance predictor to estimate the execution time of a Triton kernel. The predictor is constructed if a new kernel is encountered (i.e., when it is not already present in our database). We first define the search space of tuning configurations and input shapes. Each set of tuning parameters and input shapes is associated with the corresponding execution time of the kernel, forming a supervised learning problem. Specifically, the kernel performance predictor takes the tuning parameters and the input shape features as input and produces an estimated execution time. During deployment, the predictor generalizes to unseen input shapes and tuning configurations. To further enhance prediction quality, we also employ intermediate representation (IR) features, which have been shown to be effective [38, 39]. For NVIDIA GPUs, we use PTX, and for AMD GPUs, we use LLVM IR. As illustrated in Fig. 6, each sampled configuration is compiled by the Triton compiler. From the IR, we extract instruction-level features (e.g., instruction counts), as described in Table 1. The extracted code features, together with the corresponding input shapes and tuning parameters, are stored in a database. Finally, we use NVIDIA Nsight Systems and ROCProfiler to measure the runtime latency of each compiled kernel and record these latency measurements alongside the associated input shapes and tuning parameters. 3.2.3 Model-Guided Tuning. As illustrated in Figure 5, our system takes input shapes and candidate tuning parameters, such as tiling sizes, extracts IR-level code features, and uses a trained XGBoost model to predict the kernel execution time. Based on these predictions, our framework selects the top-50 configurations with the lowest estimated latencies. The selected configurations are then executed to measure actual execution times, enabling fine-grained discrimination. The configuration with the fastest execution time is marked. Finally, the kernel is executed with the marked configuration. 3.3 Implementation Details 3.3.1 Triton Kernel Collection. We select a set of representative Triton kernels to evaluate the effectiveness of our framework. The Triton kernels for widely used ML operations are collected from two primary sources: the official Triton repository and kernels generated by TorchInductor. The detailed sources are listed in Table 2. For instance, matrix multiplication, layer normalization, and softmax operations commonly used in large language models (LLMs) are obtained from the Triton repository. TorchInductor, which serves as the default backend for PyTorch\u2019s torch.compile [40], produces Triton kernels specialized for particular problem sizes. To enable autotuning and model training, these kernels are restructured to accept parameterized tile sizes and warps, making them tunable across different configurations. The correctness of GPU kernels is validated by comparing their outputs against those of the corresponding PyTorch operators. In addition, kernels for FlashAttention and GEMM quantization are taken from the repositories by the authors, as specified in Table 2. 3.3.2 Performance Features. The feature set employed in our predictive model is categorized into three primary domains: (1) kernel input shapes, (2) tuning parameters, and (3) IR-level code features derived from the generated PTX or LLVM IR code. These features are described in Table 1. Specifically, for the third category, we parse the compiled kernel to extract instruction counts across seven distinct groups: (i) total instructions; (ii) arithmetic operations (e.g., add, sub, cmp); (iii) bitwise logic operations; (iv) special mathematical functions (e.g., sqrt, sin); (v) synchronization primitives; (vi) global memory instructions; and (vii) shared memory instructions. These IR-level code features play an important role in capturing how high-level codes are transformed into lower-level GPU-dependent codes. The IR information helps the model quantitatively identify the portion of each instruction type so that the effect of each tuning parameter is taken into account. Furthermore, to capture hardware utilization and algorithmic characteristics, we incorporate derived high-level features. These include Arithmetic Intensity, defined as the ratio of total computational operations to the memory footprint of input and output tensors, and Grid Size, representing the total number of thread blocks spawned for the kernel execution. Our empirical observations suggest that, to ensure efficient hardware memory alignment, the Triton compiler may apply different code generation strategies based on whether tensor dimensions are divisible by 16. To expose this latent behavior to the predictor, we introduce binary alignment indicators (0 or 1) for each dimension. These features aim to assist the model in distinguishing performance patterns between aligned and unaligned input shapes, particularly when fixed tuning configurations are used. Although tuning parameters and input shapes are both kernel inputs, they are different in nature. Tuning parameters are typically declared with tl.constexpr to enable compile-time specialization that reduces computation and improve the compiler\u2019s optimization opportunities. As a result, different values of tuning parameters generally produce distinct IR code features. In contrast, for all possible combinations of input shapes, the divisibility-by-16 condition described earlier bounds number of possible uniquely generated IR programs to 2^N, where N denotes the number of input tensors. This property leads to two important implications. First, the number of distinct IR programs generated by a kernel is at most the number of possible tuning configurations, and is independent of the number of input shape combinations, which can be prohibitive large. Second, IR code features can be efficiently generated during the model construction phase by exhaustively iterating through the tuning-parameter space and subsequently reused during the deployment phase. 3.3.3 Prediction Model. As the features are in a tabular structure mixing tile sizes, problem sizes, and the PTX-based counts, our framework adopts XGBoost [27] as a prediction model. XGBoost is chosen for its robustness in regression problems and its ability to efficiently handle nonlinear relationships. Also, in order to be useful in solving real-world compiler problems (e.g., auto-tuning), one of the main concerns when designing our predictor is that the model needs to be light-weight in both training and inference cost. Compared to neural-network-based approaches [36, 37], XGBoost requires a smaller dataset and takes less training time, and thereby aligns well with our design goals.\n\n4 Evaluation\n4.1 Methodology Triton Kernels and GPUs. To demonstrate the effectiveness of the proposed TTX, we conduct the experiments with diverse widely-used DL operations, including matrix multiplication (MM), batched matrix multiplication (BMM), convolution (CONV), activations (e.g., SilU, ReLU, and GeLU), Dropout, Softmax, Batch Normalization (BN), Layer Normalization (LN), quantized GEMM, Flash Attention, and Fused MoE. The detailed sources are specified in Table 2. The experiments are conducted on four popular data center GPUs, including three NVIDIA models (Tesla V100S-PCIE-32GB, Ampere A100-PCIe-40GB, and H100-HBM3-80GB) and one AMD model (Instinct MI250). All measurements are conducted using Pytorch 2.0.1 compiled with CUDA Library 12.1 for the Nvidia GPUs and Pytorch 2.3.1 compiled with ROCm 6.1 for the AMD GPU. By default, fused MoE and FlashAttention kernels are executed in half-precision (FP16), while the others are executed in FP32. Quantized GEMM kernels are executed using both FP32 and FP16 formats. Latency is measured by running each operator five times and averaging the results from the four later measurements. For training, we collect \u223c20k data points for each kernel by randomly sampling input shapes and configurations within fixed bounds. Specifically, for input shapes, we uniformly sample: (i) MM/GEMM-Quant: M, N, K \u2208 [1, 2048]; (ii) Conv: batch \u2208 [1, 100], channels \u2208 [3, 512], spatial size \u2208 [5, 1024] with a fixed 3\u00d73 kernel, stride 1, padding 1; (iii) BMM: batch \u2208 [1, 128] and M, N, K \u2208 [1, 2048]; (iv) FlashAttention: batch \u2208 [1, 128], L_q, L_k \u2208 [1, 512], heads \u2208 [1, 128], head dimension \u2208 [1, 128]; (v) MoE: experts E \u2208 [4, 128], top-k k \u2208 [1, \u230aE/4\u230b], tokens \u2208 [128, 2048], out_dim \u2208 [1025, 3000], and in_dim \u2208 [1024, out_dim]. For all other kernels, any remaining dimensions are sampled from [1, 2048]. Tuning Configurations. Tuning hyperparameters for Triton kernels on GPUs are reported in Tables 3, 4, and 5. On the V100 GPU, the total number of configurations (Total_Configs) is determined by all combinations of tiling settings (e.g., BLOCK_M, BLOCK_N, BLOCK_K, GROUP_M) and the number of wraps (num_wraps). On the A100 and H100 GPUs, the number of compilation (optimization) stages for software-pipelining loops is included, resulting in a large number of configurations. On the MI250 GPU, the configuration space also includes waves_per_eu, a hyperparameter that controls the use of vector general-purpose registers to achieve the desired occupancy levels. Consequently, the space is much larger than others. For instance, for attention kernels, the numbers of configurations on V100, A100, and MI250 are 96, 480, and 3200, respectively. Settings. To train and evaluate the performance predictor, the collected dataset is randomly divided into 80% for training and 20% for testing. Each operator has its own predictor based on XGBoost [27]. A base model is initialized with 500 estimators. Empirically, the depth is set to 10, and the learning rate is 0.02. The XGBoost objective function is set to reg:gamma to ensure that all predicted values, e.g., latency, remain positive. Following prior work [36], we evaluate prediction accuracy using the mean absolute percentage error (MAPE). MAPE = 1/n \u2211_{i=1}^{n} |y_i\u2212 \u02c6{y_i}|/y_i where y_i denotes the ground truth value and \u02c6{y_i} represents the predicted value. To evaluate autotuning performance, we use the set of input shapes from previous work [42] and collect data for all configurations of each shape to form the ground truth. Meanwhile, TTX generates a small set of tuning configurations (e.g., Top-k) based on its performance model. Given an input shape, the best-performing candidate among the top-k is normalized to match the best one obtained from the ground truth. Baselines. Our latency predictor is compared against recent GPU kernel performance models, including Neusight [36] and the Roofline model [43]. The comparison is conducted using our Triton kernel dataset, with aligned model settings and, where applicable, feature representations. When training and evaluating the Neusight MLP model on our Triton kernel dataset, we exclude hardware-level features (e.g., L2 cache size and the number of SMs) to ensure a fair and consistent comparison. Meanwhile, Roofline relies on analytical performance bounds derived from peak hardware characteristics, including peak memory bandwidth and peak FLOPs. Kernel performance is estimated based on arithmetic intensity, defined as the ratio of total floating-point operations to the volume of memory transactions. Cross-Kernel Setting. In addition to the per-kernel evaluation above, we study how well a single unified predictor generalizes across kernels. The unified variant trains one XGBoost across all kernels using the same hyperparameters as TTX, augmented with a fixed-length PTX-IR embedding produced by a small Transformer encoder pretrained with a contrastive (NT-Xent) objective on the same kernel corpus (d_model = 128, two layers, four heads, output dimension 128, temperature 0.1, 50 epochs). The encoder is frozen and applied per (kernel, configuration) prior to XGBoost training. We evaluate this variant under leave-one-kernel-out (LOKO): for each held-out kernel, the unified model is trained on the remaining kernels and tested on the held-out one. We report MAPE per kernel and the geometric mean across folds. This study uses V100 across nine kernels (MM, BMM, LN, Softmax, BN, GeLU, SiLU, ReLU, Dropout); preliminary multi-seed and multi-GPU validation are ongoing. 4.2 Experimental Results 4.2.1 Results for Performance model. Figure 7 presents the prediction accuracy of the operations on Nvidia V100, A100, and H100, and AMD MI250. Specifically, complex operators such as GEMM, BMM, Convolution, FlashAttention, Quantized GEMM, and MoE exhibit MAPEs ranging from 9% to 22%. In contrast, the remaining seven lighter kernels achieve significantly lower error rates, ranging from 0.5% to 5%. This disparity can be attributed to the complex runtime behaviors of the compute-intensive operators, whereas the lighter kernels are influenced by less tuning parameters and exhibit more predictable performance patterns. This behavior is consistent across all the hardwares in our experiments. Although NeuSight performed well on cuDNN workloads, it consistently ranks second in our evaluation on the Triton dataset. We observed a distinct error pattern where NeuSight struggles with compute-intensive operators, exhibiting high MAPEs ranging from 19% to 219%. In contrast, for lightweight operators, the error rates are significantly lower (1.86% to 14%). These results suggest that while NeuSight performs well in its native cuDNN environment, it fails to generalize effectively to the Triton compiler context. The Roofline model consistently exhibits poor predictive accuracy, often yielding a MAPE of approximately 100%. This limitation stems from its oversimplified assumptions, which fail to capture the complex, non-linear runtime behaviors inherent in GPU kernels. Consequently, the Roofline model consistently ranks third in our evaluation. 4.2.2 Cross-Kernel Generalization Analysis. A natural question is whether a single cross-kernel model could replace the per-kernel ensemble in TTX. We investigated this empirically using the unified variant described in Section 3.2. Under leave-one-kernel-out (LOKO) evaluation, we report MAPE per kernel and the geometric mean across folds.",
+  "references": [
+    {
+      "id": "b0",
+      "title": "Tensorflow: Large-scale machine learning on heterogeneous distributed systems",
+      "authors": [
+        "M. Abadi",
+        "A. Agarwal",
+        "P. Barham",
+        "E. Brevdo",
+        "Z. Chen",
+        "C. Citro",
+        "G. S. Corrado",
+        "A. Davis",
+        "J. Dean",
+        "M. Devin et al."
+      ],
+      "year": 2016,
+      "doi": "10.5555/3026877.3026899",
+      "raw": "M. Abadi, A. Agarwal, P. Barham, E. Brevdo, Z. Chen, C. Citro, G. S. Corrado, A. Davis, J. Dean, M. Devin et al.. Tensorflow: Large-scale machine learning on heterogeneous distributed systems. 2016"
+    },
+    {
+      "id": "b1",
+      "title": "Pytorch: An imperative style, high-performance deep learning library",
+      "authors": [
+        "A. Paszke",
+        "S. Gross",
+        "F. Massa",
+        "A. Lerer",
+        "J. Bradbury",
+        "G. Chanan",
+        "T. Killeen",
+        "Z. Lin",
+        "N. Gimelshein",
+        "L. Antiga et al."
+      ],
+      "year": 2019,
+      "doi": "10.5555/3327757.3327968",
+      "raw": "A. Paszke, S. Gross, F. Massa, A. Lerer, J. Bradbury, G. Chanan, T. Killeen, Z. Lin, N. Gimelshein, L. Antiga et al.. Pytorch: An imperative style, high-performance deep learning library. 2019"
+    },
+    {
+      "id": "b2",
+      "title": "Triton: an intermediate language and compiler for tiled neural network computations",
+      "authors": [
+        "P. Tillet",
+        "H. T. Kung",
+        "D. Cox"
+      ],
+      "year": 2019,
+      "doi": "10.1145/3315508.3329973",
+      "raw": "P. Tillet, H. T. Kung, D. Cox. Triton: an intermediate language and compiler for tiled neural network computations. 2019"
+    },
+    {
+      "id": "b3",
+      "title": "An analytical model for a gpu architecture with memory-level and thread-level parallelism awareness",
+      "authors": [
+        "S. Hong",
+        "H. Kim"
+      ],
+      "year": 2009,
+      "doi": "10.1145/1555754.1555775",
+      "raw": "S. Hong, H. Kim. An analytical model for a gpu architecture with memory-level and thread-level parallelism awareness. 2009"
+    },
+    {
+      "id": "b4",
+      "title": "An integrated gpu power and performance model",
+      "authors": [
+        "S. Hong",
+        "H. Kim"
+      ],
+      "year": 2010,
+      "doi": "10.1145/1816038.1815998",
+      "raw": "S. Hong, H. Kim. An integrated gpu power and performance model. 2010"
+    },
+    {
+      "id": "b5",
+      "title": "Forecasting gpu performance for deep learning training and inference",
+      "authors": [
+        "S. Lee",
+        "A. Phanishayee",
+        "D. Mahajan"
+      ],
+      "year": 2025,
+      "doi": "10.1145/3669940.3707265",
+      "raw": "S. Lee, A. Phanishayee, D. Mahajan. Forecasting gpu performance for deep learning training and inference. 2025"
+    },
+    {
+      "id": "b6",
+      "title": "Path forward beyond simulators: Fast and accurate gpu execution time prediction for dnn workloads",
+      "authors": [
+        "Y. Li",
+        "Y. Sun",
+        "A. Jog"
+      ],
+      "year": 2023,
+      "doi": "10.1145/3613424.3614277",
+      "raw": "Y. Li, Y. Sun, A. Jog. Path forward beyond simulators: Fast and accurate gpu execution time prediction for dnn workloads. 2023"
+    },
+    {
+      "id": "b7",
+      "title": "Deepep: an efficient expert-parallel communication library",
+      "authors": [
+        "C. Zhao",
+        "S. Zhou",
+        "L. Zhang",
+        "C. Deng",
+        "Z. Xu",
+        "Y. Liu",
+        "K. Yu",
+        "J. Li",
+        "L. Zhao"
+      ],
+      "year": 2025,
+      "doi": null,
+      "raw": "C. Zhao, S. Zhou, L. Zhang, C. Deng, Z. Xu, Y. Liu, K. Yu, J. Li, L. Zhao. Deepep: an efficient expert-parallel communication library. 2025"
+    },
+    {
+      "id": "b8",
+      "title": "Flashdecoding++: Faster large language model inference with asynchronization, flat GEMM optimization, and heuristics",
+      "authors": [
+        "K. Hong",
+        "G. Dai",
+        "J. Xu",
+        "Q. Mao",
+        "X. Li",
+        "J. Liu",
+        "K. Chen",
+        "Y. Dong",
+        "Y. Wang"
+      ],
+      "year": 2024,
+      "doi": null,
+      "raw": "K. Hong, G. Dai, J. Xu, Q. Mao, X. Li, J. Liu, K. Chen, Y. Dong, Y. Wang. Flashdecoding++: Faster large language model inference with asynchronization, flat GEMM optimization, and heuristics. 2024"
+    },
+    {
+      "id": "b9",
+      "title": "Performance analysis of gemm workloads on the amd versal platform",
+      "authors": [
+        "K. M. Mhatre",
+        "V. G. P. Mulleti",
+        "C. J. Bansil",
+        "E. Taka",
+        "A. Arora"
+      ],
+      "year": 2025,
+      "doi": null,
+      "raw": "K. M. Mhatre, V. G. P. Mulleti, C. J. Bansil, E. Taka, A. Arora. Performance analysis of gemm workloads on the amd versal platform. 2025"
+    },
+    {
+      "id": "b10",
+      "title": "Nvidia tesla v100 gpu architecture",
+      "authors": [
+        "NVIDIA"
+      ],
+      "year": 2017,
+      "doi": null,
+      "raw": "NVIDIA. Nvidia tesla v100 gpu architecture. 2017"
+    },
+    {
+      "id": "b11",
+      "title": "Nvidia a100 tensor core gpu architecture",
+      "authors": [
+        "NVIDIA"
+      ],
+      "year": 2020,
+      "doi": null,
+      "raw": "NVIDIA. Nvidia a100 tensor core gpu architecture. 2020"
+    },
+    {
+      "id": "b12",
+      "title": "Amd mi250 gpu architecture",
+      "authors": [
+        "AMD"
+      ],
+      "year": 2021,
+      "doi": null,
+      "raw": "AMD. Amd mi250 gpu architecture. 2021"
+    },
+    {
+      "id": "b13",
+      "title": "Xgboost: A scalable tree boosting system",
+      "authors": [
+        "T. Chen",
+        "C. Guestrin"
+      ],
+      "year": 2016,
+      "doi": "10.1145/2939672.2939785",
+      "raw": "T. Chen, C. Guestrin. Xgboost: A scalable tree boosting system. 2016"
+    },
+    {
+      "id": "b14",
+      "title": "Layer normalization",
+      "authors": [
+        "J. L. Ba",
+        "J. R. Kiros",
+        "G. E. Hinton"
+      ],
+      "year": 2016,
+      "doi": null,
+      "raw": "J. L. Ba, J. R. Kiros, G. E. Hinton. Layer normalization. 2016"
+    },
+    {
+      "id": "b15",
+      "title": "Batch normalization: Accelerating deep network training by reducing internal covariate shift",
+      "authors": [
+        "S. Ioffe",
+        "C. Szegedy"
+      ],
+      "year": 2015,
+      "doi": null,
+      "raw": "S. Ioffe, C. Szegedy. Batch normalization: Accelerating deep network training by reducing internal covariate shift. 2015"
+    },
+    {
+      "id": "b16",
+      "title": "Attention is all you need",
+      "authors": [
+        "A. Vaswani",
+        "N. Shazeer",
+        "N. Parmar",
+        "J. Uszkoreit",
+        "L. Jones",
+        "A. N. Gomez",
+        "L. Kaiser",
+        "I. Polosukhin"
+      ],
+      "year": 2017,
+      "doi": null,
+      "raw": "A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, I. Polosukhin. Attention is all you need. 2017"
+    },
+    {
+      "id": "b17",
+      "title": "Generating High-Performance tensor programs for deep learning",
+      "authors": [
+        "L. Zheng",
+        "C. Jia",
+        "M. Sun",
+        "Z. Wu",
+        "C. H. Yu",
+        "A. Haj-Ali",
+        "Y. Wang",
+        "J. Yang",
+        "D. Zhuo",
+        "K. Sen",
+        "J. E. Gonzalez",
+        "I. Stoica"
+      ],
+      "year": 2020,
+      "doi": null,
+      "raw": "L. Zheng, C. Jia, M. Sun, Z. Wu, C. H. Yu, A. Haj-Ali, Y. Wang, J. Yang, D. Zhuo, K. Sen, J. E. Gonzalez, I. Stoica. Generating High-Performance tensor programs for deep learning. 2020"
+    },
+    {
+      "id": "b18",
+      "title": "Roofline: an insightful visual performance model for multicore architectures",
+      "authors": [
+        "S. Williams",
+        "A. Waterman",
+        "D. Patterson"
+      ],
+      "year": 2009,
+      "doi": null,
+      "raw": "S. Williams, A. Waterman, D. Patterson. Roofline: an insightful visual performance model for multicore architectures. 2009"
+    },
+    {
+      "id": "b19",
+      "title": "A simple model for portable and fast prediction of execution time and power consumption of gpu kernels",
+      "authors": [
+        "L. Braun",
+        "S. Nikas",
+        "C. Song",
+        "V. Heuveline",
+        "H. Fr\u00f6ning"
+      ],
+      "year": 2021,
+      "doi": null,
+      "raw": "L. Braun, S. Nikas, C. Song, V. Heuveline, H. Fr\u00f6ning. A simple model for portable and fast prediction of execution time and power consumption of gpu kernels. 2021"
+    },
+    {
+      "id": "b20",
+      "title": "Gpu performance estimation using software rasterization and machine learning",
+      "authors": [
+        "K. O\u2019neal",
+        "P. Brisk",
+        "A. Abousamra",
+        "Z. Waters",
+        "E. Shriver"
+      ],
+      "year": 2017,
+      "doi": null,
+      "raw": "K. O\u2019neal, P. Brisk, A. Abousamra, Z. Waters, E. Shriver. Gpu performance estimation using software rasterization and machine learning. 2017"
+    },
+    {
+      "id": "b21",
+      "title": "Gpu static modeling using ptx and deep structured learning",
+      "authors": [
+        "J. Guerreiro",
+        "A. Ilic",
+        "N. Roma",
+        "P. Tom\u00e1s"
+      ],
+      "year": 2019,
+      "doi": null,
+      "raw": "J. Guerreiro, A. Ilic, N. Roma, P. Tom\u00e1s. Gpu static modeling using ptx and deep structured learning. 2019"
+    },
+    {
+      "id": "b22",
+      "title": "An automated end-to-end optimizing compiler for deep learning",
+      "authors": [
+        "T. Chen",
+        "T. Moreau",
+        "Z. Jiang",
+        "L. Zheng",
+        "E. Yan",
+        "H. Shen",
+        "M. Cowan",
+        "L. Wang",
+        "Y. Hu",
+        "L. Ceze"
+      ],
+      "year": 2018,
+      "doi": null,
+      "raw": "T. Chen, T. Moreau, Z. Jiang, L. Zheng, E. Yan, H. Shen, M. Cowan, L. Wang, Y. Hu, L. Ceze. An automated end-to-end optimizing compiler for deep learning. 2018"
+    },
+    {
+      "id": "b23",
+      "title": "Halide: a language and compiler for optimizing parallelism, locality, and recomputation in image processing pipelines",
+      "authors": [
+        "J. Ragan-Kelley",
+        "C. Barnes",
+        "A. Adams",
+        "S. Paris",
+        "F. Durand",
+        "S. Amarasinghe"
+      ],
+      "year": 2013,
+      "doi": null,
+      "raw": "J. Ragan-Kelley, C. Barnes, A. Adams, S. Paris, F. Durand, S. Amarasinghe. Halide: a language and compiler for optimizing parallelism, locality, and recomputation in image processing pipelines. 2013"
+    },
+    {
+      "id": "b24",
+      "title": "Performance analysis of gemm workloads on the amd versal platform",
+      "authors": [
+        "K. M. Mhatre",
+        "V. G. P. Mulleti",
+        "C. J. Bansil",
+        "E. Taka",
+        "A. Arora"
+      ],
+      "year": 2025,
+      "doi": null,
+      "raw": "K. M. Mhatre, V. G. P. Mulleti, C. J. Bansil, E. Taka, A. Arora. Performance analysis of gemm workloads on the amd versal platform. 2025"
+    }
+  ],
+  "inline_citations": [
+    "b0",
+    "b1",
+    "b2",
+    "b3",
+    "b4",
+    "b5",
+    "b6",
+    "b7",
+    "b8",
+    "b9",
+    "b10",
+    "b11",
+    "b12",
+    "b13",
+    "b14",
+    "b15",
+    "b16",
+    "b17",
+    "b18",
+    "b19",
+    "b20",
+    "b21",
+    "b22",
+    "b23",
+    "b24"
+  ],
+  "word_count": 3810
+}

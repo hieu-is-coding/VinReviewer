@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('VinReviewer End-to-End System Test', () => {
+test.describe('GradioAI End-to-End System Test', () => {
   const timestamp = Math.floor(Date.now() / 1000);
   const className = `E2E Class - ${timestamp}`;
   const studentName = `E2E Student - ${timestamp}`;
@@ -16,7 +16,7 @@ test.describe('VinReviewer End-to-End System Test', () => {
       if (response.url().includes('/functions/v1/')) {
         response.text().then(text => {
           console.log(`HTTP ${response.status()} ${response.url()}:`, text);
-        }).catch(err => {});
+        }).catch(err => { });
       }
     });
 
@@ -27,9 +27,9 @@ test.describe('VinReviewer End-to-End System Test', () => {
         await route.fallback();
         return;
       }
-      
+
       console.log(`[E2E Intercept] Intercepted evaluate for submission ${submissionId}`);
-      
+
       // Make direct request to local backend
       const apiContext = page.request;
       const queueResponse = await apiContext.post('http://localhost:8000/evaluate', {
@@ -41,29 +41,29 @@ test.describe('VinReviewer End-to-End System Test', () => {
           submission_id: submissionId
         }
       });
-      
+
       if (!queueResponse.ok()) {
         const errText = await queueResponse.text();
         console.error(`[E2E Intercept] Failed to queue job:`, errText);
         await route.abort();
         return;
       }
-      
+
       const queueData = await queueResponse.json();
       const jobId = queueData.job_id;
       console.log(`[E2E Intercept] Job queued with ID ${jobId}`);
-      
+
       // Poll job status until completed
       let evaluationId = null;
       for (let i = 0; i < 80; i++) {
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
+
         const jobResponse = await apiContext.get(`http://localhost:8000/jobs/${jobId}`, {
           headers: {
             'X-API-Key': 'change-me-in-production'
           }
         });
-        
+
         if (jobResponse.ok()) {
           const jobData = await jobResponse.json();
           console.log(`[E2E Intercept] Job status: ${jobData.status}`);
@@ -76,7 +76,7 @@ test.describe('VinReviewer End-to-End System Test', () => {
           }
         }
       }
-      
+
       if (evaluationId) {
         console.log(`[E2E Intercept] Job completed. Returning evaluation ${evaluationId}`);
         await route.fulfill({
@@ -141,7 +141,7 @@ test.describe('VinReviewer End-to-End System Test', () => {
     await page.getByRole('button', { name: 'Create Rubric' }).click();
     await page.getByPlaceholder('e.g. Clarity & Focus').fill(criterionName);
     await page.getByPlaceholder('Description (optional)').fill('Quality and clarity of essay content');
-    
+
     // Set weight and max score
     await page.locator('input[type="number"]').first().fill('1');
     await page.locator('input[type="number"]').nth(1).fill('5');
@@ -187,7 +187,7 @@ test.describe('VinReviewer End-to-End System Test', () => {
     await criterionCard.getByLabel(`Edit score for ${criterionName}`).click();
     await criterionCard.locator('input[type="number"]').fill('4');
     await criterionCard.getByLabel('Save score').click();
-    
+
     // Verify overridden badge/score shows up
     await expect(page.getByText('You overrode AI')).toBeVisible();
 
@@ -204,11 +204,11 @@ test.describe('VinReviewer End-to-End System Test', () => {
     await page.goto('/classes');
     const cleanClassCard = page.locator(`div.bg-card:has-text("${className}")`);
     await expect(cleanClassCard).toBeVisible();
-    
+
     // Hover and click delete button
     await cleanClassCard.hover();
     await cleanClassCard.getByLabel('Delete class').click();
-    
+
     // Verify it is removed
     await expect(cleanClassCard).not.toBeVisible();
   });

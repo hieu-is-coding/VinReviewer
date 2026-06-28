@@ -1,0 +1,52 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1856 >>
+stream
+BT /F1 9 Tf 50 720 Td (Abstract: This paper presents a novel approach to neural machine translation using) Tj ET
+BT /F1 9 Tf 50 708 Td (attention-based transformer architectures. We demonstrate significant improvements) Tj ET
+BT /F1 9 Tf 50 696 Td (in BLEU scores on WMT14 English-German benchmarks compared to previous methods.) Tj ET
+BT /F1 9 Tf 50 674 Td (1. Introduction) Tj ET
+BT /F1 9 Tf 50 662 Td (Neural machine translation has revolutionized language processing tasks. Our method) Tj ET
+BT /F1 9 Tf 50 650 Td (builds upon the foundational work of Vaswani et al. \(2017\) and extends it with) Tj ET
+BT /F1 9 Tf 50 638 Td (multi-head cross-attention layers.) Tj ET
+BT /F1 9 Tf 50 616 Td (2. Methodology) Tj ET
+BT /F1 9 Tf 50 604 Td (We train our model on 4.5M sentence pairs using the Adam optimizer with a learning) Tj ET
+BT /F1 9 Tf 50 592 Td (rate of 0.0001 and batch size of 32. The model architecture consists of 6 encoder) Tj ET
+BT /F1 9 Tf 50 580 Td (and 6 decoder layers with 8 attention heads.) Tj ET
+BT /F1 9 Tf 50 558 Td (3. Results) Tj ET
+BT /F1 9 Tf 50 546 Td (Our model achieves a BLEU score of 28.4 on WMT14 En-De, surpassing the baseline) Tj ET
+BT /F1 9 Tf 50 534 Td (by 2.1 points. Ablation studies confirm the importance of each component.) Tj ET
+BT /F1 9 Tf 50 512 Td (4. Conclusion) Tj ET
+BT /F1 9 Tf 50 500 Td (We have demonstrated a new state-of-the-art result for neural machine translation.) Tj ET
+BT /F1 9 Tf 50 488 Td (Future work will explore larger datasets and multilingual transfer learning.) Tj ET
+BT /F1 9 Tf 50 466 Td (References) Tj ET
+BT /F1 9 Tf 50 454 Td ([1] Vaswani, A. et al. \(2017\). Attention is all you need. NeurIPS 2017.) Tj ET
+BT /F1 9 Tf 50 442 Td ([2] Bahdanau, D. et al. \(2015\). Neural machine translation by jointly) Tj ET
+BT /F1 9 Tf 50 430 Td (learning to align and translate. ICLR 2015.) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000062 00000 n 
+0000000119 00000 n 
+0000000274 00000 n 
+0000000370 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+456
+%%EOF

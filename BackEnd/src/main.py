@@ -35,24 +35,12 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Try to start GROBID container if not already running
-    try:
-        from src.services.grobid_launcher import ensure_grobid_running
-        await ensure_grobid_running()
-    except Exception as e:
-        logging.getLogger(__name__).warning("Failed to automatically start GROBID container: %s", e)
-
-    try:
-        from sentence_transformers import SentenceTransformer
-
-        app.state.encoder = SentenceTransformer("all-mpnet-base-v2")
-    except Exception:
-        app.state.encoder = None
+    app.state.encoder = None
     yield
 
 
 app = FastAPI(
-    title="VinReviewer BackEnd",
+    title="GradioAI BackEnd",
     version="0.1.0",
     description="Orchestration service bridging FrontEnd (Supabase) and GradingSystem pipeline",
     lifespan=lifespan,
